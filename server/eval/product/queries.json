@@ -1,0 +1,1272 @@
+[
+  {
+    "id": "c01",
+    "author": "claude",
+    "text": "אני מחפש מחשב נייד עד 1500 דולר",
+    "expect": "results",
+    "relevant": [
+      80,
+      81,
+      82
+    ],
+    "forbidden": {
+      "maxPrice": 1500
+    },
+    "notes": "price bound in Hebrew"
+  },
+  {
+    "id": "c02",
+    "author": "claude",
+    "text": "בושם לגבר",
+    "expect": "results",
+    "relevant": [
+      6
+    ],
+    "forbidden": {},
+    "notes": "only CK One is unisex; the rest are women's perfumes"
+  },
+  {
+    "id": "c03",
+    "author": "claude",
+    "text": "שעון יד לאישה עד 200",
+    "expect": "results",
+    "relevant": [
+      194
+    ],
+    "forbidden": {
+      "categories": [
+        "mens-watches"
+      ],
+      "maxPrice": 200
+    }
+  },
+  {
+    "id": "c04",
+    "author": "claude",
+    "text": "נעלי ספורט",
+    "expect": "results",
+    "relevant": [
+      88,
+      89,
+      90,
+      91,
+      92
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c05",
+    "author": "claude",
+    "text": "משקפי שמש זולים",
+    "expect": "results",
+    "relevant": [
+      157,
+      158,
+      155,
+      154
+    ],
+    "forbidden": {},
+    "notes": "the four cheapest"
+  },
+  {
+    "id": "c06",
+    "author": "claude",
+    "text": "אוזניות אלחוטיות",
+    "expect": "results",
+    "relevant": [
+      100,
+      101,
+      107
+    ],
+    "forbidden": {},
+    "notes": "earphones are tagged 'wireless earphones'"
+  },
+  {
+    "id": "c07",
+    "author": "claude",
+    "text": "כדור כדורסל",
+    "expect": "results",
+    "relevant": [
+      140
+    ],
+    "forbidden": {},
+    "notes": "compound: basketball is not 'ball'"
+  },
+  {
+    "id": "c08",
+    "author": "claude",
+    "text": "משהו לבית",
+    "expect": "results",
+    "relevant": [
+      43,
+      44,
+      45,
+      46,
+      47
+    ],
+    "forbidden": {
+      "categories": [
+        "groceries",
+        "mens-watches",
+        "womens-watches",
+        "vehicle",
+        "motorcycle"
+      ]
+    }
+  },
+  {
+    "id": "c09",
+    "author": "claude",
+    "text": "רהיטים לסלון",
+    "expect": "results",
+    "relevant": [
+      12,
+      47,
+      45,
+      43
+    ],
+    "forbidden": {
+      "categories": [
+        "groceries"
+      ]
+    },
+    "notes": "living room: sofa, lamp, plant, swing"
+  },
+  {
+    "id": "c10",
+    "author": "claude",
+    "text": "טלפון סמסונג",
+    "expect": "results",
+    "relevant": [
+      131,
+      132,
+      133
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c11",
+    "author": "claude",
+    "text": "מוצרי אפל",
+    "expect": "results",
+    "relevant": [
+      78,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      108,
+      121,
+      122,
+      123,
+      124,
+      159
+    ],
+    "forbidden": {
+      "categories": [
+        "groceries"
+      ]
+    },
+    "notes": "brand, not the fruit"
+  },
+  {
+    "id": "c12",
+    "author": "claude",
+    "text": "תיק יד שחור מעור",
+    "expect": "results",
+    "relevant": [
+      176,
+      173
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c13",
+    "author": "claude",
+    "text": "קרם לחות לפנים",
+    "expect": "results",
+    "relevant": [
+      120
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c14",
+    "author": "claude",
+    "text": "שמלה לבנה",
+    "expect": "results",
+    "relevant": [
+      162,
+      163,
+      164,
+      165,
+      166,
+      177,
+      180
+    ],
+    "forbidden": {},
+    "notes": "no white dress exists: other dresses, said honestly"
+  },
+  {
+    "id": "c15",
+    "author": "claude",
+    "text": "עגילים",
+    "expect": "results",
+    "relevant": [
+      182,
+      183,
+      184
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c16",
+    "author": "claude",
+    "text": "שרשרת זהב",
+    "expect": "miss",
+    "relevant": [],
+    "forbidden": {
+      "categories": [
+        "womens-jewellery"
+      ]
+    },
+    "notes": "no necklaces; earrings are not a necklace"
+  },
+  {
+    "id": "c17",
+    "author": "claude",
+    "text": "מחבת לבישול",
+    "expect": "results",
+    "relevant": [
+      68,
+      52
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c18",
+    "author": "claude",
+    "text": "סכין למטבח",
+    "expect": "results",
+    "relevant": [
+      64
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c19",
+    "author": "claude",
+    "text": "קפה",
+    "expect": "results",
+    "relevant": [
+      34
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c20",
+    "author": "claude",
+    "text": "אוכל לכלב",
+    "expect": "results",
+    "relevant": [
+      22
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c21",
+    "author": "claude",
+    "text": "רכב משפחתי",
+    "expect": "results",
+    "relevant": [
+      171,
+      170
+    ],
+    "forbidden": {},
+    "notes": "minivan, SUV"
+  },
+  {
+    "id": "c22",
+    "author": "claude",
+    "text": "טאבלט של סמסונג עד 400",
+    "expect": "results",
+    "relevant": [
+      161
+    ],
+    "forbidden": {
+      "maxPrice": 400
+    }
+  },
+  {
+    "id": "c23",
+    "author": "claude",
+    "text": "מטען לאייפון",
+    "expect": "results",
+    "relevant": [
+      104,
+      102,
+      105
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c24",
+    "author": "claude",
+    "text": "שעון חכם",
+    "expect": "results",
+    "relevant": [
+      106
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c25",
+    "author": "claude",
+    "text": "חולצה משובצת לגבר",
+    "expect": "results",
+    "relevant": [
+      83,
+      85,
+      87
+    ],
+    "forbidden": {
+      "categories": [
+        "tops",
+        "womens-dresses"
+      ]
+    }
+  },
+  {
+    "id": "c26",
+    "author": "claude",
+    "text": "a gaming laptop under $1000",
+    "expect": "miss",
+    "relevant": [],
+    "forbidden": {
+      "maxPrice": 1000
+    },
+    "notes": "cheapest laptop is $1099.99"
+  },
+  {
+    "id": "c27",
+    "author": "claude",
+    "text": "red lipstick",
+    "expect": "results",
+    "relevant": [
+      4
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c28",
+    "author": "claude",
+    "text": "cheap tennis gear",
+    "expect": "results",
+    "relevant": [
+      151,
+      152
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c29",
+    "author": "claude",
+    "text": "something to drink",
+    "expect": "results",
+    "relevant": [
+      29,
+      34,
+      39,
+      42,
+      32
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c30",
+    "author": "claude",
+    "text": "running shoes",
+    "expect": "results",
+    "relevant": [
+      88,
+      91,
+      92,
+      90
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c31",
+    "author": "claude",
+    "text": "a Rolex for men",
+    "expect": "results",
+    "relevant": [
+      95,
+      96,
+      97,
+      98
+    ],
+    "forbidden": {
+      "categories": [
+        "womens-watches"
+      ]
+    }
+  },
+  {
+    "id": "c32",
+    "author": "claude",
+    "text": "an iPhone under 300",
+    "expect": "results",
+    "relevant": [
+      121,
+      122
+    ],
+    "forbidden": {
+      "maxPrice": 300
+    }
+  },
+  {
+    "id": "c33",
+    "author": "claude",
+    "text": "a sofa",
+    "expect": "results",
+    "relevant": [
+      12
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c34",
+    "author": "claude",
+    "text": "wireless charger",
+    "expect": "results",
+    "relevant": [
+      102
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c35",
+    "author": "claude",
+    "text": "Dior perfume",
+    "expect": "results",
+    "relevant": [
+      8
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "c36",
+    "author": "claude",
+    "text": "a cricket bat and a helmet",
+    "expect": "results",
+    "relevant": [
+      143,
+      144
+    ],
+    "forbidden": {},
+    "notes": "two intents"
+  },
+  {
+    "id": "c37",
+    "author": "claude",
+    "text": "book me a hotel in Eilat",
+    "expect": "service",
+    "relevant": [],
+    "forbidden": {}
+  },
+  {
+    "id": "c38",
+    "author": "claude",
+    "text": "what's 17 times 23?",
+    "expect": "off_topic",
+    "relevant": [],
+    "forbidden": {}
+  },
+  {
+    "id": "c39",
+    "author": "claude",
+    "text": "hi there!",
+    "expect": "chat",
+    "relevant": [],
+    "forbidden": {}
+  },
+  {
+    "id": "c40",
+    "author": "claude",
+    "text": "תיק גב לבית ספר",
+    "expect": "results",
+    "relevant": [
+      175
+    ],
+    "forbidden": {}
+  },
+  {
+    "id": "a01",
+    "author": "agent",
+    "text": "אייפון זול בבקשה",
+    "expect": "results",
+    "relevant": [
+      121,
+      122,
+      124,
+      123
+    ],
+    "forbidden": {
+      "categories": [
+        "mobile-accessories"
+      ]
+    },
+    "notes": "iPhones by price; cases/chargers are not phones"
+  },
+  {
+    "id": "a02",
+    "author": "agent",
+    "text": "airpods יש?",
+    "expect": "results",
+    "relevant": [
+      100,
+      101
+    ],
+    "forbidden": {},
+    "notes": "Apple Airpods and AirPods Max"
+  },
+  {
+    "id": "a03",
+    "author": "agent",
+    "text": "נעלי נייקי לגבר",
+    "expect": "results",
+    "relevant": [
+      88,
+      89
+    ],
+    "forbidden": {
+      "categories": [
+        "womens-shoes"
+      ]
+    },
+    "notes": "only two Nike products, both men's shoes"
+  },
+  {
+    "id": "a04",
+    "author": "agent",
+    "text": "שעון רולקס לבעלי",
+    "expect": "results",
+    "relevant": [
+      95,
+      96,
+      97,
+      98
+    ],
+    "forbidden": {
+      "categories": [
+        "womens-watches"
+      ]
+    },
+    "notes": "men's Rolex; the women's Rolexes are wrong gender"
+  },
+  {
+    "id": "a05",
+    "author": "agent",
+    "text": "תביא לי משהו של דיור",
+    "expect": "results",
+    "relevant": [
+      8
+    ],
+    "forbidden": {},
+    "notes": "Dior J'adore is the only Dior"
+  },
+  {
+    "id": "a06",
+    "author": "agent",
+    "text": "תיק של פראדה לאשתי",
+    "expect": "results",
+    "relevant": [
+      174
+    ],
+    "forbidden": {},
+    "notes": "single Prada product"
+  },
+  {
+    "id": "a07",
+    "author": "agent",
+    "text": "עגילים לאשתי",
+    "expect": "results",
+    "relevant": [
+      182,
+      183,
+      184
+    ],
+    "forbidden": {
+      "categories": [
+        "mens-watches",
+        "mens-shirts",
+        "mens-shoes",
+        "groceries"
+      ]
+    },
+    "notes": "all earrings; 184 has stock 1 but is in stock"
+  },
+  {
+    "id": "a08",
+    "author": "agent",
+    "text": "הסמסונג הכי זול שיש לכם",
+    "expect": "results",
+    "relevant": [
+      131,
+      161,
+      132,
+      160,
+      133
+    ],
+    "forbidden": {},
+    "notes": "cheapest Samsung is the S7 at 299.99; superlative policy (Gate 1): the winner first, runners-up that satisfy the request are relevant",
+    "first": 131
+  },
+  {
+    "id": "a09",
+    "author": "agent",
+    "text": "which laptop is the best rated",
+    "expect": "results",
+    "relevant": [
+      80,
+      79,
+      78,
+      81,
+      82
+    ],
+    "forbidden": {},
+    "notes": "by rating: Huawei 4.98 first; superlative policy (Gate 1): the winner first, runners-up that satisfy the request are relevant",
+    "first": 80
+  },
+  {
+    "id": "a10",
+    "author": "agent",
+    "text": "מקרר",
+    "expect": "miss",
+    "relevant": [],
+    "forbidden": {
+      "categories": [
+        "kitchen-accessories"
+      ]
+    },
+    "notes": "no refrigerator; microwave/stove would be dishonest near-misses"
+  },
+  {
+    "id": "a11",
+    "author": "agent",
+    "text": "פלייסטיישן",
+    "expect": "miss",
+    "relevant": [],
+    "forbidden": {
+      "categories": [
+        "laptops",
+        "tablets",
+        "smartphones",
+        "mobile-accessories"
+      ]
+    },
+    "notes": "no game consoles in the catalog"
+  },
+  {
+    "id": "a12",
+    "author": "agent",
+    "text": "נעלי עקב לגבר",
+    "expect": "miss",
+    "relevant": [],
+    "forbidden": {
+      "categories": [
+        "womens-shoes"
+      ]
+    },
+    "notes": "men's heels do not exist; women's heels are the wrong answer"
+  },
+  {
+    "id": "a13",
+    "author": "agent",
+    "text": "do you sell an electric kettle?",
+    "expect": "miss",
+    "relevant": [],
+    "forbidden": {
+      "categories": [
+        "kitchen-accessories"
+      ]
+    },
+    "notes": "no kettle; blender/stove/microwave are not substitutes"
+  },
+  {
+    "id": "a14",
+    "author": "agent",
+    "text": "שמלה לילדה בת 6",
+    "expect": "results",
+    "relevant": [
+      163
+    ],
+    "forbidden": {
+      "categories": [
+        "womens-dresses"
+      ]
+    },
+    "notes": "only Girl Summer Dress is for a girl; evening gowns are wrong"
+  },
+  {
+    "id": "a15",
+    "author": "agent",
+    "text": "שמלת ערב שחורה",
+    "expect": "results",
+    "relevant": [
+      177
+    ],
+    "forbidden": {},
+    "notes": "Black Women's Gown is the evening gown"
+  },
+  {
+    "id": "a16",
+    "author": "agent",
+    "text": "men's shirt under $25",
+    "expect": "results",
+    "relevant": [
+      84,
+      86
+    ],
+    "forbidden": {
+      "maxPrice": 25
+    },
+    "notes": "Gigabyte tee 24.99, Man Short Sleeve 19.99 (stock 2)"
+  },
+  {
+    "id": "a17",
+    "author": "agent",
+    "text": "כדורגל",
+    "expect": "results",
+    "relevant": [
+      147
+    ],
+    "forbidden": {},
+    "notes": "Football = soccer ball; American Football is not it"
+  },
+  {
+    "id": "a18",
+    "author": "agent",
+    "text": "מחבת לטיגון",
+    "expect": "results",
+    "relevant": [
+      68,
+      52
+    ],
+    "forbidden": {},
+    "notes": "Pan, and the wok as a close alternative"
+  },
+  {
+    "id": "a19",
+    "author": "agent",
+    "text": "hand blender",
+    "expect": "results",
+    "relevant": [
+      61,
+      51
+    ],
+    "forbidden": {},
+    "notes": "Hand Blender, plus the Boxed Blender as an alternative"
+  },
+  {
+    "id": "a20",
+    "author": "agent",
+    "text": "מיטה זוגית",
+    "expect": "results",
+    "relevant": [
+      11
+    ],
+    "forbidden": {},
+    "notes": "only bed; the catalog does not say double, accept it"
+  },
+  {
+    "id": "a21",
+    "author": "agent",
+    "text": "office chair",
+    "expect": "results",
+    "relevant": [
+      14
+    ],
+    "forbidden": {},
+    "notes": "Knoll Saarinen Executive Conference Chair"
+  },
+  {
+    "id": "a22",
+    "author": "agent",
+    "text": "motorcycle under $5000",
+    "expect": "results",
+    "relevant": [
+      116,
+      113
+    ],
+    "forbidden": {
+      "maxPrice": 5000
+    },
+    "notes": "scooter 2999.99 and generic 3999.99"
+  },
+  {
+    "id": "a23",
+    "author": "agent",
+    "text": "טאבלט סמסונג",
+    "expect": "results",
+    "relevant": [
+      160,
+      161
+    ],
+    "forbidden": {},
+    "notes": "two Samsung tablets"
+  },
+  {
+    "id": "a24",
+    "author": "agent",
+    "text": "רמקול חכם לסלון",
+    "expect": "results",
+    "relevant": [
+      99,
+      103
+    ],
+    "forbidden": {},
+    "notes": "Echo Plus and HomePod Mini"
+  },
+  {
+    "id": "a25",
+    "author": "agent",
+    "text": "סוללה ניידת לטלפון",
+    "expect": "results",
+    "relevant": [
+      105
+    ],
+    "forbidden": {},
+    "notes": "MagSafe Battery Pack (power bank), stock 1"
+  },
+  {
+    "id": "a26",
+    "author": "agent",
+    "text": "mascara",
+    "expect": "results",
+    "relevant": [
+      1
+    ],
+    "forbidden": {},
+    "notes": "Essence Mascara"
+  },
+  {
+    "id": "a27",
+    "author": "agent",
+    "text": "לק אדום",
+    "expect": "results",
+    "relevant": [
+      5
+    ],
+    "forbidden": {},
+    "notes": "Red Nail Polish; red lipstick is a different product"
+  },
+  {
+    "id": "a28",
+    "author": "agent",
+    "text": "אני רוצה סמסונג שיש במלאי",
+    "expect": "results",
+    "relevant": [
+      131,
+      133,
+      160,
+      161
+    ],
+    "forbidden": {},
+    "notes": "in-stock Samsung products; the S8 (132) has stock 0"
+  },
+  {
+    "id": "a29",
+    "author": "agent",
+    "text": "תביא לי טלפון עד 1000 שקל",
+    "expect": "results",
+    "relevant": [
+      128,
+      121,
+      125,
+      134,
+      122,
+      127,
+      131,
+      135,
+      129
+    ],
+    "forbidden": {},
+    "notes": "shekel budget: no maxPrice; roughly up to $300; reply should say prices are in dollars"
+  },
+  {
+    "id": "a30",
+    "author": "agent",
+    "text": "שעון לגבר בשביל 300 שקל",
+    "expect": "results",
+    "relevant": [
+      93
+    ],
+    "forbidden": {},
+    "notes": "shekel budget (about $85-90): only the Brown Leather Belt Watch is near; reply should explain dollars"
+  },
+  {
+    "id": "a31",
+    "author": "agent",
+    "text": "היי מה נשמע",
+    "expect": "chat",
+    "relevant": [],
+    "forbidden": {},
+    "notes": "greeting"
+  },
+  {
+    "id": "a32",
+    "author": "agent",
+    "text": "תזמין לי טיסה לאילת",
+    "expect": "service",
+    "relevant": [],
+    "forbidden": {},
+    "notes": "flight booking is a service"
+  },
+  {
+    "id": "a33",
+    "author": "agent",
+    "text": "אפשר משלוח עד הבית מחר בבוקר?",
+    "expect": "service",
+    "relevant": [],
+    "forbidden": {},
+    "notes": "delivery service question"
+  },
+  {
+    "id": "a34",
+    "author": "agent",
+    "text": "write me a poem about cats",
+    "expect": "off_topic",
+    "relevant": [],
+    "forbidden": {},
+    "notes": "unrelated"
+  },
+  {
+    "id": "a35",
+    "author": "agent",
+    "text": "מה מזג האוויר מחר בחיפה",
+    "expect": "off_topic",
+    "relevant": [],
+    "forbidden": {},
+    "notes": "unrelated"
+  },
+  {
+    "id": "a36",
+    "author": "agent",
+    "text": "אייפון ואוזניות עד 200 דולר",
+    "expect": "results",
+    "relevant": [
+      121,
+      100,
+      107
+    ],
+    "forbidden": {
+      "maxPrice": 200
+    },
+    "notes": "two groups: iPhone 5s 199.99; Airpods 129.99, Beats Flex 49.99"
+  },
+  {
+    "id": "a37",
+    "author": "agent",
+    "text": "משקפי שמש ותיק יד לאישה",
+    "expect": "results",
+    "relevant": [
+      154,
+      155,
+      156,
+      157,
+      158,
+      172,
+      173,
+      174,
+      175,
+      176
+    ],
+    "forbidden": {
+      "categories": [
+        "groceries"
+      ]
+    },
+    "notes": "two groups: all sunglasses and all women's bags"
+  },
+  {
+    "id": "a38",
+    "author": "agent",
+    "text": "body lotion for men",
+    "expect": "results",
+    "relevant": [
+      120
+    ],
+    "forbidden": {},
+    "notes": "Vaseline Men lotion"
+  },
+  {
+    "id": "a39",
+    "author": "agent",
+    "text": "בושם הכי זול",
+    "expect": "results",
+    "relevant": [
+      6,
+      9,
+      10,
+      8,
+      7
+    ],
+    "forbidden": {},
+    "notes": "CK One is the cheapest perfume; superlative policy (Gate 1): the winner first, runners-up that satisfy the request are relevant",
+    "first": 6
+  },
+  {
+    "id": "a40",
+    "author": "agent",
+    "text": "נעליים אדומות",
+    "expect": "results",
+    "relevant": [
+      189,
+      88,
+      91,
+      92
+    ],
+    "forbidden": {},
+    "notes": "Red Shoes (women's) plus men's red-accent sneakers; no gender given"
+  },
+  {
+    "id": "x01",
+    "author": "agent-dev",
+    "text": "יש לכם בלנדר? משהו לשייקים",
+    "expect": "results",
+    "relevant": [
+      51,
+      61
+    ],
+    "forbidden": {},
+    "notes": "both blenders (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x02",
+    "author": "agent-dev",
+    "text": "אחי אני מחפש אופנוע עד 4000 דולר",
+    "expect": "results",
+    "relevant": [
+      113,
+      116
+    ],
+    "forbidden": {
+      "maxPrice": 4000
+    },
+    "notes": "motorcycles under 4000 (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x03",
+    "author": "agent-dev",
+    "text": "מנורה לשולחן ליד המיטה",
+    "expect": "results",
+    "relevant": [
+      47
+    ],
+    "forbidden": {},
+    "notes": "only table lamp; selfie lamp is not a home lamp (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x04",
+    "author": "agent-dev",
+    "text": "מיטה זוגית חדשה",
+    "expect": "results",
+    "relevant": [
+      11
+    ],
+    "forbidden": {},
+    "notes": "only bed in catalog (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x05",
+    "author": "agent-dev",
+    "text": "ויוו עד 300 דולר, מה יש?",
+    "expect": "results",
+    "relevant": [
+      134,
+      135
+    ],
+    "forbidden": {
+      "maxPrice": 300,
+      "categories": [
+        "groceries"
+      ]
+    },
+    "notes": "Vivo transliteration plus price (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x06",
+    "author": "agent-dev",
+    "text": "נעלי עקב לאירוע",
+    "expect": "results",
+    "relevant": [
+      186
+    ],
+    "forbidden": {
+      "categories": [
+        "mens-shoes"
+      ]
+    },
+    "notes": "heel tag only (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x07",
+    "author": "agent-dev",
+    "text": "אוזניות גדולות כאלה שמכסות את כל האוזן",
+    "expect": "results",
+    "relevant": [
+      101
+    ],
+    "forbidden": {},
+    "notes": "over-ear descriptor (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x08",
+    "author": "agent-dev",
+    "text": "איזה תיק לאישה הכי מדורג אצלכם",
+    "expect": "results",
+    "relevant": [
+      173,
+      175,
+      172,
+      176,
+      174
+    ],
+    "forbidden": {
+      "categories": [
+        "mens-shoes",
+        "groceries"
+      ]
+    },
+    "notes": "Heshe bag is top rated (4.92); superlative policy (Gate 1): the winner first, runners-up that satisfy the request are relevant",
+    "first": 173
+  },
+  {
+    "id": "x09",
+    "author": "agent-dev",
+    "text": "רמקול חכם לסלון",
+    "expect": "results",
+    "relevant": [
+      99,
+      103
+    ],
+    "forbidden": {},
+    "notes": "smart speakers via tags (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x10",
+    "author": "agent-dev",
+    "text": "שמלת ערב שחורה ארוכה",
+    "expect": "results",
+    "relevant": [
+      177
+    ],
+    "forbidden": {},
+    "notes": "gown (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x11",
+    "author": "agent-dev",
+    "text": "יש מכונת כביסה? בא לי משהו עד 2000 שקל",
+    "expect": "miss",
+    "relevant": [],
+    "forbidden": {},
+    "notes": "no appliances of this kind (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x12",
+    "author": "agent-dev",
+    "text": "מזרן אורתופדי",
+    "expect": "miss",
+    "relevant": [],
+    "forbidden": {},
+    "notes": "no mattresses (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x13",
+    "author": "agent-dev",
+    "text": "צריכה משהו לחתונה של חברה",
+    "expect": "clarify",
+    "relevant": [],
+    "forbidden": {},
+    "notes": "too open: outfit, bag, perfume, jewellery (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x15",
+    "author": "agent-dev",
+    "text": "ההזמנה שלי לא הגיעה כבר שבועיים, איפה היא??",
+    "expect": "service",
+    "relevant": [],
+    "forbidden": {},
+    "notes": "order tracking (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x16",
+    "author": "agent-dev",
+    "text": "do you have the Nike Air Jordan?",
+    "expect": "results",
+    "relevant": [
+      88
+    ],
+    "forbidden": {},
+    "notes": "brand+model (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x17",
+    "author": "agent-dev",
+    "text": "golf balls and clubs",
+    "expect": "results",
+    "relevant": [
+      148,
+      149
+    ],
+    "forbidden": {},
+    "notes": "golf items (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x18",
+    "author": "agent-dev",
+    "text": "the most expensive men's Rolex",
+    "expect": "results",
+    "relevant": [
+      98,
+      96,
+      97,
+      95
+    ],
+    "forbidden": {
+      "categories": [
+        "womens-watches"
+      ]
+    },
+    "notes": "Submariner is the priciest men's Rolex; superlative policy (Gate 1): the winner first, runners-up that satisfy the request are relevant",
+    "first": 98
+  },
+  {
+    "id": "x19",
+    "author": "agent-dev",
+    "text": "PlayStation 5 console",
+    "expect": "miss",
+    "relevant": [],
+    "forbidden": {},
+    "notes": "no consoles (from the first holdout, which was seen; now development data)"
+  },
+  {
+    "id": "x20",
+    "author": "agent-dev",
+    "text": "protein powder under $25",
+    "expect": "results",
+    "relevant": [
+      36
+    ],
+    "forbidden": {
+      "maxPrice": 25
+    },
+    "notes": "single grocery item (from the first holdout, which was seen; now development data)"
+  }
+]

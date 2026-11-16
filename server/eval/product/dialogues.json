@@ -1,0 +1,854 @@
+[
+  {
+    "id": "d01",
+    "author": "claude",
+    "title": "cheapest phone, then that one in detail",
+    "turns": [
+      {
+        "text": "מה הטלפון הכי זול?",
+        "expect": "results",
+        "relevant": [
+          128,
+          121,
+          125,
+          134
+        ],
+        "notes": "names the Realme C35",
+        "first": 128
+      },
+      {
+        "text": "אני רוצה את הכי זול",
+        "expect": "detail",
+        "detailId": 128
+      },
+      {
+        "text": "אני רוצה פרטים על טלפון שיותר זול מ-Realme C35",
+        "expect": "miss",
+        "notes": "nothing is cheaper; say so"
+      }
+    ]
+  },
+  {
+    "id": "d02",
+    "author": "claude",
+    "title": "two groups, then which one",
+    "turns": [
+      {
+        "text": "מחשב נייד ובושם עד 50",
+        "expect": "results",
+        "relevant": [
+          78,
+          79,
+          80,
+          81,
+          82,
+          6
+        ]
+      },
+      {
+        "text": "תוזיל",
+        "expect": "ask_group"
+      },
+      {
+        "text": "את המחשבים",
+        "expect": "miss",
+        "notes": "no laptop below $1099.99: honest miss, earlier cards kept"
+      }
+    ]
+  },
+  {
+    "id": "d03",
+    "author": "claude",
+    "title": "Samsung phones, then one by position",
+    "turns": [
+      {
+        "text": "טלפונים של סמסונג",
+        "expect": "results",
+        "relevant": [
+          131,
+          132,
+          133
+        ]
+      },
+      {
+        "text": "ספר לי על השלישי",
+        "expect": "detail"
+      }
+    ]
+  },
+  {
+    "id": "d04",
+    "author": "claude",
+    "title": "show more",
+    "turns": [
+      {
+        "text": "שעונים לגברים",
+        "expect": "results",
+        "relevant": [
+          93,
+          94,
+          95,
+          96,
+          97,
+          98
+        ]
+      },
+      {
+        "text": "תראה עוד",
+        "expect": "more"
+      },
+      {
+        "text": "רק מה שבמלאי",
+        "expect": "results",
+        "relevant": [
+          93,
+          94,
+          95,
+          96,
+          97,
+          98
+        ]
+      }
+    ]
+  },
+  {
+    "id": "d05",
+    "author": "claude",
+    "title": "gift for dad",
+    "turns": [
+      {
+        "text": "מתנה לאבא",
+        "expect": "clarify"
+      },
+      {
+        "text": "משהו עד 100 דולר",
+        "expect": "results",
+        "relevant": [
+          6,
+          83,
+          84,
+          85,
+          86,
+          87,
+          89,
+          90,
+          93,
+          99,
+          100,
+          103,
+          107
+        ],
+        "forbidden": {
+          "categories": [
+            "groceries",
+            "womens-bags",
+            "womens-dresses",
+            "womens-jewellery",
+            "womens-shoes",
+            "womens-watches",
+            "tops"
+          ],
+          "maxPrice": 100
+        }
+      }
+    ]
+  },
+  {
+    "id": "d06",
+    "author": "claude",
+    "title": "topic switch in English",
+    "turns": [
+      {
+        "text": "red headphones",
+        "expect": "results",
+        "relevant": [
+          101,
+          100,
+          107
+        ]
+      },
+      {
+        "text": "actually, show me sunglasses",
+        "expect": "results",
+        "relevant": [
+          154,
+          155,
+          156,
+          157,
+          158
+        ]
+      },
+      {
+        "text": "only the ones in stock",
+        "expect": "results",
+        "relevant": [
+          154,
+          155,
+          156,
+          157,
+          158
+        ]
+      }
+    ]
+  },
+  {
+    "id": "d07",
+    "author": "claude",
+    "title": "refine a dress search, then switch",
+    "turns": [
+      {
+        "text": "שמלות",
+        "expect": "results",
+        "relevant": [
+          162,
+          163,
+          164,
+          165,
+          166,
+          177,
+          178,
+          179,
+          180
+        ]
+      },
+      {
+        "text": "בצבע שחור",
+        "expect": "results",
+        "relevant": [
+          177,
+          179,
+          181
+        ]
+      },
+      {
+        "text": "מתחת ל-100",
+        "expect": "results",
+        "relevant": [
+          179
+        ],
+        "forbidden": {
+          "maxPrice": 100
+        }
+      },
+      {
+        "text": "ומה עם נעליים?",
+        "expect": "results",
+        "relevant": [
+          185,
+          186,
+          187,
+          188,
+          189
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ad01",
+    "author": "agent",
+    "title": "Samsung phones: cheaper, in stock, detail, then Apple",
+    "turns": [
+      {
+        "text": "טלפון סמסונג",
+        "expect": "results",
+        "relevant": [
+          131,
+          132,
+          133
+        ]
+      },
+      {
+        "text": "יש משהו יותר זול?",
+        "expect": "miss",
+        "notes": "S7 at 299.99 is the cheapest Samsung phone; nothing cheaper"
+      },
+      {
+        "text": "טוב אז רק מה שיש במלאי",
+        "expect": "results",
+        "relevant": [
+          131,
+          133
+        ],
+        "notes": "S8 has stock 0"
+      },
+      {
+        "text": "ספר לי על הראשון",
+        "expect": "detail",
+        "detailId": 131,
+        "notes": "first card is the S7 (cheapest first)"
+      }
+    ]
+  },
+  {
+    "id": "ad02",
+    "author": "agent",
+    "title": "laptops: show more, budget",
+    "turns": [
+      {
+        "text": "מחשבים ניידים",
+        "expect": "results",
+        "relevant": [
+          78,
+          79,
+          80,
+          81,
+          82
+        ]
+      },
+      {
+        "text": "תראה עוד",
+        "expect": "more",
+        "relevant": [
+          78,
+          79,
+          80,
+          81,
+          82
+        ],
+        "notes": "five laptops exist, four fit on screen"
+      },
+      {
+        "text": "תודה. ומשהו עד 1200?",
+        "expect": "results",
+        "relevant": [
+          81
+        ],
+        "forbidden": {
+          "maxPrice": 1200
+        }
+      },
+      {
+        "text": "ספר לי עליו",
+        "expect": "detail",
+        "detailId": 81
+      }
+    ]
+  },
+  {
+    "id": "ad03",
+    "author": "agent",
+    "title": "two groups, ambiguous cheaper, then topic change",
+    "turns": [
+      {
+        "text": "בושם ושעון לאישה עד 1000",
+        "expect": "results",
+        "relevant": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          194,
+          193
+        ],
+        "forbidden": {
+          "maxPrice": 1000
+        }
+      },
+      {
+        "text": "תוזיל",
+        "expect": "ask_group"
+      },
+      {
+        "text": "את השעונים",
+        "expect": "miss",
+        "notes": "cheapest shown watch is 129.99 (194); nothing cheaper; earlier cards stay"
+      },
+      {
+        "text": "ומה עם תיק לאישה עד 100?",
+        "expect": "results",
+        "relevant": [
+          172,
+          175,
+          176
+        ],
+        "forbidden": {
+          "maxPrice": 100
+        }
+      }
+    ]
+  },
+  {
+    "id": "ad04",
+    "author": "agent",
+    "title": "gift for wife: clarify, narrow, detail, thanks",
+    "turns": [
+      {
+        "text": "אני צריך מתנה לאשתי",
+        "expect": "clarify"
+      },
+      {
+        "text": "היא אוהבת תכשיטים ובשמים, תקציב עד 100 דולר",
+        "expect": "results",
+        "relevant": [
+          182,
+          183,
+          184,
+          6,
+          8,
+          9,
+          10
+        ],
+        "forbidden": {
+          "maxPrice": 100,
+          "categories": [
+            "groceries"
+          ]
+        },
+        "notes": "two groups: earrings and perfumes under 100"
+      },
+      {
+        "text": "ספר לי על הגוצ'י",
+        "expect": "detail",
+        "detailId": 10,
+        "notes": "Gucci Bloom 79.99"
+      },
+      {
+        "text": "ומה עם משהו מתחת ל-30?",
+        "expect": "results",
+        "relevant": [
+          182,
+          183,
+          184
+        ],
+        "forbidden": {
+          "maxPrice": 30
+        }
+      },
+      {
+        "text": "תודה! זה מושלם",
+        "expect": "chat"
+      }
+    ]
+  },
+  {
+    "id": "ad05",
+    "author": "agent",
+    "title": "sports shoes refine chain",
+    "turns": [
+      {
+        "text": "נעלי ספורט לגבר",
+        "expect": "results",
+        "relevant": [
+          88,
+          89,
+          90,
+          91,
+          92
+        ],
+        "forbidden": {
+          "categories": [
+            "womens-shoes"
+          ]
+        }
+      },
+      {
+        "text": "עד 120 דולר",
+        "expect": "results",
+        "relevant": [
+          89,
+          90,
+          91,
+          92
+        ],
+        "forbidden": {
+          "maxPrice": 120
+        }
+      },
+      {
+        "text": "יש בלבן?",
+        "expect": "results",
+        "relevant": [
+          91,
+          92
+        ],
+        "forbidden": {
+          "maxPrice": 120
+        },
+        "notes": "the Off White sneakers"
+      },
+      {
+        "text": "תוזיל קצת",
+        "expect": "miss",
+        "notes": "cheapest Off White is 109.99; nothing cheaper in that colour"
+      },
+      {
+        "text": "אוקיי, תן לי פרטים על הזול",
+        "expect": "detail",
+        "detailId": 92
+      }
+    ]
+  },
+  {
+    "id": "ad06",
+    "author": "agent",
+    "title": "sports topic hopping",
+    "turns": [
+      {
+        "text": "ציוד לטניס",
+        "expect": "results",
+        "relevant": [
+          151,
+          152
+        ]
+      },
+      {
+        "text": "ומה יש בגולף?",
+        "expect": "results",
+        "relevant": [
+          148,
+          149
+        ]
+      },
+      {
+        "text": "ובכדורסל?",
+        "expect": "results",
+        "relevant": [
+          140,
+          141
+        ]
+      },
+      {
+        "text": "ספר לי על הטבעת",
+        "expect": "detail",
+        "detailId": 141,
+        "notes": "Basketball Rim"
+      }
+    ]
+  },
+  {
+    "id": "ad07",
+    "author": "agent",
+    "title": "men's watches: budget, detail, switch to women",
+    "turns": [
+      {
+        "text": "שעון לגבר",
+        "expect": "results",
+        "relevant": [
+          93,
+          94,
+          95,
+          96,
+          97,
+          98
+        ],
+        "forbidden": {
+          "categories": [
+            "womens-watches"
+          ]
+        }
+      },
+      {
+        "text": "רק עד 2000",
+        "expect": "results",
+        "relevant": [
+          93,
+          94
+        ],
+        "forbidden": {
+          "maxPrice": 2000
+        }
+      },
+      {
+        "text": "תספר לי על הלונג'ין",
+        "expect": "detail",
+        "detailId": 94
+      },
+      {
+        "text": "תודה, ומה עם משהו לאישה?",
+        "expect": "results",
+        "relevant": [
+          190,
+          191,
+          192,
+          193,
+          194
+        ],
+        "forbidden": {
+          "categories": [
+            "mens-watches"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "ad08",
+    "author": "agent",
+    "title": "bag, detail, service, thanks, shoes",
+    "turns": [
+      {
+        "text": "תיק לאישה",
+        "expect": "results",
+        "relevant": [
+          172,
+          173,
+          174,
+          175,
+          176
+        ]
+      },
+      {
+        "text": "תביא פרטים על התיק השחור",
+        "expect": "detail",
+        "detailId": 176,
+        "notes": "Women Handbag Black"
+      },
+      {
+        "text": "תוכל להזמין לי מונית לחנות?",
+        "expect": "service"
+      },
+      {
+        "text": "טוב, תודה",
+        "expect": "chat"
+      },
+      {
+        "text": "ומה עם נעליים בזהב?",
+        "expect": "results",
+        "relevant": [
+          187
+        ],
+        "notes": "Golden Shoes Woman"
+      }
+    ]
+  },
+  {
+    "id": "u01",
+    "author": "user",
+    "title": "headphones, then Beats, then 'actually Apple headphones' (your report, 2026-11-15)",
+    "turns": [
+      {
+        "text": "אני רוצה אוזנוית",
+        "expect": "results",
+        "relevant": [
+          100,
+          101,
+          107
+        ],
+        "notes": "typo kept as typed"
+      },
+      {
+        "text": "אוזניות ביטס",
+        "expect": "detail",
+        "detailId": 107
+      },
+      {
+        "text": "אהה בעצם אוזניות אפל",
+        "expect": "results",
+        "relevant": [
+          100,
+          101
+        ],
+        "forbidden": {
+          "categories": [
+            "laptops",
+            "smartphones",
+            "tablets"
+          ]
+        },
+        "notes": "a correction that names the product type keeps it: Apple headphones, not every Apple product"
+      }
+    ]
+  },
+  {
+    "id": "u02",
+    "author": "user",
+    "title": "a gift for my girlfriend; earrings rejected; 'something else' (your conversation, 2026-11-15)",
+    "turns": [
+      {
+        "text": "אני רוצה לקנות מתנה לחברה שלי",
+        "expect": "clarify"
+      },
+      {
+        "text": "תכשיטים",
+        "expect": "results",
+        "relevant": [
+          182,
+          183,
+          184
+        ]
+      },
+      {
+        "text": "אהה בעצם משהו אחר עד 100 דולר",
+        "expect": "results",
+        "relevant": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          8,
+          9,
+          10,
+          118,
+          119,
+          154,
+          155,
+          156,
+          157,
+          158,
+          172,
+          175,
+          176,
+          185,
+          186,
+          187,
+          188,
+          189
+        ],
+        "forbidden": {
+          "categories": [
+            "womens-jewellery",
+            "groceries",
+            "vehicle",
+            "motorcycle",
+            "mens-watches",
+            "mens-shirts",
+            "mens-shoes"
+          ],
+          "maxPrice": 100
+        },
+        "notes": "something else = not the earrings; still a gift for her, under $100"
+      },
+      {
+        "text": "לא תכשיטים משהו אחר",
+        "expect": "results",
+        "relevant": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          8,
+          9,
+          10,
+          118,
+          119,
+          154,
+          155,
+          156,
+          157,
+          158,
+          172,
+          175,
+          176,
+          185,
+          186,
+          187,
+          188,
+          189
+        ],
+        "forbidden": {
+          "categories": [
+            "womens-jewellery",
+            "groceries",
+            "vehicle",
+            "motorcycle",
+            "kitchen-accessories",
+            "mens-watches",
+            "mens-shirts",
+            "mens-shoes"
+          ],
+          "maxPrice": 100
+        },
+        "notes": "still a gift for her, without jewellery, and still under the $100 set earlier"
+      }
+    ]
+  },
+  {
+    "id": "u03",
+    "author": "user",
+    "title": "a Valentine's gift, up to $200, then no price limit (your conversation, 2026-11-15)",
+    "turns": [
+      {
+        "text": "אני רוצה לקנות מתנה ליום האהבה",
+        "expect": "clarify"
+      },
+      {
+        "text": "עד 200 דולר",
+        "expect": "results",
+        "relevant": [
+          7,
+          8,
+          9,
+          10,
+          93,
+          173,
+          176,
+          194
+        ],
+        "forbidden": {
+          "categories": [
+            "kitchen-accessories",
+            "groceries",
+            "vehicle",
+            "motorcycle",
+            "furniture"
+          ],
+          "maxPrice": 200
+        },
+        "notes": "romantic gifts that use the budget; never a $12.99 lunch box"
+      },
+      {
+        "text": "בלי הגבלת מחיר",
+        "expect": "results",
+        "relevant": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          83,
+          84,
+          85,
+          86,
+          87,
+          93,
+          94,
+          95,
+          96,
+          97,
+          98,
+          118,
+          119,
+          120,
+          154,
+          155,
+          156,
+          157,
+          158,
+          172,
+          173,
+          174,
+          175,
+          176,
+          182,
+          183,
+          184,
+          190,
+          191,
+          192,
+          193,
+          194
+        ],
+        "forbidden": {
+          "categories": [
+            "kitchen-accessories",
+            "groceries",
+            "vehicle",
+            "motorcycle",
+            "furniture"
+          ]
+        },
+        "notes": "no limit: still romantic, and not the same four cards"
+      }
+    ]
+  }
+]

@@ -1,0 +1,22 @@
+[
+{"id":"s01","author":"agent-sealed","text":"יש לכם מערוך לבצק?","expect":"results","relevant":[76],"forbidden":{},"notes":"Single product by name"},
+{"id":"s02","author":"agent-sealed","text":"צלליות לעיניים","expect":"results","relevant":[2],"forbidden":{},"notes":"Eyeshadow palette"},
+{"id":"s03","author":"agent-sealed","text":"אוכל לחתול","expect":"results","relevant":[18],"forbidden":{"categories":["vehicle","motorcycle"]},"notes":"Cat food only"},
+{"id":"s04","author":"agent-sealed","text":"מקל סלפי","expect":"results","relevant":[111,109],"forbidden":{},"notes":"Selfie stick monopod and monopod for selfies"},
+{"id":"s05","author":"agent-sealed","text":"מיקרוגל בבקשה","expect":"results","relevant":[66],"forbidden":{},"notes":"Microwave oven"},
+{"id":"s06","author":"agent-sealed","text":"I need a lunch box to take to work","expect":"results","relevant":[65],"forbidden":{},"notes":"Lunch box"},
+{"id":"s07","author":"agent-sealed","text":"a serving tray for guests","expect":"results","relevant":[75],"forbidden":{},"notes":"Tray described for entertaining guests"},
+{"id":"s08","author":"agent-sealed","text":"דבש לתה","expect":"results","relevant":[27],"forbidden":{},"notes":"Honey jar"},
+{"id":"s09","author":"agent-sealed","text":"עגילים ירוקים","expect":"results","relevant":[182,183],"forbidden":{},"notes":"Colour attribute; tropical earring is not green"},
+{"id":"s10","author":"agent-sealed","text":"סניקרס לבנות עם אדום","expect":"results","relevant":[91,92],"forbidden":{"categories":["womens-shoes"]},"notes":"Off white and red sneakers"},
+{"id":"s11","author":"agent-sealed","text":"קורסט עם חצאית","expect":"results","relevant":[178,179],"forbidden":{},"notes":"Compound item, sold as corset plus skirt sets"},
+{"id":"s12","author":"agent-sealed","text":"אחי בושם בשביל 300 שקל","expect":"results","relevant":[6,9,10],"forbidden":{},"notes":"300 ILS is about 80 USD; Dior at 89.99 is slightly over"},
+{"id":"s13","author":"agent-sealed","text":"a wearable that tracks fitness, under $400","expect":"results","relevant":[106],"forbidden":{"maxPrice":400},"notes":"Fitness tracking only in description of the smartwatch"},
+{"id":"s14","author":"agent-sealed","text":"רמקול עם אלקסה","expect":"results","relevant":[99],"forbidden":{},"notes":"Alexa only in Echo description"},
+{"id":"s15","author":"agent-sealed","text":"מזגן לסלון","expect":"miss","relevant":[],"forbidden":{},"notes":"No air conditioners"},
+{"id":"s16","author":"agent-sealed","text":"נעלי כדורגל עם פקקים","expect":"miss","relevant":[],"forbidden":{},"notes":"Only baseball cleats exist, not football boots"},
+{"id":"s17","author":"agent-sealed","text":"a treadmill for home","expect":"miss","relevant":[],"forbidden":{},"notes":"No fitness machines"},
+{"id":"s18","author":"agent-sealed","text":"משהו לסבתא ליום הולדת 80","expect":"clarify","relevant":[],"forbidden":{},"notes":"No interests or budget"},
+{"id":"s19","author":"agent-sealed","text":"I have 200 dollars, what should I buy?","expect":"clarify","relevant":[],"forbidden":{},"notes":"No product need"},
+{"id":"s20","author":"agent-sealed","text":"איך מחזירים מוצר ואפשר החזר כספי?","expect":"service","relevant":[],"forbidden":{},"notes":"Returns policy question"}
+]
