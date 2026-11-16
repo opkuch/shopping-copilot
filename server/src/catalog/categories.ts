@@ -1,0 +1,30 @@
+import type { Slug } from "../messages/schema.ts";
+
+// Written from the titles in test/fixtures/catalog.json. These feed the extraction prompt,
+// so each line names concrete products and says where the neighbouring slug begins.
+export const CATEGORY_DESCRIPTIONS: Record<Slug, string> = {
+  beauty: "makeup only: mascara, eyeshadow palette, face powder, lipstick, nail polish (not skin care, not perfume)",
+  fragrances: "perfume and cologne: Calvin Klein CK One, Chanel Coco Noir, Dior J'adore, Gucci Bloom, eau de parfum",
+  furniture: "home furniture: beds, sofas, bedside tables, conference chairs, bathroom sinks with mirror",
+  groceries: "food and drink plus a few household consumables: fruit, vegetables, meat, fish, eggs, milk, rice, honey, coffee, juice, soft drinks, ice cream, cat and dog food, protein powder, tissue paper",
+  "home-decoration": "decorative items for the home: plants and plant pots, photo frames, table lamps, decoration swing, showpieces",
+  "kitchen-accessories": "kitchen tools and cookware: spatulas, whisks, blenders, pans, woks, pots, knives, forks, spoons, plates, cups, mugs, trays, graters, peelers, strainers, microwave oven, electric stove, lunch box",
+  laptops: "laptop computers: MacBook Pro, Asus Zenbook, Huawei Matebook, Lenovo Yoga, Dell XPS",
+  "mens-shirts": "men's shirts and t-shirts: check shirts, plaid shirts, short sleeve shirts, graphic tees (women's clothing is in tops or womens-dresses)",
+  "mens-shoes": "men's footwear: Nike Air Jordan, baseball cleats, trainers, sneakers",
+  "mens-watches": "men's wrist watches: Rolex, Longines, leather belt watches (women's watches are in womens-watches; smartwatches such as Apple Watch are in mobile-accessories)",
+  "mobile-accessories": "phone and audio accessories: chargers, wireless chargers, battery packs, phone cases, earphones, AirPods and over-ear headphones, smart speakers (Echo, HomePod), selfie sticks, monopods, selfie lamps, Apple Watch, camera pedestals",
+  motorcycle: "motorcycles, scooters and sportbikes: Kawasaki, MotoGP, generic motorcycles",
+  "skin-care": "body and skin products: hand soap, body wash, body and face lotion, shea butter (makeup is in beauty)",
+  smartphones: "mobile phones: iPhone 5s/6/13/X, Samsung Galaxy S series, Oppo, Realme, Vivo (phone cases and chargers are in mobile-accessories)",
+  "sports-accessories": "sports equipment: footballs, basketballs, baseball bats and gloves, cricket bats, balls, helmets and wickets, tennis rackets and balls, golf balls and clubs, volleyballs, shuttlecocks, basketball rims",
+  sunglasses: "sunglasses and fashion glasses: sun glasses, party glasses, green and black glasses",
+  tablets: "tablet computers: iPad Mini, Samsung Galaxy Tab",
+  tops: "women's and girls' dresses and frocks sold as tops: blue frock, summer dress, gray dress, short frock, tartan dress (men's shirts are in mens-shirts; gowns, corsets and suits are in womens-dresses)",
+  vehicle: "cars: Dodge Charger SXT, Dodge Hornet, Durango, Pacifica, Chrysler 300 (the Dodge Charger is a car, not a phone charger)",
+  "womens-bags": "women's bags: handbags, backpacks, leather bags, Prada bag",
+  "womens-dresses": "women's formal and fashion wear: evening gowns, corsets with skirts, dress suits, patterned dresses (casual frocks and summer dresses are in tops)",
+  "womens-jewellery": "women's jewellery: earrings (green crystal, oval, tropical)",
+  "womens-shoes": "women's footwear: heels, slippers, golden shoes, red shoes",
+  "womens-watches": "women's wrist watches: Rolex Datejust Women, IWC, gold watches for women, wrist watches (men's watches are in mens-watches)",
+};
