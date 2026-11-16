@@ -1,0 +1,1957 @@
+{
+ "generatedBy": "scripts/enrich-catalog.ts",
+ "model": "gpt-6-luna",
+ "date": "2026-11-15",
+ "products": {
+  "1": {
+   "gender": "none",
+   "keywords": [
+    "eyelash makeup",
+    "eye makeup",
+    "lash cosmetic",
+    "lash volumizer"
+   ]
+  },
+  "2": {
+   "gender": "none",
+   "keywords": [
+    "eye color",
+    "eye makeup",
+    "makeup kit",
+    "travel makeup"
+   ]
+  },
+  "3": {
+   "gender": "none",
+   "keywords": [
+    "setting cosmetic",
+    "makeup setter",
+    "shine control",
+    "complexion makeup"
+   ]
+  },
+  "4": {
+   "gender": "none",
+   "keywords": [
+    "lip color",
+    "lip cosmetic",
+    "lip makeup",
+    "lip tint"
+   ]
+  },
+  "5": {
+   "gender": "none",
+   "keywords": [
+    "nail lacquer",
+    "manicure",
+    "nail cosmetic",
+    "nail care"
+   ]
+  },
+  "6": {
+   "gender": "unisex",
+   "keywords": [
+    "cologne",
+    "scent",
+    "aroma",
+    "everyday wear"
+   ]
+  },
+  "7": {
+   "gender": "womens",
+   "keywords": [
+    "scent",
+    "aroma",
+    "personal scent",
+    "evening wear"
+   ]
+  },
+  "8": {
+   "gender": "womens",
+   "keywords": [
+    "scent",
+    "aroma",
+    "personal scent",
+    "floral aroma"
+   ]
+  },
+  "9": {
+   "gender": "womens",
+   "keywords": [
+    "scent",
+    "aroma",
+    "personal scent",
+    "fruity aroma"
+   ]
+  },
+  "10": {
+   "gender": "womens",
+   "keywords": [
+    "scent",
+    "aroma",
+    "personal scent",
+    "floral aroma"
+   ]
+  },
+  "11": {
+   "gender": "none",
+   "keywords": [
+    "bedstead",
+    "sleeping frame",
+    "bedroom",
+    "sleeping"
+   ]
+  },
+  "12": {
+   "gender": "none",
+   "keywords": [
+    "couch",
+    "seating",
+    "living room",
+    "lounge"
+   ]
+  },
+  "13": {
+   "gender": "none",
+   "keywords": [
+    "nightstand",
+    "bedroom storage",
+    "night cabinet",
+    "lamp stand"
+   ]
+  },
+  "14": {
+   "gender": "none",
+   "keywords": [
+    "office seating",
+    "meeting room",
+    "workstation",
+    "conference seating"
+   ]
+  },
+  "15": {
+   "gender": "none",
+   "keywords": [
+    "washbasin",
+    "vanity unit",
+    "bathroom fixture",
+    "washroom"
+   ]
+  },
+  "16": {
+   "gender": "none",
+   "keywords": [
+    "produce",
+    "snack",
+    "cooking ingredient",
+    "baking fruit"
+   ]
+  },
+  "17": {
+   "gender": "none",
+   "keywords": [
+    "beef cut",
+    "grilling",
+    "barbecue",
+    "protein",
+    "dinner ingredient"
+   ]
+  },
+  "18": {
+   "gender": "none",
+   "keywords": [
+    "pet meal",
+    "feline nutrition",
+    "animal feed",
+    "pet nourishment"
+   ]
+  },
+  "19": {
+   "gender": "none",
+   "keywords": [
+    "poultry",
+    "cooking ingredient",
+    "protein",
+    "dinner food",
+    "roasting"
+   ]
+  },
+  "20": {
+   "gender": "none",
+   "keywords": [
+    "frying fat",
+    "kitchen ingredient",
+    "frying",
+    "sautéing",
+    "culinary fat"
+   ]
+  },
+  "21": {
+   "gender": "none",
+   "keywords": [
+    "garden produce",
+    "salad ingredient",
+    "snack food",
+    "hydrating food"
+   ]
+  },
+  "22": {
+   "gender": "none",
+   "keywords": [
+    "pet food",
+    "canine meal",
+    "animal nutrition"
+   ]
+  },
+  "23": {
+   "gender": "none",
+   "keywords": [
+    "baking ingredient",
+    "breakfast food",
+    "cooking ingredient",
+    "protein source"
+   ]
+  },
+  "24": {
+   "gender": "none",
+   "keywords": [
+    "fish cut",
+    "fish portion",
+    "grilling ingredient",
+    "baking ingredient",
+    "pan searing"
+   ]
+  },
+  "25": {
+   "gender": "none",
+   "keywords": [
+    "sweet pepper",
+    "capsicum",
+    "salad ingredient",
+    "cooking ingredient"
+   ]
+  },
+  "26": {
+   "gender": "none",
+   "keywords": [
+    "hot pepper",
+    "spice",
+    "seasoning",
+    "salsa ingredient"
+   ]
+  },
+  "27": {
+   "gender": "none",
+   "keywords": [
+    "sweetener",
+    "sugar substitute",
+    "tea sweetener",
+    "baking ingredient"
+   ]
+  },
+  "28": {
+   "gender": "none",
+   "keywords": [
+    "frozen dessert",
+    "frozen treat",
+    "sweet snack"
+   ]
+  },
+  "29": {
+   "gender": "none",
+   "keywords": [
+    "drink",
+    "fruit drink",
+    "hydration drink",
+    "breakfast drink"
+   ]
+  },
+  "30": {
+   "gender": "none",
+   "keywords": [
+    "kiwifruit",
+    "snack",
+    "smoothie ingredient",
+    "dessert ingredient"
+   ]
+  },
+  "31": {
+   "gender": "none",
+   "keywords": [
+    "citrus",
+    "cooking ingredient",
+    "baking ingredient",
+    "beverage ingredient",
+    "garnish"
+   ]
+  },
+  "32": {
+   "gender": "none",
+   "keywords": [
+    "drink",
+    "breakfast drink",
+    "cooking ingredient",
+    "coffee addition"
+   ]
+  },
+  "33": {
+   "gender": "none",
+   "keywords": [
+    "berry",
+    "snack",
+    "cereal topping",
+    "dessert ingredient",
+    "baking ingredient"
+   ]
+  },
+  "34": {
+   "gender": "none",
+   "keywords": [
+    "hot drink",
+    "caffeinated drink",
+    "morning drink",
+    "coffee brew"
+   ]
+  },
+  "35": {
+   "gender": "none",
+   "keywords": [
+    "tuber",
+    "staple food",
+    "side dish",
+    "cooking ingredient",
+    "roasting",
+    "mashing"
+   ]
+  },
+  "36": {
+   "gender": "none",
+   "keywords": [
+    "workout supplement",
+    "dietary supplement",
+    "fitness nutrition",
+    "shake ingredient"
+   ]
+  },
+  "37": {
+   "gender": "none",
+   "keywords": [
+    "allium",
+    "aromatic ingredient",
+    "salad topping",
+    "soup ingredient",
+    "savory recipe"
+   ]
+  },
+  "38": {
+   "gender": "none",
+   "keywords": [
+    "staple food",
+    "side dish",
+    "cooking ingredient",
+    "cuisine base"
+   ]
+  },
+  "39": {
+   "gender": "none",
+   "keywords": [
+    "soda",
+    "fizzy drink",
+    "carbonated drink",
+    "soda pop"
+   ]
+  },
+  "40": {
+   "gender": "none",
+   "keywords": [
+    "berry",
+    "snack",
+    "smoothie ingredient",
+    "dessert topping",
+    "baking ingredient"
+   ]
+  },
+  "41": {
+   "gender": "none",
+   "keywords": [
+    "facial tissue",
+    "tissue holder",
+    "tissue dispenser",
+    "household supply",
+    "bathroom",
+    "bedroom",
+    "office"
+   ]
+  },
+  "42": {
+   "gender": "none",
+   "keywords": [
+    "drinking water",
+    "bottled drink",
+    "refreshment",
+    "hydration"
+   ]
+  },
+  "43": {
+   "gender": "none",
+   "keywords": [
+    "decorative accent",
+    "interior ornament",
+    "room decoration",
+    "home furnishing",
+    "living room"
+   ]
+  },
+  "44": {
+   "gender": "none",
+   "keywords": [
+    "picture holder",
+    "picture display",
+    "photo display",
+    "family keepsake",
+    "living room",
+    "bedroom"
+   ]
+  },
+  "45": {
+   "gender": "none",
+   "keywords": [
+    "faux greenery",
+    "artificial foliage",
+    "indoor greenery",
+    "home accent",
+    "living room",
+    "office decor"
+   ]
+  },
+  "46": {
+   "gender": "none",
+   "keywords": [
+    "flowerpot",
+    "planter",
+    "garden container",
+    "indoor gardening",
+    "outdoor gardening"
+   ]
+  },
+  "47": {
+   "gender": "none",
+   "keywords": [
+    "desk light",
+    "bedside light",
+    "reading light",
+    "task light",
+    "living room",
+    "office"
+   ]
+  },
+  "48": {
+   "gender": "none",
+   "keywords": [
+    "turner",
+    "food flipper",
+    "stirring utensil",
+    "cooking utensil",
+    "kitchen"
+   ]
+  },
+  "49": {
+   "gender": "none",
+   "keywords": [
+    "tumbler",
+    "beverage vessel",
+    "drinking vessel",
+    "kitchen"
+   ]
+  },
+  "50": {
+   "gender": "none",
+   "keywords": [
+    "hand beater",
+    "mixing tool",
+    "baking utensil",
+    "ingredient mixer",
+    "kitchen"
+   ]
+  },
+  "51": {
+   "gender": "none",
+   "keywords": [
+    "smoothie maker",
+    "shake maker",
+    "drink mixer",
+    "food blending appliance",
+    "kitchen"
+   ]
+  },
+  "52": {
+   "gender": "none",
+   "keywords": [
+    "stir fry pan",
+    "frying pan",
+    "cooking vessel",
+    "sauté pan",
+    "kitchen"
+   ]
+  },
+  "53": {
+   "gender": "none",
+   "keywords": [
+    "cutting surface",
+    "food prep board",
+    "food preparation",
+    "kitchen prep",
+    "kitchen"
+   ]
+  },
+  "54": {
+   "gender": "none",
+   "keywords": [
+    "citrus press",
+    "lemon press",
+    "fruit press",
+    "juice making",
+    "kitchen prep"
+   ]
+  },
+  "55": {
+   "gender": "none",
+   "keywords": [
+    "egg cutter",
+    "food cutter",
+    "salad preparation",
+    "sandwich preparation",
+    "kitchen"
+   ]
+  },
+  "56": {
+   "gender": "none",
+   "keywords": [
+    "hot plate",
+    "electric burner",
+    "portable cooktop",
+    "cooking surface",
+    "small kitchen"
+   ]
+  },
+  "57": {
+   "gender": "none",
+   "keywords": [
+    "sieve",
+    "flour sifter",
+    "liquid filter",
+    "baking utensil",
+    "cooking tool",
+    "kitchen"
+   ]
+  },
+  "58": {
+   "gender": "none",
+   "keywords": [
+    "eating utensil",
+    "flatware",
+    "cutlery",
+    "dining utensil",
+    "tableware"
+   ]
+  },
+  "59": {
+   "gender": "none",
+   "keywords": [
+    "tumbler",
+    "beverage vessel",
+    "drinking vessel",
+    "tableware",
+    "dining"
+   ]
+  },
+  "60": {
+   "gender": "none",
+   "keywords": [
+    "cheese shredder",
+    "vegetable shredder",
+    "food shredding tool",
+    "kitchen prep",
+    "cooking utensil"
+   ]
+  },
+  "61": {
+   "gender": "none",
+   "keywords": [
+    "immersion blender",
+    "stick blender",
+    "food preparation",
+    "pureeing",
+    "mixing"
+   ]
+  },
+  "62": {
+   "gender": "none",
+   "keywords": [
+    "ice mold",
+    "freezer accessory"
+   ]
+  },
+  "63": {
+   "gender": "none",
+   "keywords": [
+    "sifter",
+    "flour sifter",
+    "ingredient strainer",
+    "baking",
+    "cooking"
+   ]
+  },
+  "64": {
+   "gender": "none",
+   "keywords": [
+    "kitchen knife",
+    "cutting tool",
+    "food preparation",
+    "chopping",
+    "slicing"
+   ]
+  },
+  "65": {
+   "gender": "none",
+   "keywords": [
+    "lunch container",
+    "food container",
+    "meal prep",
+    "food storage",
+    "portable container",
+    "travel"
+   ]
+  },
+  "66": {
+   "gender": "none",
+   "keywords": [
+    "cooking appliance",
+    "reheating",
+    "defrosting",
+    "food preparation"
+   ]
+  },
+  "67": {
+   "gender": "none",
+   "keywords": [
+    "mug holder",
+    "cup holder",
+    "drinkware storage",
+    "kitchen organizer",
+    "countertop storage"
+   ]
+  },
+  "68": {
+   "gender": "none",
+   "keywords": [
+    "frying pan",
+    "skillet",
+    "stovetop cooking",
+    "frying",
+    "sauteing"
+   ]
+  },
+  "69": {
+   "gender": "none",
+   "keywords": [
+    "dinner plate",
+    "serving dish",
+    "tableware",
+    "dining",
+    "meal service"
+   ]
+  },
+  "70": {
+   "gender": "none",
+   "keywords": [
+    "serving utensil",
+    "cooking utensil",
+    "food handling",
+    "kitchen"
+   ]
+  },
+  "71": {
+   "gender": "none",
+   "keywords": [
+    "cooking pot",
+    "stovetop cookware",
+    "boiling",
+    "simmering",
+    "meal preparation"
+   ]
+  },
+  "72": {
+   "gender": "none",
+   "keywords": [
+    "spatula",
+    "food flipper",
+    "kitchen utensil",
+    "frying",
+    "sauteing"
+   ]
+  },
+  "73": {
+   "gender": "none",
+   "keywords": [
+    "spice organizer",
+    "spice holder",
+    "seasoning storage",
+    "kitchen storage",
+    "pantry organization"
+   ]
+  },
+  "74": {
+   "gender": "none",
+   "keywords": [
+    "stirring utensil",
+    "eating utensil",
+    "kitchen utensil",
+    "stirring",
+    "serving"
+   ]
+  },
+  "75": {
+   "gender": "none",
+   "keywords": [
+    "serving tray",
+    "food platter",
+    "snack serving",
+    "drink serving",
+    "entertaining"
+   ]
+  },
+  "76": {
+   "gender": "none",
+   "keywords": [
+    "dough roller",
+    "pastry roller",
+    "baking tool",
+    "pastry making",
+    "dough preparation"
+   ]
+  },
+  "77": {
+   "gender": "none",
+   "keywords": [
+    "vegetable peeler",
+    "fruit peeler",
+    "food preparation",
+    "peeling",
+    "kitchen utensil"
+   ]
+  },
+  "78": {
+   "gender": "none",
+   "keywords": [
+    "notebook computer",
+    "portable computer",
+    "creative work",
+    "video editing",
+    "office computing"
+   ]
+  },
+  "79": {
+   "gender": "none",
+   "keywords": [
+    "notebook computer",
+    "portable computer",
+    "dual display",
+    "creative work",
+    "multitasking",
+    "productivity"
+   ]
+  },
+  "80": {
+   "gender": "none",
+   "keywords": [
+    "notebook computer",
+    "portable computer",
+    "touchscreen computer",
+    "mobile workstation",
+    "office",
+    "travel"
+   ]
+  },
+  "81": {
+   "gender": "none",
+   "keywords": [
+    "notebook computer",
+    "convertible computer",
+    "tablet computer",
+    "portable computing",
+    "office",
+    "travel"
+   ]
+  },
+  "82": {
+   "gender": "none",
+   "keywords": [
+    "notebook computer",
+    "portable computer",
+    "personal computer",
+    "office",
+    "travel"
+   ]
+  },
+  "83": {
+   "gender": "mens",
+   "keywords": [
+    "button-up",
+    "checked top",
+    "apparel",
+    "casual wear",
+    "everyday wear"
+   ]
+  },
+  "84": {
+   "gender": "mens",
+   "keywords": [
+    "gaming apparel",
+    "graphic top",
+    "button-up",
+    "casual wear",
+    "everyday wear"
+   ]
+  },
+  "85": {
+   "gender": "mens",
+   "keywords": [
+    "button-up",
+    "plaid top",
+    "apparel",
+    "casual wear",
+    "everyday wear"
+   ]
+  },
+  "86": {
+   "gender": "mens",
+   "keywords": [
+    "short-sleeved top",
+    "button-up",
+    "apparel",
+    "summer clothing",
+    "casual wear"
+   ]
+  },
+  "87": {
+   "gender": "mens",
+   "keywords": [
+    "button-up",
+    "checked top",
+    "apparel",
+    "casual wear",
+    "office wear"
+   ]
+  },
+  "88": {
+   "gender": "mens",
+   "keywords": [
+    "basketball sneaker",
+    "court shoe",
+    "trainer",
+    "streetwear"
+   ]
+  },
+  "89": {
+   "gender": "mens",
+   "keywords": [
+    "baseball shoe",
+    "field shoe",
+    "cleated footwear",
+    "baseball",
+    "practice"
+   ]
+  },
+  "90": {
+   "gender": "mens",
+   "keywords": [
+    "sneaker",
+    "retro shoe",
+    "walking shoe",
+    "streetwear",
+    "everyday wear",
+    "running shoe"
+   ]
+  },
+  "91": {
+   "gender": "mens",
+   "keywords": [
+    "trainer",
+    "training shoe",
+    "workout",
+    "sportswear",
+    "athletic footwear",
+    "running shoe"
+   ]
+  },
+  "92": {
+   "gender": "mens",
+   "keywords": [
+    "trainer",
+    "casual footwear",
+    "walking shoe",
+    "streetwear",
+    "everyday wear",
+    "running shoe"
+   ]
+  },
+  "93": {
+   "gender": "mens",
+   "keywords": [
+    "wristwatch",
+    "timepiece",
+    "wrist accessory",
+    "timekeeping",
+    "everyday wear"
+   ]
+  },
+  "94": {
+   "gender": "mens",
+   "keywords": [
+    "wristwatch",
+    "timepiece",
+    "wrist accessory",
+    "timekeeping",
+    "dress accessory"
+   ]
+  },
+  "95": {
+   "gender": "mens",
+   "keywords": [
+    "wristwatch",
+    "timepiece",
+    "calendar watch",
+    "date complication",
+    "timekeeping"
+   ]
+  },
+  "96": {
+   "gender": "mens",
+   "keywords": [
+    "wristwatch",
+    "timepiece",
+    "lunar phase",
+    "moon complication",
+    "timekeeping"
+   ]
+  },
+  "97": {
+   "gender": "mens",
+   "keywords": [
+    "wristwatch",
+    "timepiece",
+    "calendar watch",
+    "date display",
+    "timekeeping"
+   ]
+  },
+  "98": {
+   "gender": "mens",
+   "keywords": [
+    "diving",
+    "scuba diving",
+    "underwater",
+    "water sports",
+    "timepiece"
+   ]
+  },
+  "99": {
+   "gender": "none",
+   "keywords": [
+    "voice assistant",
+    "home automation",
+    "connected home",
+    "wireless audio",
+    "music playback"
+   ]
+  },
+  "100": {
+   "gender": "none",
+   "keywords": [
+    "earbud",
+    "headphone",
+    "personal audio",
+    "mobile audio",
+    "wireless listening"
+   ]
+  },
+  "101": {
+   "gender": "none",
+   "keywords": [
+    "headset",
+    "noise cancellation",
+    "music listening",
+    "travel audio"
+   ]
+  },
+  "102": {
+   "gender": "none",
+   "keywords": [
+    "charging pad",
+    "charging mat",
+    "phone accessory",
+    "tablet charging"
+   ]
+  },
+  "103": {
+   "gender": "none",
+   "keywords": [
+    "home audio",
+    "voice assistant",
+    "living room",
+    "music playback"
+   ]
+  },
+  "104": {
+   "gender": "none",
+   "keywords": [
+    "wall adapter",
+    "power adapter",
+    "travel charging",
+    "mobile device"
+   ]
+  },
+  "105": {
+   "gender": "none",
+   "keywords": [
+    "portable battery",
+    "backup battery",
+    "phone accessory",
+    "travel charging"
+   ]
+  },
+  "106": {
+   "gender": "none",
+   "keywords": [
+    "wearable",
+    "wristwatch",
+    "fitness tracker",
+    "health monitoring",
+    "workout",
+    "smartwatch",
+    "smart watch"
+   ]
+  },
+  "107": {
+   "gender": "none",
+   "keywords": [
+    "earbud",
+    "headphone",
+    "music",
+    "workout",
+    "travel"
+   ]
+  },
+  "108": {
+   "gender": "none",
+   "keywords": [
+    "protective cover",
+    "smartphone case",
+    "phone cover",
+    "device protection"
+   ]
+  },
+  "109": {
+   "gender": "none",
+   "keywords": [
+    "camera stand",
+    "camera support",
+    "self portrait",
+    "photography",
+    "video recording"
+   ]
+  },
+  "110": {
+   "gender": "none",
+   "keywords": [
+    "phone light",
+    "camera lighting",
+    "video call",
+    "photography",
+    "content creation"
+   ]
+  },
+  "111": {
+   "gender": "none",
+   "keywords": [
+    "selfie pole",
+    "phone holder",
+    "group photo",
+    "travel",
+    "photography"
+   ]
+  },
+  "112": {
+   "gender": "none",
+   "keywords": [
+    "camera support",
+    "broadcast",
+    "video production",
+    "television studio",
+    "filmmaking"
+   ]
+  },
+  "113": {
+   "gender": "none",
+   "keywords": [
+    "motorbike",
+    "two wheeler",
+    "road travel",
+    "daily commute"
+   ]
+  },
+  "114": {
+   "gender": "none",
+   "keywords": [
+    "motorbike",
+    "street riding",
+    "track riding",
+    "motorcycle racing",
+    "road riding"
+   ]
+  },
+  "115": {
+   "gender": "none",
+   "keywords": [
+    "motorbike",
+    "track riding",
+    "motorsport",
+    "motorcycle racing",
+    "performance riding"
+   ]
+  },
+  "116": {
+   "gender": "none",
+   "keywords": [
+    "motor scooter",
+    "urban commuting",
+    "city travel",
+    "two wheeler",
+    "local transport"
+   ]
+  },
+  "117": {
+   "gender": "none",
+   "keywords": [
+    "motorbike",
+    "street riding",
+    "track riding",
+    "sport riding",
+    "motorcycle racing"
+   ]
+  },
+  "118": {
+   "gender": "none",
+   "keywords": [
+    "hand cleanser",
+    "hand wash",
+    "kitchen",
+    "bathroom",
+    "personal hygiene",
+    "hand care"
+   ]
+  },
+  "119": {
+   "gender": "none",
+   "keywords": [
+    "shower gel",
+    "body cleanser",
+    "shower",
+    "bathroom",
+    "personal hygiene"
+   ]
+  },
+  "120": {
+   "gender": "mens",
+   "keywords": [
+    "facial moisturizer",
+    "face moisturizer",
+    "facial lotion",
+    "skin care",
+    "daily grooming",
+    "face cream"
+   ]
+  },
+  "121": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "everyday communication"
+   ]
+  },
+  "122": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "everyday communication"
+   ]
+  },
+  "123": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "camera phone",
+    "mobile photography"
+   ]
+  },
+  "124": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "facial recognition",
+    "oled display"
+   ]
+  },
+  "125": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "everyday communication"
+   ]
+  },
+  "126": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "camera phone",
+    "mobile photography"
+   ]
+  },
+  "127": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "everyday communication"
+   ]
+  },
+  "128": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "everyday communication"
+   ]
+  },
+  "129": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "camera phone"
+   ]
+  },
+  "130": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "camera phone",
+    "mobile photography"
+   ]
+  },
+  "131": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "camera phone"
+   ]
+  },
+  "132": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "camera phone"
+   ]
+  },
+  "133": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "camera phone",
+    "mobile photography"
+   ]
+  },
+  "134": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "camera phone"
+   ]
+  },
+  "135": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "selfie photography"
+   ]
+  },
+  "136": {
+   "gender": "none",
+   "keywords": [
+    "cell phone",
+    "mobile phone",
+    "handset",
+    "mobile device",
+    "communication device",
+    "touchscreen phone",
+    "camera phone",
+    "fingerprint sensor"
+   ]
+  },
+  "137": {
+   "gender": "none",
+   "keywords": [
+    "sports ball",
+    "gridiron ball",
+    "throwing ball",
+    "catching ball",
+    "team sport",
+    "passing game",
+    "practice equipment"
+   ]
+  },
+  "138": {
+   "gender": "none",
+   "keywords": [
+    "sports ball",
+    "pitching ball",
+    "hitting ball",
+    "fielding gear",
+    "batting practice",
+    "sports gear"
+   ]
+  },
+  "139": {
+   "gender": "none",
+   "keywords": [
+    "fielding glove",
+    "catching mitt",
+    "mitt",
+    "protective gear",
+    "hand protection",
+    "fielding equipment",
+    "sports gear"
+   ]
+  },
+  "140": {
+   "gender": "none",
+   "keywords": [
+    "sports ball",
+    "indoor ball",
+    "outdoor ball",
+    "dribbling",
+    "shooting",
+    "court sport",
+    "team sport",
+    "sports gear"
+   ]
+  },
+  "141": {
+   "gender": "none",
+   "keywords": [
+    "basketball hoop",
+    "hoop assembly",
+    "backboard accessory",
+    "shooting target",
+    "court equipment",
+    "sports gear"
+   ]
+  },
+  "142": {
+   "gender": "none",
+   "keywords": [
+    "sports ball",
+    "match ball",
+    "game ball",
+    "bowling equipment",
+    "batting equipment",
+    "cricket gear"
+   ]
+  },
+  "143": {
+   "gender": "none",
+   "keywords": [
+    "sports bat",
+    "batting tool",
+    "hitting equipment",
+    "cricket gear",
+    "run scoring",
+    "sports equipment"
+   ]
+  },
+  "144": {
+   "gender": "none",
+   "keywords": [
+    "protective headgear",
+    "cricket protection",
+    "batting safety",
+    "wicketkeeping gear",
+    "sports headwear",
+    "protective equipment"
+   ]
+  },
+  "145": {
+   "gender": "none",
+   "keywords": [
+    "cricket stumps",
+    "stump set",
+    "bail set",
+    "bowling target",
+    "wicket set",
+    "cricket gear"
+   ]
+  },
+  "146": {
+   "gender": "none",
+   "keywords": [
+    "badminton birdie",
+    "birdie",
+    "shuttle",
+    "racket sport",
+    "court game",
+    "badminton gear"
+   ]
+  },
+  "147": {
+   "gender": "none",
+   "keywords": [
+    "soccer ball",
+    "sports ball",
+    "kicking ball",
+    "match ball",
+    "field game",
+    "team sport"
+   ]
+  },
+  "148": {
+   "gender": "none",
+   "keywords": [
+    "sports ball",
+    "putting ball",
+    "tee shot",
+    "driving range",
+    "golfing",
+    "course equipment"
+   ]
+  },
+  "149": {
+   "gender": "none",
+   "keywords": [
+    "golf club",
+    "iron club",
+    "approach club",
+    "chipping club",
+    "fairway equipment",
+    "golfing"
+   ]
+  },
+  "150": {
+   "gender": "none",
+   "keywords": [
+    "sports bat",
+    "hitting bat",
+    "batting equipment",
+    "baseball practice",
+    "field sport",
+    "dugout gear"
+   ]
+  },
+  "151": {
+   "gender": "none",
+   "keywords": [
+    "sports ball",
+    "court ball",
+    "practice ball",
+    "match ball",
+    "racket sport",
+    "tennis practice"
+   ]
+  },
+  "152": {
+   "gender": "none",
+   "keywords": [
+    "tennis racquet",
+    "stringed racket",
+    "court equipment",
+    "racket sport",
+    "ball game",
+    "tennis practice"
+   ]
+  },
+  "153": {
+   "gender": "none",
+   "keywords": [
+    "sports ball",
+    "court ball",
+    "net game",
+    "team sport",
+    "spiking ball",
+    "volley ball"
+   ]
+  },
+  "154": {
+   "gender": "none",
+   "keywords": [
+    "shades",
+    "sun eyewear",
+    "uv eye protection",
+    "outdoor eyewear",
+    "driving eyewear",
+    "beach eyewear"
+   ]
+  },
+  "155": {
+   "gender": "none",
+   "keywords": [
+    "shades",
+    "sun eyewear",
+    "uv eye protection",
+    "outdoor eyewear",
+    "driving eyewear",
+    "beach eyewear"
+   ]
+  },
+  "156": {
+   "gender": "none",
+   "keywords": [
+    "shades",
+    "sun eyewear",
+    "uv eye protection",
+    "outdoor eyewear",
+    "driving eyewear",
+    "beach eyewear"
+   ]
+  },
+  "157": {
+   "gender": "none",
+   "keywords": [
+    "novelty eyewear",
+    "costume eyewear",
+    "playful shades",
+    "themed eyewear",
+    "costume accessory",
+    "party accessory"
+   ]
+  },
+  "158": {
+   "gender": "none",
+   "keywords": [
+    "shades",
+    "sun eyewear",
+    "uv eye protection",
+    "outdoor eyewear",
+    "driving eyewear",
+    "beach eyewear"
+   ]
+  },
+  "159": {
+   "gender": "none",
+   "keywords": [
+    "tablet computer",
+    "touchscreen device",
+    "portable computer",
+    "mobile device",
+    "digital notebook",
+    "reading device",
+    "travel electronics"
+   ]
+  },
+  "160": {
+   "gender": "none",
+   "keywords": [
+    "android tablet",
+    "touchscreen computer",
+    "portable device",
+    "digital notebook",
+    "office productivity",
+    "entertainment device",
+    "media viewing"
+   ]
+  },
+  "161": {
+   "gender": "none",
+   "keywords": [
+    "android device",
+    "touchscreen computer",
+    "portable computer",
+    "mobile device"
+   ]
+  },
+  "162": {
+   "gender": "womens",
+   "keywords": [
+    "garment",
+    "apparel",
+    "outfit",
+    "one-piece clothing"
+   ]
+  },
+  "163": {
+   "gender": "womens",
+   "keywords": [
+    "sundress",
+    "warm weather apparel",
+    "lightweight outfit",
+    "breezy clothing"
+   ]
+  },
+  "164": {
+   "gender": "womens",
+   "keywords": [
+    "garment",
+    "apparel",
+    "outfit",
+    "one-piece clothing"
+   ]
+  },
+  "165": {
+   "gender": "womens",
+   "keywords": [
+    "casualwear",
+    "one-piece outfit",
+    "garment",
+    "apparel"
+   ]
+  },
+  "166": {
+   "gender": "womens",
+   "keywords": [
+    "plaid garment",
+    "apparel",
+    "one-piece outfit",
+    "cold weather wear"
+   ]
+  },
+  "167": {
+   "gender": "none",
+   "keywords": [
+    "automobile",
+    "car",
+    "passenger vehicle",
+    "road travel"
+   ]
+  },
+  "168": {
+   "gender": "none",
+   "keywords": [
+    "automobile",
+    "performance car",
+    "rear wheel drive car",
+    "road travel"
+   ]
+  },
+  "169": {
+   "gender": "none",
+   "keywords": [
+    "automobile",
+    "city driving",
+    "passenger car",
+    "urban transport"
+   ]
+  },
+  "170": {
+   "gender": "none",
+   "keywords": [
+    "sport utility vehicle",
+    "automobile",
+    "family transport",
+    "road travel"
+   ]
+  },
+  "171": {
+   "gender": "none",
+   "keywords": [
+    "van",
+    "family vehicle",
+    "passenger transport",
+    "road travel"
+   ]
+  },
+  "172": {
+   "gender": "womens",
+   "keywords": [
+    "purse",
+    "pocketbook",
+    "carryall",
+    "everyday carry"
+   ]
+  },
+  "173": {
+   "gender": "womens",
+   "keywords": [
+    "handbag",
+    "purse",
+    "pocketbook",
+    "carryall"
+   ]
+  },
+  "174": {
+   "gender": "womens",
+   "keywords": [
+    "handbag",
+    "purse",
+    "pocketbook",
+    "designer accessory"
+   ]
+  },
+  "175": {
+   "gender": "womens",
+   "keywords": [
+    "rucksack",
+    "knapsack",
+    "day pack",
+    "commuting"
+   ]
+  },
+  "176": {
+   "gender": "womens",
+   "keywords": [
+    "purse",
+    "pocketbook",
+    "carryall",
+    "everyday carry"
+   ]
+  },
+  "177": {
+   "gender": "womens",
+   "keywords": [
+    "formalwear",
+    "eveningwear",
+    "formal attire"
+   ]
+  },
+  "178": {
+   "gender": "womens",
+   "keywords": [
+    "two-piece outfit",
+    "coordinated set",
+    "fashion apparel",
+    "garment"
+   ]
+  },
+  "179": {
+   "gender": "womens",
+   "keywords": [
+    "two-piece outfit",
+    "coordinated set",
+    "fashion apparel",
+    "garment"
+   ]
+  },
+  "180": {
+   "gender": "womens",
+   "keywords": [
+    "daywear",
+    "one-piece outfit",
+    "garment",
+    "casualwear"
+   ]
+  },
+  "181": {
+   "gender": "womens",
+   "keywords": [
+    "formalwear",
+    "businesswear",
+    "matching set",
+    "office outfit"
+   ]
+  },
+  "182": {
+   "gender": "womens",
+   "keywords": [
+    "ear jewelry",
+    "jewelry",
+    "jewellery",
+    "ear adornment",
+    "formal accessory"
+   ]
+  },
+  "183": {
+   "gender": "womens",
+   "keywords": [
+    "ear jewelry",
+    "jewelry",
+    "jewellery",
+    "ear adornment",
+    "casual accessory"
+   ]
+  },
+  "184": {
+   "gender": "womens",
+   "keywords": [
+    "ear jewelry",
+    "jewelry",
+    "jewellery",
+    "ear adornment",
+    "summer accessory"
+   ]
+  },
+  "185": {
+   "gender": "womens",
+   "keywords": [
+    "house shoe",
+    "indoor footwear",
+    "home footwear",
+    "loungewear"
+   ]
+  },
+  "186": {
+   "gender": "womens",
+   "keywords": [
+    "high heel",
+    "dress shoe",
+    "formal footwear",
+    "evening footwear"
+   ]
+  },
+  "187": {
+   "gender": "womens",
+   "keywords": [
+    "dress shoe",
+    "party shoe",
+    "formal footwear",
+    "special occasion footwear"
+   ]
+  },
+  "188": {
+   "gender": "womens",
+   "keywords": [
+    "everyday shoe",
+    "daily footwear",
+    "casual footwear",
+    "relaxed footwear"
+   ]
+  },
+  "189": {
+   "gender": "womens",
+   "keywords": [
+    "party shoe",
+    "dress shoe",
+    "casual footwear",
+    "everyday footwear"
+   ]
+  },
+  "190": {
+   "gender": "womens",
+   "keywords": [
+    "timepiece",
+    "wristwatch",
+    "automatic movement",
+    "horology",
+    "wrist accessory"
+   ]
+  },
+  "191": {
+   "gender": "womens",
+   "keywords": [
+    "timepiece",
+    "wristwatch",
+    "lunar complication",
+    "horology",
+    "wrist accessory"
+   ]
+  },
+  "192": {
+   "gender": "womens",
+   "keywords": [
+    "timepiece",
+    "wristwatch",
+    "date display",
+    "daily wear",
+    "wrist accessory"
+   ]
+  },
+  "193": {
+   "gender": "womens",
+   "keywords": [
+    "timepiece",
+    "wristwatch",
+    "daily wear",
+    "wrist accessory"
+   ]
+  },
+  "194": {
+   "gender": "womens",
+   "keywords": [
+    "timepiece",
+    "wrist accessory",
+    "daily wear",
+    "armwear"
+   ]
+  }
+ },
+ "reviewed": "2026-11-15: removed keywords whose head word names a different product (cup 'hot drink', ice cube tray 'drink', tongs 'serving food', microwave 'quick meal', water 'beverage container'); added 'face cream' to the face lotion. Removed the Vivo V9's 'selfie camera' (a feature, not what it is). Removed the Air Jordan's 'basketball' (what it is for, not what it is: it showed for basketballs). Removed the ice cube tray's 'cooling drinks' and 'beverage' (what it is for, not what it is)."
+}
