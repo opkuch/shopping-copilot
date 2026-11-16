@@ -1,0 +1,10 @@
+{
+  "answers": [
+    {"type":"choice","name":"act","choice":"new_search","confidence":0.97,"probabilities":[{"value":"new_search","probability":0.97},{"value":"refine","probability":0.02},{"value":"chat","probability":0.005},{"value":"refer","probability":0.005}]},
+    {"type":"choice","name":"domain","choice":"catalog","confidence":0.99,"probabilities":[{"value":"catalog","probability":0.99},{"value":"service","probability":0.005},{"value":"off_topic","probability":0.005}]},
+    {"type":"choice","name":"chat_kind","choice":"greeting","confidence":0.6,"probabilities":[{"value":"greeting","probability":0.6},{"value":"catalog_overview","probability":0.4}]},
+    {"type":"predicate","name":"mentions_service","probability":0.08}
+  ],
+  "model": "gpt-6-luna",
+  "usage":{"input_tokens":120,"input_tokens_details":{"cache_write_tokens":0,"cached_tokens":0},"output_tokens":12,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":132}
+}

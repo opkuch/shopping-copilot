@@ -1,0 +1,12 @@
+{
+  "answers": [
+    {"type":"choice","name":"act","choice":"refer","confidence":0.93,"probabilities":[{"value":"refer","probability":0.93},{"value":"refine","probability":0.07}]},
+    {"type":"choice","name":"domain","choice":"catalog","confidence":0.98,"probabilities":[{"value":"catalog","probability":0.98},{"value":"service","probability":0.01},{"value":"off_topic","probability":0.01}]},
+    {"type":"choice","name":"chat_kind","choice":"greeting","confidence":0.5,"probabilities":[{"value":"greeting","probability":0.5},{"value":"catalog_overview","probability":0.5}]},
+    {"type":"predicate","name":"mentions_service","probability":0.01},
+    {"type":"choice","name":"target_group","choice":"unclear","confidence":0.8,"probabilities":[{"value":"unclear","probability":0.8},{"value":"first","probability":0.2}]},
+    {"type":"choice","name":"refer_target","choice":"card_2","confidence":0.91,"probabilities":[{"value":"card_2","probability":0.91},{"value":"card_1","probability":0.05},{"value":"unclear","probability":0.04}]}
+  ],
+  "model": "gpt-6-luna",
+  "usage":{"input_tokens":120,"input_tokens_details":{"cache_write_tokens":0,"cached_tokens":0},"output_tokens":12,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":132}
+}

@@ -1,0 +1,10 @@
+{
+  "answers": [
+    {"type":"refusal","name":"act"},
+    {"type":"choice","name":"domain","choice":"catalog","confidence":0.7,"probabilities":[{"value":"catalog","probability":0.7},{"value":"service","probability":0.1},{"value":"off_topic","probability":0.2}]},
+    {"type":"choice","name":"chat_kind","choice":"greeting","confidence":0.5,"probabilities":[{"value":"greeting","probability":0.5},{"value":"catalog_overview","probability":0.5}]},
+    {"type":"predicate","name":"mentions_service","probability":0.1}
+  ],
+  "model": "gpt-6-luna",
+  "usage":{"input_tokens":120,"input_tokens_details":{"cache_write_tokens":0,"cached_tokens":0},"output_tokens":12,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":132}
+}
