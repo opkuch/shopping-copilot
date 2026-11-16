@@ -1,0 +1,29 @@
+{
+  "name": "bazak-shopping-copilot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/server.ts",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
+    "eval:catalog": "node scripts/eval-catalog.ts",
+    "enrich:catalog": "node --env-file-if-exists=.env scripts/enrich-catalog.ts",
+    "eval:product": "node --env-file-if-exists=.env scripts/eval-product.ts",
+    "record:model": "node --env-file-if-exists=.env scripts/record-model.ts",
+    "serve:fake": "node scripts/serve-fake.ts",
+    "eval:sim": "node --env-file-if-exists=.env scripts/eval-sim.ts"
+  },
+  "dependencies": {
+    "fastify": "^5.12.8",
+    "openai": "^7.57.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "typescript": "^7.0.2"
+  }
+}
