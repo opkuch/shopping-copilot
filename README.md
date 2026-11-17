@@ -13,16 +13,7 @@ npm run setup                         # installs everything and builds the web a
 npm start                             # open http://127.0.0.1:3000
 ```
 
-No API key? `npm --prefix server run serve:fake` runs the same app on port 3100 with scripted models, so you can click around offline.
-
-```bash
-npm test                                      # server + web tests, offline
-npx --prefix web playwright install chromium  # once
-npm run e2e                                   # browser tests against the real server
-npm --prefix server run eval:product          # paid: end-to-end eval with live models
-npm --prefix server run eval:sim              # paid: simulated shoppers vs. a simple baseline
-npm --prefix server run eval:catalog          # free: checks the live DummyJSON API still looks as expected
-```
+The server also serves the built web app, so there's no separate client to start. No API key? `npm --prefix server run serve:fake` runs the same app on port 3100 with scripted models, so you can click around offline.
 
 ## Architecture and framework choice
 
@@ -81,6 +72,14 @@ browser (React) ──▶ Fastify server ──▶ one turn:
 
 **The story.** Three layers of tests check that it *works*; two evals measure whether it's *good*.
 
+```bash
+npm test                                      # server + web tests, offline
+npx --prefix web playwright install chromium  # once
+npm run e2e                                   # browser tests
+npm --prefix server run eval:product          # paid, live models
+npm --prefix server run eval:sim              # paid, simulated shoppers
+```
+
 1. **Server tests (352, offline):** the real pipeline, real filtering over a saved copy of the catalog, and scripted model answers. They cover the assignment's examples, lists, follow-ups, price rules, retries, the two-tab race and storage failures.
 2. **Web tests (99):** every card, chip, error and loading state, and how the page reacts to each server response.
 3. **Browser tests (13):** the real server in Chromium. They cover refreshing mid-answer, clicking an old card, the phone layout, and accessibility checks.
@@ -111,4 +110,4 @@ I used Claude Code as a pair programmer: I made the design calls and checked the
 - Conversations can't be deleted or renamed.
 - It's built for one local server process (the in-process lock and rate limit assume it).
 
-**With another week:** run the evals on every prompt change and grow them from real conversations; give the models a running summary of the whole conversation; put a real search engine in front of the filters for a bigger catalog; add delete and rename.
+**With another week:** run the evals on every prompt change and grow them from real conversations; give the models a running summary of the whole conversation; put a real search engine in front of the filters for a bigger catalog; delete and rename conversations; a cart; more languages; and visual polish (original prices on discounted cards, a busy marker in the sidebar).
