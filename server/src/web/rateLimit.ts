@@ -1,7 +1,8 @@
 // A cap on new turns, because every turn makes paid model calls: a runaway client (a stuck retry loop, a
 // script) must not run up the bill. Sliding windows in memory, per conversation and for the whole
 // process (the server binds to loopback, so there is one user and no per-IP key worth having).
-// Resends of a message already accepted are not counted: they join the run in flight and cost nothing.
+// A resend that makes no model call (already answered, or joining its run in flight) is not counted; a resend
+// that runs the turn again is (routes/conversations.ts).
 
 export type RateLimiter = {
   /** True when one more new turn fits; it is then counted. `key` is the conversation id, or "new". */
@@ -26,6 +27,11 @@ export function createRateLimiter(opts: { perConversation?: number; total?: numb
       const mine = byKey.get(key) ?? [];
       prune(mine, t);
       prune(all, t);
+      // Keys whose window emptied are forgotten, so the map stays as small as the last minute's traffic.
+      for (const [k, list] of byKey) {
+        prune(list, t);
+        if (list.length === 0) byKey.delete(k);
+      }
       if (mine.length >= perConversation || all.length >= total) return false;
       mine.push(t);
       all.push(t);

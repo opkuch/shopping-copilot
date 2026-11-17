@@ -25,6 +25,15 @@ function parsePayload(json: string): Payload | null {
   }
 }
 
+/** A trace row that can't be read is reported as such, like an unreadable message: the other traces still load. */
+function parseTrace(json: string): unknown {
+  try {
+    return JSON.parse(json) as unknown;
+  } catch {
+    return { unreadable: true };
+  }
+}
+
 function toMessage(row: MsgRow): Message {
   if (row.role === "user") {
     return { id: row.id, role: "user", text: row.text, createdAt: row.created_at };
@@ -49,6 +58,7 @@ export function createStore(
     convById: db.prepare("SELECT id, title, revision FROM conversations WHERE id = ?"),
     msgsOf: db.prepare("SELECT * FROM messages WHERE conversation_id = ? ORDER BY position"),
     lastPos: db.prepare("SELECT MAX(position) AS p FROM messages WHERE conversation_id = ?"),
+    lastOf: db.prepare("SELECT id, role FROM messages WHERE conversation_id = ? ORDER BY position DESC LIMIT 1"),
     insertConv: db.prepare("INSERT INTO conversations (id, title, created_at, updated_at, revision) VALUES (?, ?, ?, ?, 0)"),
     insertMsg: db.prepare("INSERT INTO messages (id, conversation_id, role, position, text, payload_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"),
     bump: db.prepare("UPDATE conversations SET revision = revision + 1, updated_at = ? WHERE id = ?"),
@@ -136,6 +146,11 @@ export function createStore(
       return { kind: "not_tail", conversation: view(row.conversation_id) as ConversationView } satisfies ResendState;
     },
 
+    unansweredTail(conversationId) {
+      const last = q.lastOf.get(conversationId) as { id: string; role: string } | undefined;
+      return last?.role === "user" ? last.id : null;
+    },
+
     storeAssistant({ conversationId, userMessageId, text, payload, trace }): StoreAssistantResult {
       return withTransaction(db, (): StoreAssistantResult => {
         if (!q.convById.get(conversationId)) return { kind: "dropped", reason: "conversation_gone" };
@@ -200,12 +215,23 @@ export function createStore(
       return null;
     },
 
+    shownCard(conversationId, productId) {
+      // Newest first: the card as it was last shown (its stock and price may have changed since an older reply).
+      const rows = (q.assistants.all(conversationId) as MsgRow[]);
+      for (const row of rows) {
+        const payload = row.payload_json === null ? null : parsePayload(row.payload_json);
+        const card = payload?.groups.flatMap((g) => g.products).find((p) => p.id === productId);
+        if (card) return card;
+      }
+      return null;
+    },
+
     previousExchange(conversationId) {
       // The tail is the message being answered; the two before it are the last exchange.
       const [tail, assistant, user] = q.lastThree.all(conversationId) as MsgRow[];
       if (tail?.role !== "user" || assistant?.role !== "assistant" || user?.role !== "user") return null;
       const payload = assistant.payload_json === null ? null : parsePayload(assistant.payload_json);
-      return { user: user.text, assistant: assistant.text, pending: payload?.pending ?? null, purpose: payload?.purpose ?? null, memory: payload?.memory ?? null };
+      return { user: user.text, assistant: assistant.text, memory: payload?.memory ?? null, pending: payload?.pending ?? null };
     },
 
     traces(userMessageId) {
@@ -213,7 +239,7 @@ export function createStore(
         id: string; attempt: number; outcome: string; trace_json: string; created_at: string;
       }>;
       return rows.map((r) => ({
-        id: r.id, attempt: r.attempt, outcome: r.outcome, trace: JSON.parse(r.trace_json) as unknown, createdAt: r.created_at,
+        id: r.id, attempt: r.attempt, outcome: r.outcome, trace: parseTrace(r.trace_json), createdAt: r.created_at,
       }));
     },
   };

@@ -9,9 +9,8 @@ import { randomUUID } from "node:crypto";
 import { createCategoryNames } from "../src/catalog/cache.ts";
 import type { AssistantMessage, Group, Stage } from "../src/messages/schema.ts";
 import { createBudget } from "../src/pipeline/budget.ts";
-import { labelFor } from "../src/pipeline/merge.ts";
 import { createReplyWriter } from "../src/reply/compose.ts";
-import { resultsSentence } from "../src/reply/templates.ts";
+import { labelFor, resultsSentence } from "../src/reply/templates.ts";
 import { createTurnRunner } from "../src/pipeline/runTurn.ts";
 import { CallFailed } from "../src/pipeline/ports.ts";
 import type { ReplyWriter, Retriever, Store, TurnOutcome } from "../src/pipeline/ports.ts";
@@ -25,7 +24,8 @@ import {
 import type { Step } from "./fakes/models.ts";
 import type { ExtractionResult, Preview, RouterResult } from "../src/messages/schema.ts";
 import type { ExtractInput, ProseInput, RouterInput } from "../src/pipeline/ports.ts";
-import { CURATED, giftCategories } from "../src/pipeline/purpose.ts";
+import { CURATED, GIFT_CATEGORIES, giftCategories } from "../src/pipeline/purpose.ts";
+const GIFT_KID = GIFT_CATEGORIES.kid;
 
 type Wrap = {
   retriever?: (real: Retriever) => Retriever;
@@ -57,10 +57,13 @@ function harness(wrap: Wrap = {}) {
   const state = { conversationId: null as string | null, revision: 0, id: "" };
 
   type Script = {
-    router: Step<RouterInput, RouterResult>;
+    /** Omitted on a card click the server opens without asking the router. */
+    router?: Step<RouterInput, RouterResult>;
     /** Omitted: extraction hangs until aborted, which is what a turn that needs no slots should do to it. */
     extract?: Step<ExtractInput, ExtractionResult>;
     write?: Step<ProseInput, string | null>;
+    /** A click on a card: the product id the client sends with the message. */
+    productId?: number;
   };
 
   function start(text: string, script: Script) {
@@ -73,11 +76,11 @@ function harness(wrap: Wrap = {}) {
     state.conversationId = accepted.conversationId;
     state.revision = accepted.revision;
     state.id = id;
-    router.queue(script.router);
-    slots.queue(script.extract ?? ((_i, ctx) => hangUntilAborted(ctx.signal)));
+    if (script.router !== undefined) router.queue(script.router);
+    if (script.productId === undefined || script.router !== undefined) slots.queue(script.extract ?? ((_i, ctx) => hangUntilAborted(ctx.signal)));
     // Only refer turns call the writer. Unscripted, the fake's "no step" error becomes null, like a failed call.
     if (script.write !== undefined) writer.queue(script.write);
-    const args = { conversationId: accepted.conversationId, revision: accepted.revision, userMessage: accepted.userMessage };
+    const args = { conversationId: accepted.conversationId, revision: accepted.revision, userMessage: accepted.userMessage, ...(script.productId !== undefined ? { productId: script.productId } : {}) };
     return { id, args, outcome: runner.run(args) };
   }
   async function say(text: string, script: Script) {
@@ -102,7 +105,7 @@ const tick = () => new Promise<void>((r) => setImmediate(r));
 test("greeting, service, and off_topic get their template and touch no product endpoint", async () => {
   const h = harness();
   const greeting = done((await h.say("hi", { router: routerResult({ act: "chat", chatKind: "greeting" }) })).outcome);
-  assert.equal(greeting.text, "I can help you find products in our catalog.");
+  assert.equal(greeting.text, "Happy to help. Tell me what you're looking for.");
 
   // act is new_search but nothing is shoppable: the domain guard wins over the act
   const service = done((await h.say("a flight to Tokyo", { router: routerResult({ act: "new_search", domain: "service" }) })).outcome);
@@ -148,7 +151,7 @@ test("an extraction refusal is the same refusal template", async () => {
 
 // ---------- new searches ----------
 
-// router.v2: the note is for a service the user asks for ("and a flight"), not one mentioned as context
+// The note is for a service the user asks for ("and a flight"), not one mentioned as context
 // ("for my flight"); which phrasing gets the flag is the live eval's job, the mechanism is this test's.
 test("headphones and a flight to Tokyo: headphones retrieved, service sentence appended", async () => {
   const h = harness();
@@ -189,7 +192,7 @@ test("something cheap and cool: a curated browse of the cheapest product per cat
   });
   const m = done(outcome);
   assert.deepEqual(q(m.groups[0]), {
-    category: null, noun: null, attributes: [], priceMin: null, priceMax: null, sort: "price_asc", inStock: false, gender: null, categoryStated: false, top: false, within: CURATED, purpose: "curated", offset: 0,
+    category: null, noun: null, attributes: [], priceMin: null, priceMax: null, sort: "price_asc", inStock: false, gender: null, categoryStated: false, top: false, within: CURATED, purpose: "curated", exclude: [], offset: 0,
   });
   assert.deepEqual(h.productCalls().map((c) => c.method), ["all"]);
   const products = m.groups[0]?.products ?? [];
@@ -215,9 +218,9 @@ test("no intent at all: the default order across categories, and the reply claim
   assert.equal(m.groups[0]?.label, "Picks");
 });
 
-test("a white dress in Hebrew: no category guessed, no white dress exists, so other dresses are shown and the reply says so", async () => {
+test("a white dress: no category guessed, no white dress exists, so other dresses are shown and the reply says so", async () => {
   const h = harness();
-  const { outcome } = await h.say("אני רוצה שמלה לבנה", {
+  const { outcome } = await h.say("I want a white dress", {
     router: routerResult(),
     extract: search({ noun: "dress", attributes: ["white"] }),
   });
@@ -230,31 +233,12 @@ test("a white dress in Hebrew: no category guessed, no white dress exists, so ot
   // Dresses live in two categories in this catalog, and most titles never say "dress".
   assert.ok(g.products.every((p) => p.category === "womens-dresses" || p.category === "tops"));
   assert.equal(g.total, 10);
-  // The writer was unscripted (a failed call), so the reply is the Hebrew template draft.
-  assert.equal(m.text, 'אין התאמה ל-"white" בקטגוריה שמלות. הנה מוצרים אחרים בקטגוריה.');
-  const call = h.writer.calls.at(-1)?.input;
-  assert.equal(call?.kind, "results");
-  assert.equal(call?.kind === "results" ? call.language : null, "he");
+  // The writer was unscripted (a failed call), so the reply is the template draft.
+  assert.equal(m.text, "I couldn't find white dresses in our catalog. Here are other dresses.");
+  assert.equal(h.writer.calls.at(-1)?.input.kind, "results");
 });
 
-test("a Hebrew miss gets the Hebrew template", async () => {
-  const h = harness();
-  const { outcome } = await h.say("טיסה ללונדון", {
-    router: routerResult(),
-    extract: search({ noun: "zzzz", priceMax: 50 }),
-  });
-  const m = done(outcome);
-  assert.equal(m.groups[0]?.status, "miss");
-  assert.match(m.text, /^לא מצאתי בקטלוג "Zzzzes" עד \$50\.$/);
-});
 
-test("Hebrew templates answer chat and service turns in Hebrew", async () => {
-  const h = harness();
-  const hi = done((await h.say("שלום", { router: routerResult({ act: "chat", chatKind: "greeting" }) })).outcome);
-  assert.equal(hi.text, "אני יכול לעזור לך למצוא מוצרים בקטלוג שלנו.");
-  const flight = done((await h.say("טיסה לטוקיו", { router: routerResult({ domain: "service" }) })).outcome);
-  assert.match(flight.text, /להזמין נסיעות או שירותים אחרים/);
-});
 
 test("men's watch: the gender picks the category instead of being matched as text", async () => {
   const h = harness();
@@ -292,15 +276,16 @@ test("a laptop and a fragrance under 50: two groups, the bound belongs to the fr
   assert.ok(m.groups[1]?.products.every((p) => p.price <= 50));
 });
 
-test("a laptop, a perfume, and a watch: first two looked up, the sentence says so", async () => {
+test("a seven-item list: the first six are looked up, and the reply says the rest must be sent separately", async () => {
   const h = harness();
-  const { outcome } = await h.say("A laptop, a perfume, and a watch", {
+  const nouns = ["laptop", "perfume", "watch", "lipstick", "sunglasses", "charger"];
+  const { outcome } = await h.say("a laptop, perfume, a watch, lipstick, sunglasses, a charger and a kettle", {
     router: routerResult(),
-    extract: extraction([intent({ noun: "laptop" }), intent({ noun: "perfume" })], 1),
+    extract: extraction(nouns.map((noun) => intent({ noun })), 1),
   });
   const m = done(outcome);
-  assert.equal(m.groups.length, 2);
-  assert.match(m.text, /I only looked up the first two\./);
+  assert.equal(m.groups.length, 6);
+  assert.match(m.text, /I looked up the first 6 items; send the rest separately./);
 });
 
 test("a results turn: when the writer fails, the template draft is the reply", async () => {
@@ -355,15 +340,6 @@ test("under 50 euros: the bound is not applied and the sentence says why", async
   assert.match(m.text, /Prices are in US dollars, so I didn't apply that price limit\./);
 });
 
-test("shekels the model called 'other' are still shekels when the message says so", async () => {
-  const h = harness();
-  const { outcome } = await h.say("טלפון עד 1000 שקל", {
-    router: routerResult(), extract: search({ category: "smartphones", priceMax: 1000, currency: "other" }),
-  });
-  const m = done(outcome);
-  assert.equal(q(m.groups[0]).priceMax, 270);
-  assert.match(m.text, /3\.7/);
-});
 
 test("a singular superlative names the winner; the runners-up stay as cards", async () => {
   const h = harness();
@@ -379,9 +355,9 @@ test("a singular superlative names the winner; the runners-up stay as cards", as
   assert.equal(input.groups[0]?.request.topIsFirst, true);
 });
 
-test("a Hebrew query: retrieval uses the English noun the extraction returned", async () => {
+test("retrieval uses the noun the extraction returned, not the words as typed", async () => {
   const h = harness();
-  const { outcome } = await h.say("שפתון אדום", {
+  const { outcome } = await h.say("lipstik, red one", {
     router: routerResult(), extract: search({ noun: "lipstick", attributes: ["red"] }),
   });
   const m = done(outcome);
@@ -399,7 +375,7 @@ test("cheap laptops then under 1000: refine keeps price_asc and the category and
   const m = done(second.outcome);
   const queried = (h.store.traces(second.id)[0]?.trace as { queries: Array<{ query: unknown }> }).queries[0]?.query;
   assert.deepEqual(queried, {
-    category: "laptops", noun: null, attributes: [], priceMin: null, priceMax: 1000, sort: "price_asc", inStock: false, gender: null, categoryStated: true, top: false, within: null, purpose: null, offset: 0,
+    category: "laptops", noun: null, attributes: [], priceMin: null, priceMax: 1000, sort: "price_asc", inStock: false, gender: null, categoryStated: true, top: false, within: null, purpose: null, exclude: [], offset: 0,
   });
   // the cheapest laptop is $1099.99, so this is a miss that restates what was asked; the laptops
   // already on screen stay the working query instead of an empty group
@@ -409,6 +385,19 @@ test("cheap laptops then under 1000: refine keeps price_asc and the category and
   // the router and extractor saw the stored query and the cards on screen
   assert.equal(h.router.calls[1]?.input.storedQueries.length, 1);
   assert.equal(h.router.calls[1]?.input.shownCards.length, 4);
+});
+
+test("a word a relaxed match left out is still asked for on the next change: white dress, then under $100", async () => {
+  const h = harness();
+  const first = done((await h.say("I want a white dress", { router: routerResult(), extract: search({ noun: "dress", attributes: ["white"] }) })).outcome);
+  assert.equal(first.groups[0]?.match, "attributes_relaxed");
+  assert.deepEqual(first.groups[0]?.dropped, ["white"]);
+  const second = await h.say("under 100", { router: routerResult({ act: "refine" }), extract: search({ priceMax: 100, currency: "USD" }) });
+  const queried = (h.store.traces(second.id)[0]?.trace as { queries: Array<{ query: Group["query"] }> }).queries[0]?.query;
+  assert.deepEqual(queried?.attributes, ["white"]);
+  assert.equal(queried?.priceMax, 100);
+  // and the reply says again that there is no white one
+  assert.match(done(second.outcome).text, /white/i);
 });
 
 test("a stated category stays stated on a refine: iphones in smartphones, then cheaper, never leaves smartphones", async () => {
@@ -439,7 +428,7 @@ test("make both cheaper with two different patches applies each to its own group
   const h = harness();
   await twoGroups(h);
   const turn = await h.say("laptops under 1500 and the fragrance under 60", {
-    router: routerResult({ act: "refine", targetGroup: "both" }),
+    router: routerResult({ act: "refine", targetGroup: "all" }),
     extract: search({ priceMax: 1500, currency: "USD" }, { priceMax: 60, currency: "USD" }),
   });
   const m = done(turn.outcome);
@@ -489,7 +478,7 @@ test("a refine of one group describes only that group; the kept group is not re-
   const h = harness();
   const before = done((await twoGroups(h)).outcome);
   const m = done((await h.say("the laptops under 1500", {
-    router: routerResult({ act: "refine", targetGroup: "first" }), extract: search({ priceMax: 1500 }),
+    router: routerResult({ act: "refine", targetGroup: 1 }), extract: search({ priceMax: 1500 }),
   })).outcome);
   assert.deepEqual(m.groups[1], { ...before.groups[1], repeat: true });
   assert.doesNotMatch(m.text, /fragrance/i);
@@ -509,21 +498,114 @@ const twoGroups = (h: ReturnType<typeof harness>) =>
     extract: search({ category: "laptops", sort: "price_desc" }, { category: "fragrances", sort: "price_desc" }),
   });
 
-test("cheaper with two groups and target unclear: ask which group, no fetch, working query unchanged", async () => {
+test("cheaper with two groups and no word on which: ask once, then apply the stored change to the search named", async () => {
   const h = harness();
   const first = done((await twoGroups(h)).outcome);
   h.api.reset();
-  const { outcome } = await h.say("cheaper", {
+  const asked = done((await h.say("cheaper", {
     router: routerResult({ act: "refine", targetGroup: "unclear" }), extract: search({ relativePrice: "cheaper" }),
-  });
-  assert.equal(done(outcome).text, "Which one should I change: Laptops or Fragrances?");
-  assert.deepEqual(h.api.calls, []);
-  assert.equal(h.store.workingQuery(h.state.conversationId as string)?.messageId, first.id);
-  // The answer names a group; the stored "cheaper" is applied to it, though the router said refer.
-  const m = done((await h.say("the laptops", {
-    router: routerResult({ act: "refer", targetGroup: "first" }), extract: search({}),
   })).outcome);
+  assert.equal(asked.text, "Which one should I change: Laptops or Fragrances?");
+  assert.deepEqual(asked.suggestions.map((c) => c.text), ["the laptops", "the fragrances"]);
+  assert.deepEqual(h.api.calls, [], "a question fetches nothing");
+  assert.equal(h.store.workingQuery(h.state.conversationId as string)?.messageId, first.id);
+  // The answer names a search; the stored "cheaper" is applied to it, though the router said refer.
+  const m = done((await h.say("the laptops", { router: routerResult({ act: "refer", targetGroup: 1 }), extract: search({}) })).outcome);
   assert.deepEqual(m.groups.map((g) => q(g).priceMax), [1399.98, null]);
+  assert.equal(m.groups[1]?.repeat, true, "the fragrances stay as they were");
+});
+
+test("the answer to 'which one?' may name the item as a product ('the laptops' extracted as laptops): the stored change still applies", async () => {
+  const h = harness();
+  await twoGroups(h);
+  await h.say("cheaper", { router: routerResult({ act: "refine", targetGroup: "unclear" }), extract: search({ relativePrice: "cheaper" }) });
+  const m = done((await h.say("the laptops", { router: routerResult({ act: "refer", targetGroup: 1 }), extract: search({ category: "laptops" }) })).outcome);
+  assert.deepEqual(m.groups.map((g) => q(g).priceMax), [1399.98, null]);
+});
+
+test("a new product typed instead of answering 'which one?' is a new search, not a change to the item the router guessed", async () => {
+  const h = harness();
+  await twoGroups(h);
+  await h.say("cheaper", { router: routerResult({ act: "refine", targetGroup: "unclear" }), extract: search({ relativePrice: "cheaper" }) });
+  const m = done((await h.say("actually, show me sunglasses", {
+    router: routerResult({ act: "new_search", targetGroup: 1 }), extract: search({ category: "sunglasses" }),
+  })).outcome);
+  assert.equal(m.groups.length, 1);
+  assert.equal(q(m.groups[0]).category, "sunglasses");
+  assert.equal(q(m.groups[0]).priceMax, null, "the stored 'cheaper' is not applied to the new search");
+});
+
+// ---------- shopping lists ----------
+
+const fiveItems = () => search(
+  { noun: "egg", category: "groceries" }, { noun: "case", attributes: ["iphone"] }, { noun: "lipstick" },
+  { noun: "tennis ball" }, { noun: "kettle" },
+);
+
+test("a five-item list: one group per item, three cards each, and the item the catalog lacks is named in the reply", async () => {
+  const h = harness();
+  const m = done((await h.say("eggs, an iPhone case, a lipstick, a tennis ball and a kettle", { router: routerResult(), extract: fiveItems(), write: null })).outcome);
+  assert.equal(m.groups.length, 5);
+  assert.deepEqual(m.groups.map((g) => g.status), ["results", "results", "results", "results", "miss"]);
+  assert.ok(m.groups.every((g) => g.products.length <= 3), "a list shows the best match and two alternatives per item");
+  assert.equal(m.groups[0]?.products[0]?.title, "Eggs");
+  assert.equal(m.groups[1]?.products[0]?.title, "iPhone 12 Silicone Case with MagSafe Plum");
+  assert.equal(m.text, "Here's your list: 4 of 5 items found (Eggs, Cases, Lipsticks and Balls). No match for kettles.");
+});
+
+test("a list: 'a watch under $100' changes only that search; the others stay as they were", async () => {
+  const h = harness();
+  const list = done((await h.say("eggs, an iPhone case, a watch, a tennis ball and a kettle", { router: routerResult(),
+    extract: search({ noun: "egg", category: "groceries" }, { noun: "case", attributes: ["iphone"] }, { noun: "watch" }, { noun: "tennis ball" }, { noun: "kettle" }) })).outcome);
+  assert.equal(list.groups[2]?.products.length, 3);
+  h.api.reset();
+  const m = done((await h.say("a watch under $100", { router: routerResult({ act: "refine", targetGroup: 3 }), extract: search({ priceMax: 100, currency: "USD" }) })).outcome);
+  assert.deepEqual(m.groups.map((g) => g.repeat ?? false), [true, true, false, true, true]);
+  assert.equal(q(m.groups[2]).priceMax, 100);
+  assert.deepEqual(m.groups[2]?.products.map((p) => p.title), ["Brown Leather Belt Watch"]);
+  assert.equal(h.api.calls.filter((c) => c.method !== "categories").length, 1, "one search fetched, not five");
+  assert.deepEqual(m.groups[0]?.products, list.groups[0]?.products);
+});
+
+test("a list: the price written in the middle of it belongs to that item only", async () => {
+  const h = harness();
+  // the extractor copied the bound onto every item; code keeps it on the tennis ball, written just before it
+  const copied = search({ noun: "egg", priceMax: 10, currency: "USD" }, { noun: "case", attributes: ["iphone"], priceMax: 10, currency: "USD" },
+    { noun: "tennis ball", priceMax: 10, currency: "USD" }, { noun: "lipstick", priceMax: 10, currency: "USD" });
+  const m = done((await h.say("eggs, an iPhone case, a tennis ball under $10 and a lipstick", { router: routerResult(), extract: copied })).outcome);
+  assert.deepEqual(m.groups.map((g) => q(g).priceMax), [null, null, 10, null]);
+  assert.equal(m.groups[1]?.products[0]?.price, 29.99, "the $29.99 case is not cut by the ball's limit");
+});
+
+test("a list: 'remove the eggs' takes that item off and keeps the rest as the working list", async () => {
+  const h = harness();
+  await h.say("eggs, an iPhone case, a lipstick, a tennis ball and a kettle", { router: routerResult(), extract: fiveItems() });
+  const m = done((await h.say("remove the eggs", { router: routerResult({ act: "remove", targetGroup: 1 }) })).outcome);
+  assert.equal(m.text, "Removed Eggs. Still on your list: Cases, Lipsticks, Balls, Kettles.");
+  assert.deepEqual(m.groups.map((g) => g.label), ["Cases", "Lipsticks", "Balls", "Kettles"]);
+  assert.equal(h.store.workingQuery(h.state.conversationId as string)?.groups.length, 4);
+  // the next change counts from the shorter list: #1 is now the case
+  const next = done((await h.say("#1 under $100", { router: routerResult({ act: "refine", targetGroup: 1 }), extract: search({ priceMax: 100, currency: "USD" }) })).outcome);
+  assert.equal(next.groups[0]?.repeat ?? false, false);
+  assert.equal(next.groups[0]?.label, "Cases");
+});
+
+test("a list: 'swap #3' shows the next options for that item only", async () => {
+  const h = harness();
+  const list = done((await h.say("eggs, a dress and a watch", { router: routerResult(), extract: search({ noun: "egg", category: "groceries" }, { noun: "dress" }, { noun: "watch" }) })).outcome);
+  assert.equal(list.groups[2]?.products.length, 3);
+  const m = done((await h.say("swap #3", { router: routerResult({ act: "more", targetGroup: 3 }) })).outcome);
+  assert.deepEqual(m.groups.map((g) => g.repeat ?? false), [true, true, false]);
+  assert.equal(m.groups[2]?.shownFrom, 3, "only the new watches are drawn");
+  assert.equal(m.groups[2]?.products.length, 6);
+});
+
+test("a list: 'anything under $30?' with no item named fits every search, and the reply says so", async () => {
+  const h = harness();
+  await h.say("eggs, a dress and a watch", { router: routerResult(), extract: search({ noun: "egg", category: "groceries" }, { noun: "dress" }, { noun: "watch" }) });
+  const m = done((await h.say("anything under $30?", { router: routerResult({ act: "refine", targetGroup: "unclear" }), extract: search({ priceMax: 30, currency: "USD" }) })).outcome);
+  assert.ok(m.groups.every((g) => q(g).priceMax === 30));
+  assert.match(m.text, /I applied that to every search on screen./);
 });
 
 test("cheaper with target both: both groups are re-fetched, each with its own bound", async () => {
@@ -531,7 +613,7 @@ test("cheaper with target both: both groups are re-fetched, each with its own bo
   await twoGroups(h);
   h.api.reset();
   const m = done((await h.say("make both cheaper", {
-    router: routerResult({ act: "refine", targetGroup: "both" }), extract: search({ relativePrice: "cheaper" }),
+    router: routerResult({ act: "refine", targetGroup: "all" }), extract: search({ relativePrice: "cheaper" }),
   })).outcome);
   assert.deepEqual(m.groups.map((g) => q(g).priceMax), [1399.98, 69.98]);
   assert.deepEqual(h.productCalls().map((c) => c.method).sort(), ["byCategory", "byCategory"]);
@@ -541,7 +623,7 @@ test("make both cheaper with the patch repeated per group (as the live model ret
   const h = harness();
   await twoGroups(h);
   const m = done((await h.say("make both cheaper", {
-    router: routerResult({ act: "refine", targetGroup: "both" }),
+    router: routerResult({ act: "refine", targetGroup: "all" }),
     extract: search({ relativePrice: "cheaper" }, { relativePrice: "cheaper" }),
   })).outcome);
   assert.deepEqual(m.groups.map((g) => q(g).priceMax), [1399.98, 69.98]);
@@ -553,7 +635,7 @@ test("a target of first re-fetches only that group and copies the other forward 
   const before = done((await twoGroups(h)).outcome);
   h.api.reset();
   const m = done((await h.say("the laptops under 1500", {
-    router: routerResult({ act: "refine", targetGroup: "first" }), extract: search({ priceMax: 1500 }),
+    router: routerResult({ act: "refine", targetGroup: 1 }), extract: search({ priceMax: 1500 }),
   })).outcome);
   assert.equal(q(m.groups[0]).priceMax, 1500);
   assert.deepEqual(m.groups[1], { ...before.groups[1], repeat: true });
@@ -584,16 +666,15 @@ test("a refine with no working query is treated as a new search", async () => {
   assert.equal(q(m.groups[0]).sort, "price_asc");
 });
 
-test("a refine carrying two patches applies the first and says the other must be sent separately", async () => {
+test("a refine of one named search with two patches applies the first to it", async () => {
   const h = harness();
   await twoGroups(h);
   const m = done((await h.say("laptop cheaper and perfume under 30", {
-    router: routerResult({ act: "refine", targetGroup: "first" }),
+    router: routerResult({ act: "refine", targetGroup: 1 }),
     extract: search({ relativePrice: "cheaper" }, { priceMax: 30 }),
   })).outcome);
   assert.equal(q(m.groups[0]).priceMax, 1399.98);
   assert.equal(q(m.groups[1]).priceMax, null);
-  assert.match(m.text, /I changed one thing; send the other change separately\./);
 });
 
 test("a refine with no intent re-runs the stored query unchanged", async () => {
@@ -641,7 +722,7 @@ test("the Rolex: refer resolves a named card; on detail failure the reply uses t
   assert.equal(m.detail?.id, card?.id);
   assert.equal(m.detail?.source, "stored_card");
   assert.equal(m.detail?.description, card?.description);
-  assert.equal(m.detail?.brand, null);
+  assert.equal(m.detail?.brand, card?.brand ?? null, "the stored card still knows its brand");
   assert.equal(m.text, `Here are more details about ${card?.title}. More details are unavailable right now.`);
   assert.equal(h.writer.calls.length, writesBefore, "no prose model when the live detail is missing");
 });
@@ -661,22 +742,60 @@ test("a refer message does not become the working query", async () => {
   assert.equal(h.store.workingQuery(h.state.conversationId as string)?.messageId, a.id);
 });
 
-test("refer with nothing on screen, and refer with an unclear target, use their templates", async () => {
+test("refer with nothing on screen uses its template; a question about several cards reads their details", async () => {
   const h = harness();
   const none = done((await h.say("the second one", { router: routerResult({ act: "refer", referTarget: null }) })).outcome);
   assert.equal(none.text, "There are no products on screen yet. What are you looking for?");
-  await h.say("laptops", { router: routerResult(), extract: search({ category: "laptops" }) });
+  const shown = done((await h.say("laptops", { router: routerResult(), extract: search({ category: "laptops" }) })).outcome);
   h.api.reset();
-  const unclear = done((await h.say("that one", { router: routerResult({ act: "refer", referTarget: "unclear" }) })).outcome);
+  // No model answer (the writer is unscripted): ask which card, so the next message can pick one.
+  const unclear = done((await h.say("which is lighter?", { router: routerResult({ act: "refer", referTarget: "unclear" }) })).outcome);
   assert.equal(unclear.text, "Which one? You can say a number from 1 to 4 or a product name.");
-  assert.deepEqual(h.api.calls, []);
+  assert.deepEqual(h.api.calls.map((c) => c.arg), shown.groups[0]?.products.map((p) => p.id));
+  const input = h.writer.calls.at(-1)?.input;
+  assert.ok(input?.kind === "answer");
+  assert.deepEqual(input.products.map((p) => p.position), [1, 2, 3, 4]);
+  assert.equal(input.message, "which is lighter?");
+});
+
+test("a question about the shown cards is answered from their listings, and the cards stay the working query", async () => {
+  const h = harness();
+  const shown = done((await h.say("laptops", { router: routerResult(), extract: search({ category: "laptops" }) })).outcome);
+  const m = done((await h.say("compare the first two", {
+    router: routerResult({ act: "refer", referTarget: "unclear" }),
+    write: "The Huawei Matebook X Pro (1) is rated higher than the Asus Zenbook (2).",
+  })).outcome);
+  assert.equal(m.text, "The Huawei Matebook X Pro (1) is rated higher than the Asus Zenbook (2).");
+  assert.deepEqual(m.groups, []);
+  assert.equal(h.store.workingQuery(h.state.conversationId as string)?.messageId, shown.id);
 });
 
 // ---------- failures ----------
 
-test("router failure: no assistant row, the catalog is never called, the failed trace is stored", async () => {
+test("router failure, extraction names a product: searched anyway, the fallback is in the trace", async () => {
   const h = harness();
   const { id, outcome } = await h.say("laptops", { router: new CallFailed("timeout", "router timed out"), extract: search({ category: "laptops" }) });
+  const m = done(outcome);
+  assert.equal(m.groups[0]?.status, "results");
+  assert.ok(m.groups[0]?.products.every((p) => p.category === "laptops"));
+  const trace = h.store.traces(id).at(-1)?.trace as { routerFallback?: { kind: string } };
+  assert.equal(trace.routerFallback?.kind, "timeout");
+});
+
+test("router failure on 'show more' or 'the second one' with cards on screen: answered from the words alone", async () => {
+  const h = harness();
+  await h.say("laptops", { router: routerResult(), extract: search({ category: "laptops" }) });
+  const more = done((await h.say("show more", { router: new CallFailed("timeout", "router timed out"), extract: search({}) })).outcome);
+  assert.equal(more.groups[0]?.status, "results");
+  assert.ok((more.groups[0]?.shownFrom ?? 0) > 0, "the next cards of the same search");
+  const second = await h.say("tell me about the second one", { router: new CallFailed("timeout", "router timed out"), extract: search({}) });
+  assert.notEqual(second.outcome.kind, "reply_failed");
+  assert.ok(done(second.outcome).detail !== null);
+});
+
+test("router failure with no product named: no assistant row, the catalog is never called, the failed trace is stored", async () => {
+  const h = harness();
+  const { id, outcome } = await h.say("tell me about it", { router: new CallFailed("timeout", "router timed out"), extract: search({}) });
   assert.equal(outcome.kind, "reply_failed");
   assert.deepEqual(h.api.calls, []);
   const conv = h.store.getConversation(h.state.conversationId as string);
@@ -710,7 +829,7 @@ test("one of two fetches fails: one group unavailable, the other kept, label nam
   assert.deepEqual(m.groups.map((g) => g.status), ["results", "unavailable"]);
   assert.deepEqual(m.groups[1], {
     label: "Fragrances", status: "unavailable", match: "none", total: 0, products: [],
-    query: { category: "fragrances", noun: null, attributes: [], priceMin: null, priceMax: null, sort: "relevance", inStock: false, gender: null, categoryStated: true, top: false, within: null, purpose: null, offset: 0 },
+    query: { category: "fragrances", noun: null, attributes: [], priceMin: null, priceMax: null, sort: "relevance", inStock: false, gender: null, categoryStated: true, top: false, within: null, purpose: null, exclude: [], offset: 0 },
   });
   assert.match(m.text, /I couldn't load Fragrances right now\.$/);
 });
@@ -728,7 +847,7 @@ test("a failed fetch on one refined group does not count the copied-forward grou
   await twoGroups(h);
   h.api.failNext.byCategory = new CallFailed("timeout", "t");
   const { outcome } = await h.say("the laptops cheaper", {
-    router: routerResult({ act: "refine", targetGroup: "first" }), extract: search({ relativePrice: "cheaper" }),
+    router: routerResult({ act: "refine", targetGroup: 1 }), extract: search({ relativePrice: "cheaper" }),
   });
   assert.equal(outcome.kind, "reply_failed");
 });
@@ -861,7 +980,7 @@ test("the trace carries prompt versions, router answers, raw extraction, queries
   assert.equal(t.router.answers.act.probability, 0.93);
   assert.equal(t.extraction.intents[0].category, "laptops");
   assert.equal(t.queries[0].query.category, "laptops");
-  assert.equal(typeof t.queries[0].categoryStated, "boolean");
+  assert.equal(typeof t.queries[0].query.categoryStated, "boolean");
   assert.equal(typeof t.totalMs, "number");
   assert.ok(t.events.some((e: { kind: string }) => e.kind === "retrieval"), "module trace events are collected");
   assert.doesNotMatch(JSON.stringify(t), /authorization|bearer|api[_-]?key|sk-/i);
@@ -869,7 +988,7 @@ test("the trace carries prompt versions, router answers, raw extraction, queries
 
 test("a second attempt of the same message gets the next attempt number", async () => {
   const h = harness();
-  const first = h.start("laptops", { router: new CallFailed("timeout", "t") });
+  const first = h.start("laptops", { router: new CallFailed("timeout", "t"), extract: search({}) });
   assert.equal((await first.outcome).kind, "reply_failed");
   h.router.queue(routerResult());
   h.slots.queue(search({ category: "laptops" }));
@@ -881,7 +1000,7 @@ test("a second attempt of the same message gets the next attempt number", async 
 test("chat is guarded before domain: a greeting the router calls off_topic still gets the greeting", async () => {
   const h = harness();
   const m = done((await h.say("hello", { router: routerResult({ act: "chat", domain: "off_topic" }) })).outcome);
-  assert.equal(m.text, "I can help you find products in our catalog.");
+  assert.equal(m.text, "Happy to help. Tell me what you're looking for.");
 });
 
 test("refer with a live detail lets the prose model phrase it", async () => {
@@ -895,18 +1014,14 @@ test("refer with a live detail lets the prose model phrase it", async () => {
 // ---------- prose facts, templates, labels ----------
 
 const baseQuery = (over: Partial<Group["query"]> = {}): Group["query"] => ({
-  category: null, noun: null, attributes: [], priceMin: null, priceMax: null, sort: "relevance", inStock: false, gender: null, categoryStated: false, top: false, within: null, purpose: null, offset: 0, ...over,
+  category: null, noun: null, attributes: [], priceMin: null, priceMax: null, sort: "relevance", inStock: false, gender: null, categoryStated: false, top: false, within: null, purpose: null, exclude: [], offset: 0, ...over,
 });
 const card = (id: number) => ({ id, title: `P${id}`, description: "d", price: id, thumbnail: "t", rating: 4, category: "laptops", inStock: true });
 const grp = (query: Group["query"], n: number, total: number, over: Partial<Group> = {}): Group => ({
   label: "X", status: "results", match: "exact", query, products: Array.from({ length: n }, (_, i) => card(i + 1)), total, ...over,
 });
-const noFlags = {
-  droppedIntents: false, mentionsService: false, currencyNotApplied: false,
-  secondPatchIgnored: false, noCheaper: null, noPricier: null,
-};
 
-test("the reply writer's facts are the product and the language name", async () => {
+test("the reply writer's facts are the question and the product", async () => {
   const bodies: Array<{ input: Array<{ content: string }> }> = [];
   const client = {
     responses: {
@@ -918,11 +1033,10 @@ test("the reply writer's facts are the product and the language name", async () 
   } as unknown as Parameters<typeof createReplyWriter>[0];
   const c = card(7);
   const detail = { ...c, brand: "B", availabilityStatus: null, warrantyInformation: null, shippingInformation: null, returnPolicy: null, reviewCount: 3, source: "live" as const };
-  const out = await createReplyWriter(client).write({ kind: "refer", language: "he", detail, message: "הוא מתאים לגיימינג?" }, { budget: createBudget(), trace: { event() {} } });
+  const out = await createReplyWriter(client).write({ kind: "refer", detail, message: "is it good for gaming?" }, { budget: createBudget(), trace: { event() {} } });
   assert.equal(out, "ok");
   const facts = JSON.parse(bodies[0]?.input[1]?.content as string);
-  assert.equal(facts.language, "Hebrew");
-  assert.equal(facts.message, "הוא מתאים לגיימינג?", "the writer sees the question, so it can answer it");
+  assert.equal(facts.message, "is it good for gaming?", "the writer sees the question, so it can answer it");
   assert.equal(facts.product.title, "P7");
   assert.equal(facts.product.brand, "B");
 });
@@ -963,73 +1077,65 @@ test("group labels are pluralized and capitalized for nouns, display names for c
 
 // ---------- vague and gift requests ----------
 
-test("a gift with no budget asks one question with chips; the answer is read with what it knew", async () => {
+test("a gift with no budget shows ideas at once; the chips carry the whole request", async () => {
   const h = harness();
-  const asked = done((await h.say("מתנה לאבא", { router: routerResult(), extract: search({ gift: true, attributes: ["men"] }) })).outcome);
-  assert.deepEqual(asked.groups, []);
-  assert.match(asked.text, /מתנה/);
-  assert.ok(asked.suggestions.some((s) => s.text === "עד 100 דולר"));
-  assert.ok(!asked.suggestions.some((s) => s.text === "בשבילו"), "the recipient is known, so it is not asked");
-
-  // "Up to $100" alone: the router may call it chat; it is the answer to the question.
-  const answered = done((await h.say("משהו עד 100 דולר", {
-    router: routerResult({ act: "chat" }), extract: search({ priceMax: 100, currency: "USD" }),
-  })).outcome);
-  const g = answered.groups[0];
-  assert.equal(g?.label, "רעיונות למתנה"); // a Hebrew chat gets Hebrew group labels
+  const m = done((await h.say("a gift for my dad", { router: routerResult(), extract: search({ gift: true, attributes: ["men"] }) })).outcome);
+  const g = m.groups[0];
+  assert.equal(g?.label, "Gift ideas");
+  assert.equal(g?.query.purpose, "gift");
   assert.equal(g?.query.gender, "mens");
   assert.ok((g?.products.length ?? 0) > 0);
-  assert.ok(g?.products.every((p) => p.price <= 100 && !p.category.startsWith("womens-") && p.category !== "groceries"));
-  assert.match(answered.text, /רעיונות למתנה בשבילו עד \$100/);
+  assert.ok(g?.products.every((p) => !p.category.startsWith("womens-") && p.price <= 1000), "no women's gifts, and no $9,000 Rolex with no budget");
+  const chips = m.suggestions.map((s) => s.text);
+  assert.ok(chips.includes("a gift for him up to $100"), `chips: ${chips}`);
+  assert.ok(!chips.includes("a gift for her"), "the recipient is known, so it is not offered");
 });
 
-test("a gift question is asked once: answering only who it is for shows ideas for her, with budget chips", async () => {
+test("a gift for someone unknown offers the recipients as chips, and a budget refines the ideas", async () => {
   const h = harness();
-  const asked = done((await h.say("אני מחפש מתנה", { router: routerResult(), extract: search({ gift: true }) })).outcome);
-  assert.deepEqual(asked.groups, []);
-  const answered = done((await h.say("בשבילה", {
-    router: routerResult({ act: "chat" }), extract: search({ attributes: ["women"] }),
+  const asked = done((await h.say("I'm looking for a gift", { router: routerResult(), extract: search({ gift: true }) })).outcome);
+  assert.ok((asked.groups[0]?.products.length ?? 0) > 0, "ideas at once, never a question with nothing on screen");
+  const chips = asked.suggestions.map((s) => s.text);
+  assert.ok(chips.includes("a gift for him") && chips.includes("a gift for her"), `chips: ${chips}`);
+  const m = done((await h.say("up to $100", { router: routerResult({ act: "refine" }), extract: search({ priceMax: 100, currency: "USD" }) })).outcome);
+  assert.equal(m.groups[0]?.query.purpose, "gift");
+  assert.ok(m.groups[0]?.products.every((p) => p.price <= 100));
+});
+
+test("a kind-of-product chip under gift ideas for dad is a men's perfume", async () => {
+  const h = harness();
+  const ideas = done((await h.say("a gift for my dad", { router: routerResult(), extract: search({ gift: true, attributes: ["men"] }) })).outcome);
+  assert.ok(ideas.suggestions.some((s) => s.text === "a perfume as a gift for him"));
+  const m = done((await h.say("a perfume as a gift for him", {
+    router: routerResult(), extract: search({ noun: "perfume", category: "fragrances", gift: true, attributes: ["men"] }),
   })).outcome);
-  const g = answered.groups[0];
-  assert.equal(g?.query.purpose, "gift");
-  assert.equal(g?.query.gender, "womens");
-  assert.ok((g?.products.length ?? 0) > 0);
-  assert.ok(g?.products.every((p) => !p.category.startsWith("mens-")));
-  assert.ok(answered.suggestions.some((s) => s.text === "עד 100 דולר"), "the budget is offered as a chip, not asked again");
-  assert.ok(!answered.suggestions.some((s) => s.text === "בשבילה"), "the recipient is known");
-});
-
-test("after the question, a kind of product keeps the recipient: 'perfume' for dad is a men's perfume", async () => {
-  const h = harness();
-  await h.say("a gift for my dad", { router: routerResult(), extract: search({ gift: true, attributes: ["men"] }) });
-  const m = done((await h.say("perfume", { router: routerResult(), extract: search({ noun: "perfume", category: "fragrances" }) })).outcome);
   assert.deepEqual(m.groups[0]?.products.map((p) => p.title), ["Calvin Klein CK One"]);
 });
 
-test("a place with no product named asks what kind of product, never shows a guessed set", async () => {
+test("a place with no product named is searched as a word, never a question with nothing on screen", async () => {
   const h = harness();
-  const m = done((await h.say("something for the beach", { router: routerResult(), extract: search({ theme: "beach" }) })).outcome);
-  assert.deepEqual(m.groups, []);
-  assert.match(m.text, /What kind of product/);
+  const m = done((await h.say("something for the beach", { router: routerResult(), extract: search({ attributes: ["beach"] }) })).outcome);
+  assert.equal(m.groups.length, 1);
+  assert.ok(m.groups[0]?.status === "results" || m.suggestions.length > 0, "results, or a miss with next steps");
 });
 
-test("a kid's gift with a budget is shown at once: balls, gadgets, sunglasses within the budget", async () => {
+test("a kid's gift with a budget is shown at once: balls and sunglasses within the budget, no phone gadgets", async () => {
   const h = harness();
-  const m = done((await h.say("מתנה לילד בן 10 עד 50 דולר", {
+  const m = done((await h.say("a gift for a 10 year old kid, under $50", {
     router: routerResult(), extract: search({ gift: true, attributes: ["kid"], priceMax: 50, currency: "USD" }),
   })).outcome);
   const products = m.groups[0]?.products ?? [];
   assert.ok(products.length > 0);
-  assert.ok(products.every((p) => p.price <= 50 && ["sports-accessories", "mobile-accessories", "sunglasses"].includes(p.category)));
+  assert.ok(products.every((p) => p.price <= 50 && GIFT_KID.includes(p.category as never)));
+  assert.ok(products.every((p) => p.category !== "mobile-accessories"), "no phone gadgets for a child");
 });
 
-test("a wedding is a gift: no budget, so one question", async () => {
+test("a wedding is a gift: ideas at once, with budget chips", async () => {
   const h = harness();
-  const m = done((await h.say("צריכה משהו לחתונה של חברה", { router: routerResult(), extract: search({ theme: "wedding" }) })).outcome);
-  assert.deepEqual(m.groups, []);
-  assert.ok(m.suggestions.some((s) => s.text === "עד 50 דולר"));
+  const m = done((await h.say("something for a friend's wedding", { router: routerResult(), extract: search({ gift: true }) })).outcome);
+  assert.equal(m.groups[0]?.query.purpose, "gift");
+  assert.ok(m.suggestions.some((s) => s.text === "a gift up to $50"), m.suggestions.map((s) => s.text).join(" | "));
 });
-
 
 // ---------- the missing intents ----------
 
@@ -1037,13 +1143,13 @@ test("show more: the next cards are appended to the same search, then 'that's al
   const h = harness();
   const first = done((await h.say("laptops", { router: routerResult(), extract: search({ category: "laptops", sort: "price_asc" }) })).outcome);
   assert.equal(first.groups[0]?.products.length, 4);
-  const more = done((await h.say("תראה עוד", { router: routerResult({ act: "refer", referTarget: "unclear" }) })).outcome);
+  const more = done((await h.say("show me more", { router: routerResult({ act: "refer", referTarget: "unclear" }) })).outcome);
   const g = more.groups[0];
   // like "load more": the first four stay, the fifth is added after them
   assert.equal(g?.products.length, 5);
   assert.deepEqual(g?.products.slice(0, 4).map((p) => p.id), first.groups[0]?.products.map((p) => p.id));
   assert.equal(g?.shownFrom, 4, "the first four are in the message above: the client draws only the fifth");
-  assert.match(more.text, /5 מתוך 5/);
+  assert.match(more.text, /Laptops 5 of 5/);
   const none = done((await h.say("show more", { router: routerResult({ act: "more" }) })).outcome);
   assert.match(none.text, /That's all 5/);
 });
@@ -1060,7 +1166,7 @@ test("'tell me about it' with one card on screen is that card, even when the dom
   const h = harness();
   const a = done((await h.say("laptops under 1100", { router: routerResult(), extract: search({ category: "laptops", priceMax: 1100, currency: "USD" }) })).outcome);
   assert.equal(a.groups[0]?.products.length, 1);
-  const m = done((await h.say("ספר לי עליו", { router: routerResult({ act: "refer", domain: "off_topic", referTarget: "unclear" }) })).outcome);
+  const m = done((await h.say("tell me about it", { router: routerResult({ act: "refer", domain: "off_topic", referTarget: "unclear" }) })).outcome);
   assert.equal(m.detail?.id, a.groups[0]?.products[0]?.id);
 });
 
@@ -1078,7 +1184,7 @@ test("cheaper is the same search: no white sneaker cheaper is a miss, never a re
   const said = await h.say("a bit cheaper", { router: routerResult({ act: "refine" }), extract: search({ relativePrice: "cheaper" }) });
   const m = done(said.outcome);
   const t = h.store.traces(said.id)[0]?.trace;
-  assert.deepEqual((t as unknown as { flags: { noCheaper: unknown } }).flags.noCheaper, { price: 109.99 });
+  assert.equal((t as unknown as { flags: { noCheaper: unknown } }).flags.noCheaper, true);
   assert.ok(m.groups[0]?.products.every((p) => /white/i.test(p.title)), "the earlier white sneakers stay");
 });
 
@@ -1088,7 +1194,7 @@ test("one of two searches finds nothing: its old cards do not stay on screen und
     router: routerResult(), extract: extraction([intent({ category: "womens-jewellery" }), intent({ category: "fragrances", priceMax: 100, currency: "USD" })]),
   });
   const m = done((await h.say("and under 30?", {
-    router: routerResult({ act: "refine", targetGroup: "both" }), extract: search({ priceMax: 30, currency: "USD" }),
+    router: routerResult({ act: "refine", targetGroup: "all" }), extract: search({ priceMax: 30, currency: "USD" }),
   })).outcome);
   const cards = m.groups.flatMap((g) => g.products);
   assert.ok(cards.length > 0);
@@ -1099,46 +1205,36 @@ test("next steps under results come from the screen: more, cheaper", async () =>
   const h = harness();
   const m = done((await h.say("laptops", { router: routerResult(), extract: search({ category: "laptops" }) })).outcome);
   assert.deepEqual(m.suggestions.map((s) => s.text), ["show more", "something cheaper"]);
-  const he = done((await h.say("שעונים לגבר", { router: routerResult(), extract: search({ category: "mens-watches", attributes: ["men"] }) })).outcome);
-  assert.equal(he.groups[0]?.label, "שעוני גברים");
-  assert.ok(he.suggestions.every((s) => /[֐-׿]/.test(s.label)), "Hebrew chips in a Hebrew chat");
 });
 
 // ---------- conversation memory and rejection (from a real conversation) ----------
 
-test("a gift for her, then rejecting earrings: the gift and the recipient are remembered, jewellery is left out", async () => {
+test("a gift for her, then rejecting jewelry: the gift and the recipient are remembered, jewelry is left out", async () => {
   const h = harness();
-  // 1. the gift question
-  await h.say("אני רוצה לקנות מתנה לחברה שלי", { router: routerResult(), extract: search({ gift: true, attributes: ["women"] }) });
+  // 1. gift ideas for her
+  await h.say("I want to buy a gift for my girlfriend", { router: routerResult(), extract: search({ gift: true, attributes: ["women"] }) });
   // 2. a kind from the chips
-  const jewels = done((await h.say("תכשיטים", { router: routerResult(), extract: search({ category: "womens-jewellery", noun: "jewelry", gift: true }) })).outcome);
+  const jewels = done((await h.say("jewelry as a gift for her", { router: routerResult(), extract: search({ category: "womens-jewellery", noun: "jewelry", gift: true, attributes: ["women"] }) })).outcome);
   assert.ok(jewels.groups[0]?.products.every((p) => p.category === "womens-jewellery"));
-  // 3. "actually something else, up to $100": what is shown is rejected; the gift for her is not forgotten
-  const other = done((await h.say("אהה בעצם משהו אחר עד 100 דולר", {
-    router: routerResult({ act: "refine" }), extract: search({ priceMax: 100, currency: "USD" }),
+  // 3. "actually something else, up to $100": the router's reject; the gift for her is not forgotten
+  const other = done((await h.say("actually something else, up to $100", {
+    router: routerResult({ act: "reject" }), extract: search({ priceMax: 100, currency: "USD" }),
   })).outcome);
   const g = other.groups[0];
   assert.equal(g?.query.purpose, "gift");
   assert.equal(g?.query.gender, "womens");
   assert.ok((g?.products.length ?? 0) > 0);
   assert.ok(g?.products.every((p) => p.category !== "womens-jewellery" && p.price <= 100), "no earrings again");
-  // 4. "not jewelry, something else", the router's reject act: still her gift ideas
-  const said = await h.say("לא תכשיטים משהו אחר", { router: routerResult({ act: "reject" }), extract: search({}) });
-  const again = done(said.outcome);
+  // 4. "not jewelry, something else": still her gift ideas, still the $100 budget
+  const again = done((await h.say("not jewelry, something else", { router: routerResult({ act: "reject" }), extract: search({}) })).outcome);
   assert.ok(again.groups[0]?.products.every((p) => p.category !== "womens-jewellery" && !["groceries", "kitchen-accessories"].includes(p.category)));
   assert.ok(again.groups[0]?.products.every((p) => p.price <= 100), "the $100 budget from the turn before still applies");
   assert.equal(again.groups[0]?.query.gender, "womens");
-  assert.equal((h.store.traces(said.id)[0]?.trace as { rejectedBy?: string }).rejectedBy, "router");
 });
 
-test("rejecting by words is only a backup: a rejection that names the new product is a search for it", async () => {
+test("a rejection that names the new product is a search for it: 'not earrings, a watch'", async () => {
   const h = harness();
   await h.say("earrings", { router: routerResult(), extract: search({ category: "womens-jewellery", noun: "earring" }) });
-  // The router missed the rejection (said refine); the words and an empty extraction still reject.
-  const words = await h.say("something else", { router: routerResult({ act: "refine" }), extract: search({}) });
-  assert.ok(done(words.outcome).groups[0]?.products.every((p) => p.category !== "womens-jewellery"));
-  assert.equal((h.store.traces(words.id)[0]?.trace as { rejectedBy?: string }).rejectedBy, "words");
-  // "Not earrings, a watch": the extraction names a watch, so the words do not reject; it is a watch search.
   const watch = done((await h.say("not earrings, a watch", {
     router: routerResult({ act: "new_search" }), extract: search({ noun: "watch" }),
   })).outcome);
@@ -1146,27 +1242,36 @@ test("rejecting by words is only a backup: a rejection that names the new produc
   assert.ok(watch.groups[0]?.products.every((p) => /watch/i.test(p.title) && p.category !== "womens-jewellery"), "watches, not a browse without earrings");
 });
 
+test("'perfume but not Chanel': the excluded brand is never shown, and a refine adds to what is ruled out", async () => {
+  const h = harness();
+  const m = done((await h.say("perfume but not Chanel", { router: routerResult(), extract: search({ noun: "perfume", category: "fragrances", exclude: ["chanel"] }) })).outcome);
+  assert.ok((m.groups[0]?.products.length ?? 0) > 0);
+  assert.ok(m.groups[0]?.products.every((p) => !/chanel/i.test(p.title)));
+  const next = done((await h.say("not Dior either", { router: routerResult({ act: "refine" }), extract: search({ exclude: ["dior"] }) })).outcome);
+  assert.deepEqual(q(next.groups[0]).exclude, ["chanel", "dior"]);
+  assert.ok(next.groups[0]?.products.every((p) => !/chanel|dior/i.test(p.title)));
+});
+
 test("the models are told what the conversation is about", async () => {
   const h = harness();
   await h.say("a gift for my wife", { router: routerResult(), extract: search({ gift: true, attributes: ["women"] }) });
-  await h.say("up to $100", { router: routerResult({ act: "chat" }), extract: search({ priceMax: 100, currency: "USD" }) });
+  await h.say("up to $100", { router: routerResult({ act: "refine" }), extract: search({ priceMax: 100, currency: "USD" }) });
   const seen: Array<unknown> = [];
   await h.say("something cheaper", {
     router: (input) => { seen.push(input.memory); return routerResult({ act: "refine" }); },
     extract: search({ relativePrice: "cheaper" }),
   });
-  assert.deepEqual(seen[0], { purpose: { gift: true, gender: "womens", kid: false, theme: null }, excluded: [] });
+  assert.deepEqual(seen[0], { purpose: { gift: true, gender: "womens", kid: false }, excluded: [] });
 });
 
-test("a Valentine's gift: romantic categories, the budget steers the ranking, lifting it changes the cards", async () => {
+test("a gift with a budget leads with ideas that use it; lifting the budget changes the cards", async () => {
   const h = harness();
-  await h.say("אני רוצה לקנות מתנה ליום האהבה", { router: routerResult(), extract: search({ gift: true, theme: "valentine" }) });
-  const budget = done((await h.say("עד 200 דולר", { router: routerResult(), extract: search({ priceMax: 200, currency: "USD" }) })).outcome);
+  const budget = done((await h.say("a gift for her up to $200", { router: routerResult(), extract: search({ gift: true, attributes: ["women"], priceMax: 200, currency: "USD" }) })).outcome);
   const cards = budget.groups[0]?.products ?? [];
   assert.ok(cards.length > 0);
-  assert.ok(cards.every((p) => p.price <= 200 && !["kitchen-accessories", "groceries", "mobile-accessories"].includes(p.category)), "romantic, never a lunch box");
+  assert.ok(cards.every((p) => p.price <= 200 && !["kitchen-accessories", "groceries"].includes(p.category)), "never a lunch box");
   assert.ok((cards[0]?.price ?? 0) >= 50, "the first ideas use the budget");
-  const open = done((await h.say("בלי הגבלת מחיר", { router: routerResult({ act: "refine" }), extract: search({ clear: ["price"] }) })).outcome);
+  const open = done((await h.say("any price", { router: routerResult({ act: "refine" }), extract: search({ clear: ["price"] }) })).outcome);
   assert.notDeepEqual(open.groups[0]?.products.map((p) => p.id), cards.map((p) => p.id), "no limit is not the same four cards");
 });
 
@@ -1184,11 +1289,11 @@ test("with no order asked for, the best-rated products lead; an explicit order a
 test("'and under $30?' with two searches on screen and no product named applies to both, without asking", async () => {
   const h = harness();
   await h.say("earrings and perfume", { router: routerResult(), extract: extraction([intent({ category: "womens-jewellery" }), intent({ category: "fragrances" })]) });
-  const m = done((await h.say("ומה עם משהו מתחת ל-30?", {
+  const m = done((await h.say("and something under $30?", {
     router: routerResult({ act: "refine", targetGroup: "unclear" }), extract: search({ priceMax: 30, currency: "USD" }),
   })).outcome);
   assert.ok(m.groups.flatMap((g) => g.products).every((p) => p.price <= 30));
-  assert.ok(!/איזה|which/i.test(m.text), "no 'which one?' question");
+  assert.ok(!/which/i.test(m.text), "no 'which one?' question");
 });
 
 test("after 'nothing cheaper' the next steps stay (show more), without offering 'cheaper' again", async () => {
@@ -1253,7 +1358,7 @@ test("a gift's categories follow its recipient: 'for my mom' after 'for my dad' 
   await h.say("a gift for my dad up to $100", { router: routerResult(), extract: search({ gift: true, attributes: ["men"], priceMax: 100, currency: "USD" }) });
   const m = done((await h.say("actually it's for my mom", { router: routerResult({ act: "refine" }), extract: search({ gift: true, attributes: ["women"] }) })).outcome);
   assert.equal(q(m.groups[0]).gender, "womens");
-  assert.deepEqual(q(m.groups[0]).within, giftCategories({ kid: false, gender: "womens", theme: null }));
+  assert.deepEqual(q(m.groups[0]).within, giftCategories({ kid: false, gender: "womens" }));
   assert.ok(m.groups[0]?.products.every((p) => !p.category.startsWith("mens-") && p.category !== "mobile-accessories"));
 });
 
@@ -1263,4 +1368,82 @@ test("a recipient carried over from a gift question never empties a search: 'a d
   const m = done((await h.say("actually I need a dress for myself", { router: routerResult(), extract: search({ noun: "dress", category: "tops" }) })).outcome);
   assert.equal(m.groups[0]?.status, "results");
   assert.equal(q(m.groups[0]).gender, null);
+});
+
+test("a gift for a kid stays a kid's gift: no adult chips, and the next change keeps the kid's categories", async () => {
+  const h = harness();
+  const asked = done((await h.say("I'm looking for a gift", { router: routerResult(), extract: search({ gift: true }) })).outcome);
+  // no chip offers a kid (the catalog has no kids' products), but a shopper can still type it
+  assert.ok(!asked.suggestions.some((s) => /kid/.test(s.text)), asked.suggestions.map((s) => s.text).join(" | "));
+  const shown = done((await h.say("for a kid", { router: routerResult({ act: "refine" }), extract: search({ attributes: ["kid"] }) })).outcome);
+  assert.deepEqual(q(shown.groups[0]).within, GIFT_KID);
+  // a budget next: still a kid's gift
+  const budget = done((await h.say("up to $50", { router: routerResult({ act: "refine" }), extract: search({ priceMax: 50, currency: "USD" }) })).outcome);
+  assert.deepEqual(q(budget.groups[0]).within, GIFT_KID);
+  assert.ok(budget.groups[0]?.products.every((p) => GIFT_KID.includes(p.category as never) && p.price <= 50));
+  const kidIdeas = done((await h.say("a gift for a kid", { router: routerResult(), extract: search({ gift: true, attributes: ["kid"] }) })).outcome);
+  assert.ok(!kidIdeas.suggestions.some((s) => /perfume|watch/.test(s.text)), "no adult kinds offered for a kid");
+});
+
+test("a child is who a product is for, not a word to search: 'a ball for a kid' shows balls, with no miss about 'kid balls'", async () => {
+  const h = harness();
+  const m = done((await h.say("a ball for a kid", { router: routerResult(), extract: search({ noun: "ball", attributes: ["kid"] }) })).outcome);
+  assert.equal(m.groups[0]?.status, "results");
+  assert.ok(!q(m.groups[0]).attributes.some((a) => a.includes("kid")), `searched for: ${q(m.groups[0]).attributes}`);
+  assert.ok((m.groups[0]?.products ?? []).every((p) => /ball/i.test(p.title)));
+  assert.ok(!/kid/i.test(m.text), m.text);
+});
+
+// ---------- no dead ends ----------
+
+test("'around $300' is a range around it, not an exact price: the extractor's 300..300 becomes 150..375", async () => {
+  const h = harness();
+  const m = done((await h.say("a watch for my wife around $300", {
+    router: routerResult(), extract: search({ noun: "watch", attributes: ["women"], priceMin: 300, priceMax: 300, currency: "USD" }),
+  })).outcome);
+  assert.deepEqual([q(m.groups[0]).priceMin, q(m.groups[0]).priceMax], [150, 375]);
+});
+
+test("a miss always offers a next step: drop the price, or an example search", async () => {
+  const h = harness();
+  const m = done((await h.say("a blue watch under $5", {
+    router: routerResult(), extract: search({ noun: "watch", attributes: ["blue"], priceMax: 5, currency: "USD" }),
+  })).outcome);
+  assert.equal(m.groups[0]?.status, "miss");
+  const chips = m.suggestions.map((s) => s.text);
+  assert.ok(chips.includes("any price"), `chips: ${chips}`);
+  assert.equal(chips.length, 3, `chips: ${chips}`);
+});
+
+test("no model sentence where the template says it all: a shopping list, or a turn where every search missed", async () => {
+  const h = harness();
+  const writes = () => h.writer.calls.length;
+  await h.say("eggs, an iPhone case, a lipstick, a tennis ball and a kettle", { router: routerResult(), extract: fiveItems() });
+  assert.equal(writes(), 0, "a list's summary is the reply");
+  const { id } = await h.say("a kettle", { router: routerResult(), extract: search({ noun: "kettle" }) });
+  assert.equal(writes(), 0, "a miss is the whole answer");
+  assert.ok((h.store.traces(id)[0]?.trace as { events: Array<{ kind: string }> }).events.some((e) => e.kind === "prose_not_needed"));
+  await h.say("laptops", { router: routerResult(), extract: search({ category: "laptops" }), write: null });
+  assert.equal(writes(), 1, "results still get a sentence written for the message");
+});
+
+test("a click on a card from an older reply opens that product by id, with no model call to work out which card", async () => {
+  const h = harness();
+  const glasses = done((await h.say("cheap sunglasses", { router: routerResult(), extract: search({ category: "sunglasses", sort: "price_asc" }) })).outcome);
+  await h.say("laptops", { router: routerResult(), extract: search({ category: "laptops" }) });
+  const older = glasses.groups[0]?.products[1];
+  const routed = h.router.calls.length;
+  const extracted = h.slots.calls.length;
+  const m = done((await h.say(`tell me about the ${older?.title}`, { productId: older?.id })).outcome);
+  assert.equal(m.detail?.id, older?.id, "the sunglasses, though the laptops are the working search");
+  assert.equal(h.router.calls.length, routed, "no router call");
+  assert.equal(h.slots.calls.length, extracted, "no extraction call");
+});
+
+test("a product id the chat never showed is read like any other message", async () => {
+  const h = harness();
+  await h.say("laptops", { router: routerResult(), extract: search({ category: "laptops" }) });
+  const m = done((await h.say("tell me about the Rolex", { productId: 99999, router: routerResult({ act: "chat", chatKind: "greeting" }) })).outcome);
+  assert.equal(m.detail, null);
+  assert.equal(h.router.calls.length, 2, "the router read it");
 });

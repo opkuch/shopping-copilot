@@ -2,7 +2,7 @@
 // It scores what the user got (the action taken, the cards shown, the reply), not what a model returned.
 
 export type Action =
-  | "results" | "miss" | "detail" | "more" | "clarify" | "ask_group"
+  | "results" | "miss" | "detail" | "more" | "answer" | "remove" | "clarify" | "ask_group"
   | "service" | "chat" | "off_topic" | "refused" | "dead_end" | "error";
 
 export type Forbidden = { categories?: string[]; maxPrice?: number; minPrice?: number };
@@ -12,13 +12,16 @@ export type QueryCase = {
   relevant: number[]; forbidden: Forbidden; notes?: string;
   /** A superlative ("the cheapest Samsung"): this product must be the first card; the others are runners-up. */
   first?: number;
+  /** Other actions that are just as good ("a gift": results or a question). */
+  acceptAlso?: Action[];
 };
 export type DialogueTurn = {
-  text: string; expect: Action; relevant?: number[]; forbidden?: Forbidden; detailId?: number; first?: number; notes?: string;
+  text: string; expect: Action; relevant?: number[]; forbidden?: Forbidden; detailId?: number; first?: number; acceptAlso?: Action[]; notes?: string;
 };
 export type Dialogue = { id: string; author: string; title?: string; turns: DialogueTurn[] };
 export type VagueCase = {
-  id: string; author: string; text: string; expect: "clarify" | "coherent"; allowedCategories: string[]; notes?: string;
+  /** coherent: a set from the allowed categories; searched: results or an honest miss, never a question. */
+  id: string; author: string; text: string; expect: "clarify" | "coherent" | "searched"; allowedCategories: string[]; notes?: string;
 };
 
 export type Card = { id: number; title: string; price: number; category: string };
@@ -46,12 +49,11 @@ type Trace = {
 const TEMPLATE_ACTION: Record<string, Action> = {
   greeting: "chat", catalog_overview: "chat", service: "service", off_topic: "off_topic",
   router_refused: "refused", extraction_refused: "refused", ask_which_group: "ask_group",
-  refer_unclear: "dead_end", refer_no_cards: "dead_end",
+  refer_unclear: "dead_end", refer_no_cards: "dead_end", remove_only: "dead_end",
 };
 
 /**
- * The action a turn took, as the user saw it. A trace may name it (`action`, for actions added later:
- * more, clarify); otherwise it is derived from the template, a detail, or the groups.
+ * The action a turn took, as the user saw it. A trace may name it (`action`: more, answer, remove); otherwise it is derived from the template, a detail, or the groups.
  * A product turn whose every fetched group missed is a "miss", even when the earlier cards stayed.
  */
 export function actionOf(status: number, trace: Trace | null, hasDetail: boolean): Action {
@@ -86,14 +88,15 @@ export function violations(cards: Card[], f: Forbidden | undefined): Card[] {
 
 /**
  * precision@shown: the share of cards shown that you labelled relevant.
- * recall@shown: relevant cards shown, out of as many as the screen could hold (4 per group).
+ * recall@shown: relevant cards shown, out of as many as the screen could hold (4 per group, 3 in a list).
  * Both are null when the case has no relevant products (a miss, a service, a chat).
  */
 export function relevance(cards: Card[], relevant: number[], groupCount: number): { precision: number | null; recall: number | null; hits: number } {
   if (relevant.length === 0) return { precision: null, recall: null, hits: 0 };
   const want = new Set(relevant);
   const hits = cards.filter((c) => want.has(c.id)).length;
-  const capacity = 4 * Math.max(1, groupCount);
+  // the screen holds 4 cards a search, 3 once a shopping list puts three or more searches on it (pipeline/turn.ts)
+  const capacity = (groupCount >= 3 ? 3 : 4) * Math.max(1, groupCount);
   return {
     precision: cards.length === 0 ? 0 : hits / cards.length,
     recall: hits / Math.min(relevant.length, capacity),
@@ -105,8 +108,9 @@ const cents = (n: number) => Math.round(n * 100);
 
 export function amountsIn(text: string): number[] {
   const out: number[] = [];
-  for (const m of text.matchAll(/\$\s?(\d[\d,]*(?:\.\d+)?)|(\d[\d,]*(?:\.\d+)?)\s?\$/g)) {
-    const n = Number((m[1] ?? m[2] ?? "").replace(/,/g, ""));
+  // "$50", "50$", "50 dollars", "50 bucks", "50 USD", "USD 50": the runtime guard (reply/compose.ts) reads the same forms.
+  for (const m of text.matchAll(/\$\s?(\d[\d,]*(?:\.\d+)?)|(\d[\d,]*(?:\.\d+)?)\s?(?:\$|dollars?\b|bucks\b|usd\b)|\busd\s?(\d[\d,]*(?:\.\d+)?)/gi)) {
+    const n = Number((m[1] ?? m[2] ?? m[3] ?? "").replace(/,/g, ""));
     if (Number.isFinite(n)) out.push(n);
   }
   return out;
@@ -122,9 +126,11 @@ export function grounding(reply: string, shown: Card[], userText: string, catalo
 } {
   const allowed = new Set([...shown.map((c) => cents(c.price)), ...amountsIn(userText).map(cents), ...(detailPrice === null ? [] : [cents(detailPrice)])]);
   for (const m of userText.matchAll(/\d+(?:\.\d+)?/g)) {
-    allowed.add(cents(Number(m[0])));
-    // a shekel amount is applied in dollars at ILS_PER_USD (3.7), whole dollars: "1000 שקל" is $270
-    allowed.add(cents(Math.round(Number(m[0]) / 3.7)));
+    const n = Number(m[0]);
+    allowed.add(cents(n));
+    // "around $300" is searched as $150-$375 (pipeline/merge.ts approximate), and a reply may say so
+    allowed.add(cents(n * 0.5));
+    allowed.add(cents(n * 1.25));
   }
   // "cheaper than $1099.99" is applied as a bound of $1099.98: a cent off a shown price is a fact, not an invention
   for (const c of [...allowed]) { allowed.add(c - 1); allowed.add(c + 1); }
@@ -153,7 +159,7 @@ export type TurnScore = {
 };
 
 export function scoreTurn(
-  expect: { action: Action; relevant: number[]; forbidden?: Forbidden; detailId?: number; first?: number },
+  expect: { action: Action; relevant: number[]; forbidden?: Forbidden; detailId?: number; first?: number; acceptAlso?: Action[] },
   obs: Observed, userText: string, catalogTitles: string[], detail: Card | null,
   /** Cards still on screen from earlier turns: a reply may name them ("similar in price to the Realme C35"). */
   earlier: Card[] = [],
@@ -162,7 +168,7 @@ export function scoreTurn(
   const bad = violations(obs.cards, expect.forbidden);
   // A detail turn shows one product: the reply may name it and quote its price.
   const g = grounding(obs.reply, [...obs.cards, ...(detail ? [detail] : []), ...earlier], userText, catalogTitles, detail?.price ?? null);
-  const actionOk = obs.action === expect.action && (expect.detailId === undefined || obs.detailId === expect.detailId) &&
+  const actionOk = (obs.action === expect.action || (expect.acceptAlso ?? []).includes(obs.action)) && (expect.detailId === undefined || obs.detailId === expect.detailId) &&
     (expect.first === undefined || obs.cards[0]?.id === expect.first);
   const deadEnd = obs.action === "dead_end" && expect.action !== "dead_end";
   const relevantEnough = rel.precision === null || (rel.precision >= 0.75 && (rel.recall ?? 0) >= 0.5);
@@ -173,8 +179,11 @@ export function scoreTurn(
   };
 }
 
-/** A vague request passes by asking (clarify), or by a coherent set: every card in an allowed category. */
+/** A vague request passes by asking (clarify), by a coherent set (every card in an allowed category), or by a search. */
 export function scoreVague(c: VagueCase, obs: Observed): { pass: boolean; reason: string } {
+  if (c.expect === "searched") {
+    return obs.action === "results" || obs.action === "miss" ? { pass: true, reason: "searched" } : { pass: false, reason: "expected a search, got " + obs.action };
+  }
   if (c.expect === "clarify") {
     return obs.action === "clarify" ? { pass: true, reason: "asked" } : { pass: false, reason: `expected a clarifying question, got ${obs.action}` };
   }

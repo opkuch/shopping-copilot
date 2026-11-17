@@ -5,7 +5,7 @@
     "title": "cheapest phone, then that one in detail",
     "turns": [
       {
-        "text": "מה הטלפון הכי זול?",
+        "text": "what's the cheapest phone?",
         "expect": "results",
         "relevant": [
           128,
@@ -17,12 +17,12 @@
         "first": 128
       },
       {
-        "text": "אני רוצה את הכי זול",
+        "text": "I want the cheapest one",
         "expect": "detail",
         "detailId": 128
       },
       {
-        "text": "אני רוצה פרטים על טלפון שיותר זול מ-Realme C35",
+        "text": "I want details on a phone cheaper than the Realme C35",
         "expect": "miss",
         "notes": "nothing is cheaper; say so"
       }
@@ -34,7 +34,7 @@
     "title": "two groups, then which one",
     "turns": [
       {
-        "text": "מחשב נייד ובושם עד 50",
+        "text": "a laptop and perfume under 50",
         "expect": "results",
         "relevant": [
           78,
@@ -46,12 +46,15 @@
         ]
       },
       {
-        "text": "תוזיל",
-        "expect": "ask_group"
+        "text": "cheaper",
+        "expect": "ask_group",
+        "relevant": [],
+        "notes": "two searches on screen, no word on which: ask once"
       },
       {
-        "text": "את המחשבים",
+        "text": "the laptops",
         "expect": "miss",
+        "relevant": [],
         "notes": "no laptop below $1099.99: honest miss, earlier cards kept"
       }
     ]
@@ -62,7 +65,7 @@
     "title": "Samsung phones, then one by position",
     "turns": [
       {
-        "text": "טלפונים של סמסונג",
+        "text": "Samsung phones",
         "expect": "results",
         "relevant": [
           131,
@@ -71,7 +74,7 @@
         ]
       },
       {
-        "text": "ספר לי על השלישי",
+        "text": "tell me about the third one",
         "expect": "detail"
       }
     ]
@@ -82,7 +85,7 @@
     "title": "show more",
     "turns": [
       {
-        "text": "שעונים לגברים",
+        "text": "men's watches",
         "expect": "results",
         "relevant": [
           93,
@@ -94,11 +97,11 @@
         ]
       },
       {
-        "text": "תראה עוד",
+        "text": "show more",
         "expect": "more"
       },
       {
-        "text": "רק מה שבמלאי",
+        "text": "only what's in stock",
         "expect": "results",
         "relevant": [
           93,
@@ -117,11 +120,24 @@
     "title": "gift for dad",
     "turns": [
       {
-        "text": "מתנה לאבא",
-        "expect": "clarify"
+        "text": "a gift for my dad",
+        "expect": "results",
+        "relevant": [],
+        "forbidden": {
+          "categories": [
+            "groceries",
+            "tops",
+            "womens-bags",
+            "womens-dresses",
+            "womens-jewellery",
+            "womens-shoes",
+            "womens-watches"
+          ]
+        },
+        "notes": "relabelled 2026-11-17: a gift shows ideas at once (no clarifying question)"
       },
       {
-        "text": "משהו עד 100 דולר",
+        "text": "something under $100",
         "expect": "results",
         "relevant": [
           6,
@@ -134,7 +150,6 @@
           90,
           93,
           99,
-          100,
           103,
           107
         ],
@@ -197,7 +212,7 @@
     "title": "refine a dress search, then switch",
     "turns": [
       {
-        "text": "שמלות",
+        "text": "dresses",
         "expect": "results",
         "relevant": [
           162,
@@ -212,7 +227,7 @@
         ]
       },
       {
-        "text": "בצבע שחור",
+        "text": "in black",
         "expect": "results",
         "relevant": [
           177,
@@ -221,7 +236,7 @@
         ]
       },
       {
-        "text": "מתחת ל-100",
+        "text": "under 100",
         "expect": "results",
         "relevant": [
           179
@@ -231,7 +246,7 @@
         }
       },
       {
-        "text": "ומה עם נעליים?",
+        "text": "and what about shoes?",
         "expect": "results",
         "relevant": [
           185,
@@ -249,7 +264,7 @@
     "title": "Samsung phones: cheaper, in stock, detail, then Apple",
     "turns": [
       {
-        "text": "טלפון סמסונג",
+        "text": "Samsung phone",
         "expect": "results",
         "relevant": [
           131,
@@ -258,12 +273,12 @@
         ]
       },
       {
-        "text": "יש משהו יותר זול?",
+        "text": "is there anything cheaper?",
         "expect": "miss",
         "notes": "S7 at 299.99 is the cheapest Samsung phone; nothing cheaper"
       },
       {
-        "text": "טוב אז רק מה שיש במלאי",
+        "text": "ok then just what's in stock",
         "expect": "results",
         "relevant": [
           131,
@@ -272,7 +287,7 @@
         "notes": "S8 has stock 0"
       },
       {
-        "text": "ספר לי על הראשון",
+        "text": "tell me about the first one",
         "expect": "detail",
         "detailId": 131,
         "notes": "first card is the S7 (cheapest first)"
@@ -285,7 +300,7 @@
     "title": "laptops: show more, budget",
     "turns": [
       {
-        "text": "מחשבים ניידים",
+        "text": "laptops",
         "expect": "results",
         "relevant": [
           78,
@@ -296,7 +311,7 @@
         ]
       },
       {
-        "text": "תראה עוד",
+        "text": "show more",
         "expect": "more",
         "relevant": [
           78,
@@ -308,7 +323,7 @@
         "notes": "five laptops exist, four fit on screen"
       },
       {
-        "text": "תודה. ומשהו עד 1200?",
+        "text": "thanks. and anything under 1200?",
         "expect": "results",
         "relevant": [
           81
@@ -318,7 +333,7 @@
         }
       },
       {
-        "text": "ספר לי עליו",
+        "text": "tell me about it",
         "expect": "detail",
         "detailId": 81
       }
@@ -330,7 +345,7 @@
     "title": "two groups, ambiguous cheaper, then topic change",
     "turns": [
       {
-        "text": "בושם ושעון לאישה עד 1000",
+        "text": "perfume and a watch for a woman, up to 1000",
         "expect": "results",
         "relevant": [
           6,
@@ -346,16 +361,19 @@
         }
       },
       {
-        "text": "תוזיל",
-        "expect": "ask_group"
+        "text": "cheaper",
+        "expect": "ask_group",
+        "relevant": [],
+        "notes": "two searches on screen, no word on which: ask once"
       },
       {
-        "text": "את השעונים",
+        "text": "the watches",
         "expect": "miss",
+        "relevant": [],
         "notes": "cheapest shown watch is 129.99 (194); nothing cheaper; earlier cards stay"
       },
       {
-        "text": "ומה עם תיק לאישה עד 100?",
+        "text": "and what about a women's bag under 100?",
         "expect": "results",
         "relevant": [
           172,
@@ -374,11 +392,21 @@
     "title": "gift for wife: clarify, narrow, detail, thanks",
     "turns": [
       {
-        "text": "אני צריך מתנה לאשתי",
-        "expect": "clarify"
+        "text": "I need a gift for my wife",
+        "expect": "results",
+        "relevant": [],
+        "forbidden": {
+          "categories": [
+            "groceries",
+            "mens-shirts",
+            "mens-shoes",
+            "mens-watches"
+          ]
+        },
+        "notes": "relabelled 2026-11-17: a gift shows ideas at once (no clarifying question)"
       },
       {
-        "text": "היא אוהבת תכשיטים ובשמים, תקציב עד 100 דולר",
+        "text": "she likes jewelry and perfume, budget up to $100",
         "expect": "results",
         "relevant": [
           182,
@@ -398,13 +426,13 @@
         "notes": "two groups: earrings and perfumes under 100"
       },
       {
-        "text": "ספר לי על הגוצ'י",
+        "text": "tell me about the Gucci",
         "expect": "detail",
         "detailId": 10,
         "notes": "Gucci Bloom 79.99"
       },
       {
-        "text": "ומה עם משהו מתחת ל-30?",
+        "text": "what about something under 30?",
         "expect": "results",
         "relevant": [
           182,
@@ -416,7 +444,7 @@
         }
       },
       {
-        "text": "תודה! זה מושלם",
+        "text": "thanks! that's perfect",
         "expect": "chat"
       }
     ]
@@ -427,7 +455,7 @@
     "title": "sports shoes refine chain",
     "turns": [
       {
-        "text": "נעלי ספורט לגבר",
+        "text": "men's sports shoes",
         "expect": "results",
         "relevant": [
           88,
@@ -443,7 +471,7 @@
         }
       },
       {
-        "text": "עד 120 דולר",
+        "text": "up to $120",
         "expect": "results",
         "relevant": [
           89,
@@ -456,7 +484,7 @@
         }
       },
       {
-        "text": "יש בלבן?",
+        "text": "any in white?",
         "expect": "results",
         "relevant": [
           91,
@@ -468,12 +496,12 @@
         "notes": "the Off White sneakers"
       },
       {
-        "text": "תוזיל קצת",
+        "text": "a bit cheaper",
         "expect": "miss",
         "notes": "cheapest Off White is 109.99; nothing cheaper in that colour"
       },
       {
-        "text": "אוקיי, תן לי פרטים על הזול",
+        "text": "ok, give me details on the cheaper one",
         "expect": "detail",
         "detailId": 92
       }
@@ -485,7 +513,7 @@
     "title": "sports topic hopping",
     "turns": [
       {
-        "text": "ציוד לטניס",
+        "text": "tennis gear",
         "expect": "results",
         "relevant": [
           151,
@@ -493,7 +521,7 @@
         ]
       },
       {
-        "text": "ומה יש בגולף?",
+        "text": "and what do you have for golf?",
         "expect": "results",
         "relevant": [
           148,
@@ -501,7 +529,7 @@
         ]
       },
       {
-        "text": "ובכדורסל?",
+        "text": "and basketball?",
         "expect": "results",
         "relevant": [
           140,
@@ -509,7 +537,7 @@
         ]
       },
       {
-        "text": "ספר לי על הטבעת",
+        "text": "tell me about the hoop",
         "expect": "detail",
         "detailId": 141,
         "notes": "Basketball Rim"
@@ -522,7 +550,7 @@
     "title": "men's watches: budget, detail, switch to women",
     "turns": [
       {
-        "text": "שעון לגבר",
+        "text": "a men's watch",
         "expect": "results",
         "relevant": [
           93,
@@ -539,7 +567,7 @@
         }
       },
       {
-        "text": "רק עד 2000",
+        "text": "only up to 2000",
         "expect": "results",
         "relevant": [
           93,
@@ -550,12 +578,12 @@
         }
       },
       {
-        "text": "תספר לי על הלונג'ין",
+        "text": "tell me about the Longines",
         "expect": "detail",
         "detailId": 94
       },
       {
-        "text": "תודה, ומה עם משהו לאישה?",
+        "text": "thanks, what about something for women?",
         "expect": "results",
         "relevant": [
           190,
@@ -578,7 +606,7 @@
     "title": "bag, detail, service, thanks, shoes",
     "turns": [
       {
-        "text": "תיק לאישה",
+        "text": "a women's bag",
         "expect": "results",
         "relevant": [
           172,
@@ -589,21 +617,21 @@
         ]
       },
       {
-        "text": "תביא פרטים על התיק השחור",
+        "text": "give me details on the black bag",
         "expect": "detail",
         "detailId": 176,
         "notes": "Women Handbag Black"
       },
       {
-        "text": "תוכל להזמין לי מונית לחנות?",
+        "text": "can you order me a taxi to the store?",
         "expect": "service"
       },
       {
-        "text": "טוב, תודה",
+        "text": "ok, thanks",
         "expect": "chat"
       },
       {
-        "text": "ומה עם נעליים בזהב?",
+        "text": "and what about gold shoes?",
         "expect": "results",
         "relevant": [
           187
@@ -618,7 +646,7 @@
     "title": "headphones, then Beats, then 'actually Apple headphones' (your report, 2026-11-15)",
     "turns": [
       {
-        "text": "אני רוצה אוזנוית",
+        "text": "I want headphnoes",
         "expect": "results",
         "relevant": [
           100,
@@ -628,12 +656,12 @@
         "notes": "typo kept as typed"
       },
       {
-        "text": "אוזניות ביטס",
+        "text": "Beats headphones",
         "expect": "detail",
         "detailId": 107
       },
       {
-        "text": "אהה בעצם אוזניות אפל",
+        "text": "ahh actually Apple headphones",
         "expect": "results",
         "relevant": [
           100,
@@ -656,11 +684,21 @@
     "title": "a gift for my girlfriend; earrings rejected; 'something else' (your conversation, 2026-11-15)",
     "turns": [
       {
-        "text": "אני רוצה לקנות מתנה לחברה שלי",
-        "expect": "clarify"
+        "text": "I want to buy a gift for my girlfriend",
+        "expect": "results",
+        "relevant": [],
+        "forbidden": {
+          "categories": [
+            "groceries",
+            "mens-shirts",
+            "mens-shoes",
+            "mens-watches"
+          ]
+        },
+        "notes": "relabelled 2026-11-17: a gift shows ideas at once (no clarifying question)"
       },
       {
-        "text": "תכשיטים",
+        "text": "jewelry",
         "expect": "results",
         "relevant": [
           182,
@@ -669,7 +707,7 @@
         ]
       },
       {
-        "text": "אהה בעצם משהו אחר עד 100 דולר",
+        "text": "ahh actually something else, up to $100",
         "expect": "results",
         "relevant": [
           1,
@@ -712,7 +750,7 @@
         "notes": "something else = not the earrings; still a gift for her, under $100"
       },
       {
-        "text": "לא תכשיטים משהו אחר",
+        "text": "not jewelry, something else",
         "expect": "results",
         "relevant": [
           1,
@@ -763,11 +801,22 @@
     "title": "a Valentine's gift, up to $200, then no price limit (your conversation, 2026-11-15)",
     "turns": [
       {
-        "text": "אני רוצה לקנות מתנה ליום האהבה",
-        "expect": "clarify"
+        "text": "I want to buy a Valentine's Day gift",
+        "expect": "results",
+        "relevant": [],
+        "forbidden": {
+          "categories": [
+            "groceries",
+            "kitchen-accessories",
+            "vehicle",
+            "motorcycle",
+            "furniture"
+          ]
+        },
+        "notes": "relabelled 2026-11-17: a gift shows ideas at once (no clarifying question)"
       },
       {
-        "text": "עד 200 דולר",
+        "text": "up to $200",
         "expect": "results",
         "relevant": [
           7,
@@ -792,7 +841,7 @@
         "notes": "romantic gifts that use the budget; never a $12.99 lunch box"
       },
       {
-        "text": "בלי הגבלת מחיר",
+        "text": "no price limit",
         "expect": "results",
         "relevant": [
           1,
@@ -848,6 +897,96 @@
           ]
         },
         "notes": "no limit: still romantic, and not the same four cards"
+      }
+    ]
+  },
+  {
+    "id": "l01",
+    "author": "claude",
+    "title": "a five-item list with one item the catalog lacks, then remove one, then other options for one",
+    "turns": [
+      {
+        "text": "I need eggs, an iPhone case, a red lipstick, tennis balls and a kettle",
+        "expect": "results",
+        "relevant": [
+          23,
+          108,
+          4,
+          151
+        ],
+        "notes": "five groups, three cards at most each; no kettle in the catalog: an honest miss named in the reply"
+      },
+      {
+        "text": "remove the kettle",
+        "expect": "remove",
+        "relevant": [],
+        "notes": "the other four stay as the working list"
+      },
+      {
+        "text": "other options for the iPhone case?",
+        "expect": "more",
+        "relevant": [],
+        "notes": "more of that one search only; there is a single case, so 'that's all'"
+      }
+    ]
+  },
+  {
+    "id": "l02",
+    "author": "claude",
+    "title": "a price written in the middle of a list belongs to that item",
+    "turns": [
+      {
+        "text": "eggs, an iPhone case, sunglasses under $25 and a tennis racket",
+        "expect": "results",
+        "relevant": [
+          23,
+          108,
+          155,
+          157,
+          158,
+          152
+        ],
+        "notes": "the $25 is the sunglasses' only: the $29.99 case and the $49.99 racket still show"
+      }
+    ]
+  },
+  {
+    "id": "l03",
+    "author": "claude",
+    "title": "a list, then a change to one item named by its label",
+    "turns": [
+      {
+        "text": "a laptop, a perfume and a watch",
+        "expect": "results",
+        "relevant": [
+          78,
+          79,
+          80,
+          81,
+          82,
+          6,
+          7,
+          8,
+          9,
+          10,
+          93,
+          98,
+          106,
+          193,
+          194
+        ],
+        "notes": "three groups"
+      },
+      {
+        "text": "make the perfume under $60",
+        "expect": "results",
+        "relevant": [
+          6
+        ],
+        "forbidden": {
+          "maxPrice": 60
+        },
+        "notes": "only the perfume search changes; the laptops and watches are carried forward, not redrawn"
       }
     ]
   }

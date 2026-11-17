@@ -1,5 +1,4 @@
-import { useT } from "../i18n.ts";
-import type { LangPref } from "../i18n.ts";
+import { t } from "../strings.ts";
 import { useEffect, useState } from "react";
 import type { MouseEvent, RefObject } from "react";
 import { formatRelative } from "../format.ts";
@@ -9,8 +8,6 @@ import { pathFor } from "../state/router.ts";
 import type { Route } from "../state/router.ts";
 
 type Props = {
-  langPref: LangPref;
-  onLangPref(pref: LangPref): void;
   list: ListState;
   activeId: string | null;
   onNavigate(route: Route): void;
@@ -23,8 +20,8 @@ type Props = {
 function useNow(): number {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 60_000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(timer);
   }, []);
   return now;
 }
@@ -34,8 +31,7 @@ function plainClick(e: MouseEvent) {
   return e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
 }
 
-export function Sidebar({ list, activeId, onNavigate, onRetry, drawer, langPref, onLangPref }: Props) {
-  const t = useT();
+export function Sidebar({ list, activeId, onNavigate, onRetry, drawer }: Props) {
   const now = useNow();
   const go = (route: Route) => (e: MouseEvent) => {
     if (!plainClick(e)) return;
@@ -53,14 +49,6 @@ export function Sidebar({ list, activeId, onNavigate, onRetry, drawer, langPref,
       inert={drawer?.hidden || undefined}
     >
       <Brand name={t.appName} />
-      <label className="lang-picker">
-        <span>{t.language}</span>
-        <select value={langPref} onChange={(e) => onLangPref(e.target.value as LangPref)}>
-          <option value="auto">{t.langAuto}</option>
-          <option value="en">English</option>
-          <option value="he">עברית</option>
-        </select>
-      </label>
       <a className="button primary new-chat" href="/" onClick={go({ view: "home" })}>
         {t.newChat}
       </a>
@@ -103,7 +91,7 @@ export function Sidebar({ list, activeId, onNavigate, onRetry, drawer, langPref,
                   aria-current={active ? "page" : undefined}
                   onClick={go(route)}
                 >
-                  <span className="conversation-title" dir="auto">
+                  <span className="conversation-title">
                     {c.title}
                   </span>
                   <time className="conversation-time" dateTime={c.updatedAt}>

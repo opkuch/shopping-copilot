@@ -6,27 +6,29 @@ import { singularize, tokenize } from "./normalize.ts";
 // and as soft words they were dropped on relaxation and printed in sentences ("running men shoes").
 const GENDER: Record<string, Gender> = {
   men: "mens", man: "mens", male: "mens", mens: "mens", boy: "mens", him: "mens",
-  women: "womens", woman: "womens", female: "womens", womens: "womens", lady: "womens", ladie: "womens",
+  women: "womens", woman: "womens", female: "womens", womens: "womens", lady: "womens",
   girl: "womens", her: "womens",
 };
 
-export const isGenderWord = (w: string) => w in GENDER;
+// Words for a child say who a product is for, not what it is. No product in the catalog says "kid",
+// so as text they emptied every search ("I couldn't find kid balls"). They are dropped here, and only
+// steer a gift (purpose.ts). Singular forms, as normalizeWords produces them ("babies" -> "baby").
+export const KID_WORDS = new Set(["kid", "child", "children", "toddler", "baby", "infant", "teen", "teenage", "teenager"]);
 
-/** Splits normalized attribute words into the gender they name (first one wins) and the rest. */
+/** Splits normalized attribute words into the gender they name (first one wins) and the rest, without words for a child. */
 export function splitGender(words: string[]): { gender: Gender | null; rest: string[] } {
   let gender: Gender | null = null;
   const rest: string[] = [];
   for (const w of words) {
     const g = GENDER[w];
-    if (g === undefined) rest.push(w);
-    else gender ??= g;
+    if (g !== undefined) gender ??= g;
+    else if (!KID_WORDS.has(w)) rest.push(w);
   }
   return { gender, rest };
 }
 
 // Every product in the slug is this thing, so the word is redundant once the slug is chosen.
-// Keys are singular because lookup happens after singularizing. "grocerie" is what
-// singularize("groceries") produces, so utterance tokens still hit the table.
+// Keys are singular because lookup happens after singularizing ("groceries" -> "grocery").
 export const SYNONYMS: Record<string, Slug> = {
   phone: "smartphones", smartphone: "smartphones",
   laptop: "laptops", notebook: "laptops",
@@ -34,7 +36,7 @@ export const SYNONYMS: Record<string, Slug> = {
   tablet: "tablets",
   sunglass: "sunglasses", shade: "sunglasses",
   motorcycle: "motorcycle", motorbike: "motorcycle",
-  grocery: "groceries", grocerie: "groceries",
+  grocery: "groceries",
   bag: "womens-bags", handbag: "womens-bags", purse: "womens-bags",
   // The category's own name. Without these, "skin care" was searched as the word "care", which no
   // product title has, and the turn ended in a miss labelled "Cares" over three skin-care products.
@@ -83,8 +85,8 @@ export function resolveCategory(args: {
   const noun = args.noun !== null && isSynonym(args.noun) ? null : args.noun;
   const attributes = args.attributes.filter((a) => !isSynonym(a));
 
-  // The extracted words count as what the user said: extraction translates them to English, so a
-  // category named in Hebrew is "stated" too. Utterance tokens alone are ASCII-only.
+  // The extracted words count as what the user said: the extractor may name the category in its own
+  // words ("phone" for "mobile"), and that is still the user stating it.
   const tokens = new Set([...tokenize(utterance), ...(args.noun === null ? [] : [args.noun]), ...args.attributes]);
   const slugWords = chosen.split("-").map(singularize);
   const categoryStated =

@@ -1,8 +1,7 @@
-import { previewed } from "../state/effects.ts";
-import { useT } from "../i18n.ts";
+import { t } from "../strings.ts";
 import { useLayoutEffect, useRef } from "react";
 import type { ReactElement } from "react";
-import type { AssistantMessage as Assistant, Message, Preview, Stage } from "../api/types.ts";
+import type { AssistantMessage as Assistant, Message, Preview, ProductCard as Card, Stage } from "../api/types.ts";
 import type { ConversationState, Sent, TailState } from "../state/reducer.ts";
 import { ErrorBoundary } from "./ErrorBoundary.tsx";
 import { AssistantMessage, MessageFailed, UserMessage } from "./Messages.tsx";
@@ -23,6 +22,8 @@ export type TurnProps = {
   onRetry(sent: Sent): void;
   /** Sends a suggestion chip's text as the user's next message. */
   onSuggest(text: string): void;
+  /** A click on a card: asks about that product, by id. */
+  onOpenCard(productId: number, text: string): void;
 };
 
 type Props = TurnProps & {
@@ -33,10 +34,11 @@ type Props = TurnProps & {
   title?: string | null;
 };
 
-export function Transcript({ messages, conversationId, revision, inflight, notSent, tail, canRetry, onRetry, onSuggest, title = null }: Props) {
-  const t = useT();
+export function Transcript({ messages, conversationId, revision, inflight, notSent, tail, canRetry, onRetry, onSuggest, onOpenCard, title = null }: Props) {
   const log = useRef<HTMLDivElement>(null);
   const nearBottom = useRef(true);
+  // The first layout of a conversation jumps straight to its end; new content after that glides into view.
+  const placed = useRef(false);
 
   const last = messages.at(-1);
   const tailMessage = last?.role === "user" ? last : null;
@@ -56,12 +58,16 @@ export function Transcript({ messages, conversationId, revision, inflight, notSe
     const el = log.current;
     // The user's own new message always scrolls into view, even after they scrolled up to read.
     if (!el || (!nearBottom.current && !sending)) return;
-    el.scrollTop = el.scrollHeight;
+    let target = el.scrollHeight - el.clientHeight;
     const reply = endsWithReply ? el.querySelector<HTMLElement>(".messages > :last-child") : null;
     if (reply) {
       const top = reply.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - REPLY_GAP_PX;
-      el.scrollTop = Math.min(el.scrollTop, top);
+      target = Math.min(target, top);
     }
+    const glide = placed.current && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    placed.current = true;
+    if (glide && typeof el.scrollTo === "function") el.scrollTo({ top: target, behavior: "smooth" });
+    else el.scrollTop = target;
     // oxlint-disable-next-line react/exhaustive-effect-dependencies
   }, [signature, sending, endsWithReply]);
 
@@ -90,7 +96,8 @@ export function Transcript({ messages, conversationId, revision, inflight, notSe
   // error boundary, so a malformed message must not throw here.
   const latestSearch = messages.findLast((m) => m.role === "assistant" && (m.unreadable === true || (m.groups?.length ?? 0) > 0));
   const working = latestSearch?.role === "assistant" && !latestSearch.unreadable ? latestSearch : null;
-  const openCard = (cardTitle: string) => onSuggest(t.tellMeAbout(cardTitle));
+  // Any card on screen can be opened, not only the latest search's: the click names the product by id.
+  const openCard = (card: Card) => onOpenCard(card.id, t.tellMeAbout(card.title));
 
   const pendingStage = inflight && (localInflight !== null || inflight.messageId === tailMessage?.id) ? inflight.stage : null;
 
@@ -109,17 +116,16 @@ export function Transcript({ messages, conversationId, revision, inflight, notSe
         <AssistantMessage
           message={m}
           onSuggest={m === messages.at(-1) && canRetry ? onSuggest : null}
-          // A reply that resumed after a reload had its cards shown early: no second deal.
-          animate={!previewed.has(messages[i - 1]?.id ?? "")}
           working={m === working}
-          onOpen={m === working && canRetry ? openCard : null}
+          onOpen={canRetry ? openCard : null}
         />
       </ErrorBoundary>
     ),
   );
   if (localInflight) {
     items.push(
-      <div key={localInflight.messageId} className="turn">
+      // "sending": the bubble eases in once; the stored message takes over this element (same key) without replaying it.
+      <div key={localInflight.messageId} className="turn sending">
         <UserMessage message={{ id: localInflight.messageId, text: localInflight.text }} />
       </div>,
     );
@@ -155,7 +161,7 @@ export function Transcript({ messages, conversationId, revision, inflight, notSe
     <div className="transcript" ref={log} onScroll={onScroll} tabIndex={0}>
       <div className="messages-column">
       {title && (
-        <h1 className="conversation-title" dir="auto">
+        <h1 className="conversation-title">
           {title}
         </h1>
       )}
@@ -171,7 +177,6 @@ export function Transcript({ messages, conversationId, revision, inflight, notSe
 export const NEW_CHAT_VIEW: ConversationState = { status: "ready", view: { id: "", title: "", revision: 0, messages: [] } };
 
 export function ConversationPane({ conversation, onRetryLoad, turn }: { conversation: ConversationState; onRetryLoad(): void; turn: TurnProps }) {
-  const t = useT();
   switch (conversation.status) {
     case "none":
       return null;

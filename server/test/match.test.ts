@@ -5,7 +5,7 @@ import type { RawProductFull } from "../src/pipeline/ports.ts";
 import { normalizeWord, normalizeWords, singularize, tokenize } from "../src/slots/normalize.ts";
 import { DENYLIST } from "../src/slots/denylist.ts";
 import { resolveCategory } from "../src/slots/aliases.ts";
-import { agentPartner, matchedWords, matchesAll, titleHits } from "../src/retrieval/match.ts";
+import { matchesAll, titleHits } from "../src/retrieval/match.ts";
 
 const catalog = JSON.parse(readFileSync(new URL("./fixtures/catalog.json", import.meta.url), "utf8")) as RawProductFull[];
 const byTitle = (t: string) => {
@@ -16,6 +16,10 @@ const byTitle = (t: string) => {
 const matching = (words: string[]) => catalog.filter((p) => matchesAll(p, words)).map((p) => p.title);
 
 test("singularize", () => {
+  // eyewear stays "glasses" in queries and titles alike, apart from a drinking "glass"
+  assert.equal(singularize("glasses"), "glasses");
+  assert.deepEqual(tokenize("Party Glasses"), ["party", "glasses"]);
+  assert.equal(singularize("glass"), "glass");
   assert.equal(singularize("watches"), "watch");
   assert.equal(singularize("dresses"), "dress");
   assert.equal(singularize("shoes"), "shoe");
@@ -66,19 +70,6 @@ test("whole-token match avoids the substring noise measured on the live API", ()
   assert.ok(matchesAll(byTitle("Rolex Submariner Watch"), ["watch", "rolex"]));
   assert.ok(!matchesAll(byTitle("Rolex Submariner Watch"), ["watch", "red"]));
   assert.ok(matchesAll(byTitle("Rolex Submariner Watch"), []));
-});
-
-test("an -ing word matches its -er partner and nothing looser (sim s03: 'training' vs 'Trainers')", () => {
-  assert.equal(agentPartner("training"), "trainer");
-  assert.equal(agentPartner("trainer"), "training");
-  assert.equal(agentPartner("ring"), null);
-  assert.equal(agentPartner("string"), null);
-  assert.equal(agentPartner("cover"), null);
-  const puma = byTitle("Puma Future Rider Trainers");
-  assert.deepEqual(matchedWords(puma, ["training"]), ["training"]);
-  // the bare stem never matches: "designer" is not "design", "blender" is not "a blend of"
-  assert.deepEqual(matchedWords(byTitle("Dior J'adore"), ["blender"]), []);
-  assert.deepEqual(matchedWords(byTitle("Annibale Colombo Sofa"), ["designer"]), []);
 });
 
 test("titleHits counts matched words in the title only", () => {

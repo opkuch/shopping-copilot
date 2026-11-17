@@ -23,7 +23,7 @@
   --warn-bg: #fbefd2;
   --warn-ink: #6a4a00;
 
-  --font: "Schibsted Grotesk Variable", "Segoe UI", system-ui, -apple-system, "Noto Sans Hebrew", Arial, sans-serif;
+  --font: "Schibsted Grotesk Variable", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
 
   /* Type scale: 13 / 15 / 17 / 21 / 26, display clamps up to 52. */
   --step--1: 0.8125rem;
@@ -260,7 +260,7 @@ textarea {
   color: var(--ink, inherit);
 }
 
-/* Applied filters under a group header: what the search is doing, removable where it can be. */
+/* Applied filters under a group header: what the search is doing. */
 .filters {
   list-style: none;
   display: flex;
@@ -273,7 +273,6 @@ textarea {
 .filter {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
   padding: 0.15rem 0.6rem;
   border: 1px solid var(--line);
   border-radius: var(--r-pill);
@@ -281,62 +280,26 @@ textarea {
   font-size: var(--step--1);
 }
 
-.filter-clear {
-  border: 0;
-  background: none;
-  padding: 0 0.15rem;
-  line-height: 1;
-  font-size: 1rem;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.filter-clear:hover {
-  color: var(--emerald-deep);
-}
-
-/* The phone drawer comes in from the side the reading starts on. */
-@media (max-width: 899px) {
-  [dir="rtl"] .sidebar:not(.open) {
-    transform: translateX(100%);
-  }
-}
-
-/* Prices and other left-to-right numbers stay in order inside right-to-left text. */
-.price,
-.filter span {
-  unicode-bidi: isolate;
-}
-
-/* A price reads left to right in both languages ("$89.99", never "89.99$"), so the tag keeps its hole on
-   the left in both. */
-.price {
-  direction: ltr;
-}
-
-/* The interface language picker in the sidebar. */
-.lang-picker {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: var(--step--1);
-  color: var(--muted);
-}
-
-.lang-picker select {
-  flex: 1;
-  min-width: 0;
-  padding: 0.3rem 0.5rem;
-  border: 1px solid var(--control);
-  border-radius: 0.5rem;
-  background: var(--surface);
-  color: inherit;
-  font: inherit;
-}
-
-/* Cards first: the template sentence over early cards, until the written reply replaces it in place. */
+/* Cards first: the template sentence over early cards, until the written reply replaces it in place. The <p> is
+   keyed by its text, so the written reply arrives as a new element and fades in (see .fresh below). */
 .assistant-text {
   transition: color 0.3s var(--ease-out);
+}
+
+/* The shopper's own message eases in as it is sent; the stage label under a reply on its way fades between stages. */
+.turn.sending .bubble {
+  animation: rise 0.22s var(--ease-out) both;
+}
+
+.pending-text {
+  animation: settle 0.25s var(--ease-out) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 }
 
 .assistant-text.draft {
@@ -671,11 +634,13 @@ textarea {
   overflow: hidden;
 }
 
+/* Wraps rather than clipping: on a narrow card the rating moves under the price. */
 .product-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.25rem 0.5rem;
   margin-top: auto;
   padding-top: 0.5rem;
 }
@@ -802,7 +767,7 @@ textarea {
 .message.assistant.fresh .assistant-text,
 .message.assistant.fresh .group-header,
 .message.assistant.fresh .group-note {
-  animation: settle 0.28s var(--ease-out) both;
+  animation: settle 0.35s var(--ease-out) both;
 }
 
 /* The chips take the place of the progress row when the reply is done: they fade in, nothing jumps. */
@@ -1170,4 +1135,9 @@ textarea {
   .dots span {
     opacity: 0.6;
   }
+}
+
+/* The last-resort error line when the app itself fails to render. */
+.app-failed {
+  padding: 2rem 1rem;
 }

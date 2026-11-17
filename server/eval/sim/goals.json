@@ -1,157 +1,157 @@
 [
   {
-    "id": "s01", "lang": "he",
-    "goal": "A gift for your wife. She loves perfume. Budget up to 400 shekels (about $108).",
+    "id": "s01", 
+    "goal": "A gift for your wife. She loves perfume. Budget up to $100.",
     "style": "Start vague: only say you want a gift for your wife. Reveal that she likes perfume and the budget only when asked or when the results are off.",
     "accept": [6, 8, 9, 10]
   },
   {
-    "id": "s02", "lang": "he",
+    "id": "s02", 
     "goal": "The cheapest Samsung phone that is actually in stock.",
     "style": "Ask for Samsung phones first. Then narrow to cheapest, then to in stock, one thing per message.",
     "accept": [131]
   },
   {
-    "id": "s03", "lang": "en",
+    "id": "s03", 
     "goal": "Sneakers for the gym, for yourself (a man), under $100.",
     "style": "Casual and short, lowercase, no punctuation.",
     "accept": [90]
   },
   {
-    "id": "s04", "lang": "he",
+    "id": "s04", 
     "goal": "Wireless headphones. You first think you want Beats, but after seeing them you change your mind and want Apple ones.",
     "style": "Write with small typos. Change your mind mid-conversation as described.",
     "accept": [100, 101]
   },
   {
-    "id": "s05", "lang": "he",
+    "id": "s05", 
     "goal": "A laptop for work under $1500, the best rated one.",
-    "style": "Start with just 'מחשב נייד'. Add the budget, then ask which is best rated.",
+    "style": "Start with just 'laptop'. Add the budget, then ask which is best rated.",
     "accept": [80]
   },
   {
-    "id": "s06", "lang": "en",
+    "id": "s06", 
     "goal": "A black dress for an evening event, under $150.",
     "style": "Start with 'dresses', then narrow down step by step.",
     "accept": [177, 179]
   },
   {
-    "id": "s07", "lang": "he",
+    "id": "s07", 
     "goal": "An espresso / coffee machine for your kitchen. (The shop does not sell one; you do not know that.)",
     "style": "Ask directly. If offered something else, judge honestly whether it is a coffee machine.",
     "accept": [], "impossible": true
   },
   {
-    "id": "s08", "lang": "he",
+    "id": "s08", 
     "goal": "A Samsung tablet. You want details about the cheapest one before deciding.",
     "style": "Ask for tablets, then ask about the cheapest Samsung one by referring to it from the list (e.g. 'the white one', 'the cheaper Samsung').",
     "accept": [161]
   },
   {
-    "id": "s09", "lang": "he",
-    "goal": "A watch for yourself (a man), budget up to 500 shekels (about $135).",
-    "style": "Mix Hebrew with some English words. Give the budget in shekels.",
+    "id": "s09", 
+    "goal": "A watch for yourself (a man), budget up to $150.",
+    "style": "Casual, with some chat abbreviations ('u', 'pls'). Give the budget in dollars.",
     "accept": [93]
   },
   {
-    "id": "s10", "lang": "en",
+    "id": "s10", 
     "goal": "Sunglasses. Midway, get distracted and look at women's bags for a turn, then go back to the sunglasses and want the cheapest one that is in stock.",
     "style": "Refer back to the earlier sunglasses without restating the full request ('ok back to the sunglasses').",
     "accept": [157, 158],
     "notes": "158 is accepted too: shoppers reasonably doubt that 'Party Glasses' are sunglasses"
   },
   {
-    "id": "s11", "lang": "he",
+    "id": "s11", 
     "goal": "Something to make smoothies at home.",
     "style": "Describe the need, not the product name. Do not say 'blender'.",
     "accept": [51, 61]
   },
   {
-    "id": "s12", "lang": "he",
+    "id": "s12", 
     "goal": "A Valentine's Day gift for your girlfriend, up to $200. Not jewelry: she has plenty.",
-    "style": "Start with 'מתנה ליום האהבה'. Answer questions briefly. If you are shown jewelry, say not jewelry.",
+    "style": "Start with 'valentine's day gift'. Answer questions briefly. If you are shown jewelry, say not jewelry.",
     "accept": [6, 7, 8, 9, 10, 172, 173, 176, 186, 194]
   },
   {
-    "id": "s13", "lang": "en",
+    "id": "s13", 
     "goal": "A plant to brighten your living room.",
     "style": "Start vague: 'something to make my living room nicer'. Mention a plant only if the first results don't include one.",
     "accept": [45, 46]
   },
   {
-    "id": "s14", "lang": "he",
+    "id": "s14", 
     "goal": "A basketball for your 10-year-old son.",
     "style": "Say it is for your son. Short messages.",
     "accept": [140]
   },
   {
-    "id": "s15", "lang": "en",
+    "id": "s15", 
     "goal": "A men's leather wallet. (The shop does not sell one; you do not know that.)",
     "style": "Ask directly. If offered something else, judge honestly whether it is a wallet.",
     "accept": [], "impossible": true
   },
   {
-    "id": "h01", "lang": "he", "hard": true, "maxTurns": 10,
+    "id": "h01", "hard": true, "maxTurns": 10,
     "goal": "You browse laptops, then women's perfumes, then women's watches (one request each, look at the results). Then you go back to the laptops from the start and want the cheapest one that is in stock and under $1500.",
-    "style": "When going back, refer to it loosely ('נחזור למחשבים מקודם'), without repeating the details.",
+    "style": "When going back, refer to it loosely ('back to the laptops from before'), without repeating the details.",
     "accept": [81]
   },
   {
-    "id": "h02", "lang": "en", "hard": true, "maxTurns": 10,
+    "id": "h02", "hard": true, "maxTurns": 10,
     "goal": "You are deciding between the Samsung Galaxy Tab S8 Plus and the iPad Mini. Take the better-rated one, unless it costs more than $100 extra; then take the cheaper one.",
     "style": "Ask the assistant for both tablets' ratings and prices. Only decide once you know both ratings from the assistant.",
     "accept": [160]
   },
   {
-    "id": "h04", "lang": "he", "hard": true, "maxTurns": 10,
+    "id": "h04", "hard": true, "maxTurns": 10,
     "goal": "You want exactly the Samsung Galaxy S8. If it turns out to be out of stock, you'll settle for another Samsung phone that is in stock and costs under $550.",
     "style": "Ask for the S8 by name. Only accept an alternative once you've been told the S8 can't be bought.",
     "accept": [131]
   },
   {
-    "id": "h05", "lang": "en", "hard": true, "maxTurns": 10,
+    "id": "h05", "hard": true, "maxTurns": 10,
     "goal": "A protective case for your iPhone.",
     "style": "Start with 'something to protect my phone'. If shown screen stuff or chargers, correct it: you mean a case.",
     "accept": [108]
   },
   {
-    "id": "h06", "lang": "he", "hard": true, "maxTurns": 10,
+    "id": "h06", "hard": true, "maxTurns": 10,
     "goal": "Two things in one go: a women's perfume up to $100, and men's sports shoes up to $120. You're done only when you've found one of each.",
     "style": "Ask for both in one message. Report both product ids when done.",
     "accept": [], "acceptAll": [[6, 8, 9, 10], [90, 91, 92]]
   },
   {
-    "id": "h07", "lang": "he", "hard": true, "maxTurns": 10,
-    "goal": "Something for your new apartment's kitchen, for cooking Asian food (stir-fry). Budget 150 shekels (about $40).",
-    "style": "Start very vague: 'משהו לדירה החדשה'. Reveal kitchen, then budget in shekels, then the Asian cooking, one per message, only when asked or when results are off.",
+    "id": "h07", "hard": true, "maxTurns": 10,
+    "goal": "Something for your new apartment's kitchen, for cooking Asian food (stir-fry). Budget $40.",
+    "style": "Start very vague: 'something for my new apartment'. Reveal kitchen, then budget, then the Asian cooking, one per message, only when asked or when results are off.",
     "accept": [52, 68]
   },
   {
-    "id": "h08", "lang": "en", "hard": true, "maxTurns": 10,
+    "id": "h08", "hard": true, "maxTurns": 10,
     "goal": "Look at women's watches, then men's watches. Then go back and buy the cheapest women's watch that is in stock.",
     "style": "After the men's watches, say something like 'what was the cheapest women's one again? I'll take it, if it's in stock'.",
     "accept": [194]
   },
   {
-    "id": "h09", "lang": "he", "hard": true, "maxTurns": 10,
+    "id": "h09", "hard": true, "maxTurns": 10,
     "goal": "A women's bag between $100 and $300.",
-    "style": "Start with 'תיק לאישה'. Then ask for something more luxurious. When shown something very expensive, say it's too much, something in the middle. Never state the exact range unless asked twice.",
+    "style": "Start with 'women's bag'. Then ask for something more luxurious. When shown something very expensive, say it's too much, something in the middle. Never state the exact range unless asked twice.",
     "accept": [173]
   },
   {
-    "id": "h10", "lang": "he", "hard": true, "maxTurns": 10,
+    "id": "h10", "hard": true, "maxTurns": 10,
     "goal": "An iPhone 14. (The shop doesn't have one; you don't know that.) You'll accept the newest iPhone the shop has.",
-    "style": "Ask for 'אייפון 14'. If told it doesn't exist, ask what the newest iPhone is.",
+    "style": "Ask for 'iPhone 14'. If told it doesn't exist, ask what the newest iPhone is.",
     "accept": [123]
   },
   {
-    "id": "h11", "lang": "he", "hard": true, "maxTurns": 6,
+    "id": "h11", "hard": true, "maxTurns": 6,
     "goal": "The cheapest men's watch that is in stock.",
-    "style": "Very terse, one or two words per message: 'שעון', then 'גבר', then 'זול', then 'במלאי'.",
+    "style": "Very terse, one or two words per message: 'watch', then 'men', then 'cheap', then 'in stock'.",
     "accept": [93]
   },
   {
-    "id": "h12", "lang": "en", "hard": true, "maxTurns": 10,
+    "id": "h12", "hard": true, "maxTurns": 10,
     "goal": "The highest-rated kitchen item under $10.",
     "style": "Ask for kitchen stuff under $10, then ask which is rated best. Accept only once the assistant has told you it is the best rated of all of them, not just of the ones shown.",
     "accept": [62]

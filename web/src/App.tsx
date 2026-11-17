@@ -17,10 +17,7 @@ import type { Sent } from "./state/reducer.ts";
 import { currentRoute, navigate, onPopState } from "./state/router.ts";
 import type { Route } from "./state/router.ts";
 import { useSend } from "./state/send.ts";
-
-import { browserLang, langOf, LangContext, readLangPref, STRINGS, writeLangPref } from "./i18n.ts";
-import type { LangPref } from "./i18n.ts";
-import { useState } from "react";
+import { t } from "./strings.ts";
 
 const APP_TITLE = "Shopping copilot";
 
@@ -48,22 +45,6 @@ export function App({ client = defaultClient }: { client?: ApiClient }) {
   const tailMessage = view ? unansweredTail(view) : null;
   useTailResume(client, dispatch, stateRef, send, tailMessage?.id ?? null, inflight?.messageId === tailMessage?.id);
 
-  // The interface follows the conversation (its first message), the home page the browser.
-  const firstUser = view?.messages.find((m) => m.role === "user");
-  const [langPref, setLangPref] = useState<LangPref>(readLangPref);
-  const autoLang = firstUser ? langOf(firstUser.text) : inflight ? langOf(inflight.text) : browserLang();
-  // The sidebar picker overrides the automatic choice; it sets the language and the direction together.
-  const lang = langPref === "auto" ? autoLang : langPref;
-  const chooseLang = useCallback((pref: LangPref) => {
-    writeLangPref(pref);
-    setLangPref(pref);
-  }, [setLangPref]);
-  const t = STRINGS[lang];
-  useEffect(() => {
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
-  }, [lang]);
-
   const narrow = useMediaQuery(NARROW_QUERY);
   const { isOpen: drawerOpen, close: closeDrawer, toggle: toggleDrawer, drawerRef, buttonRef } = useDrawer(narrow);
 
@@ -83,7 +64,7 @@ export function App({ client = defaultClient }: { client?: ApiClient }) {
   }, [activeTitle]);
 
   const onSend = useCallback(
-    (text: string) => {
+    (text: string, productId?: number) => {
       const s = stateRef.current;
       const open = s.conversation.status === "ready" ? s.conversation.view : null;
       if (s.route.view === "conversation" && !open) return;
@@ -92,6 +73,7 @@ export function App({ client = defaultClient }: { client?: ApiClient }) {
         text,
         conversationId: open ? open.id : null,
         revision: open ? open.revision : 0,
+        ...(productId !== undefined ? { productId } : {}),
       });
     },
     [send],
@@ -107,13 +89,13 @@ export function App({ client = defaultClient }: { client?: ApiClient }) {
     canRetry: inflight === null,
     onRetry,
     onSuggest: onSend,
+    onOpenCard: (productId, text) => onSend(text, productId),
   };
   const homeHasTurn = route.view === "home" && (shownInflight !== null || shownNotSent !== null);
   const canSend = inflight === null && (route.view === "home" || view !== null);
   const draftKey = activeId ?? NEW_CHAT;
 
   return (
-    <LangContext.Provider value={lang}>
     <div className="app">
       <header className="topbar" inert={drawerOpen || undefined}>
         <button
@@ -130,7 +112,7 @@ export function App({ client = defaultClient }: { client?: ApiClient }) {
           </svg>
         </button>
         {activeTitle ? (
-          <span className="topbar-title" dir="auto">
+          <span className="topbar-title">
             {activeTitle}
           </span>
         ) : (
@@ -138,8 +120,6 @@ export function App({ client = defaultClient }: { client?: ApiClient }) {
         )}
       </header>
       <Sidebar
-        langPref={langPref}
-        onLangPref={chooseLang}
         list={list}
         activeId={activeId}
         onNavigate={go}
@@ -166,6 +146,5 @@ export function App({ client = defaultClient }: { client?: ApiClient }) {
       <Toast toast={toast} onDismiss={dismissToast} />
       <Announcer announcement={state.announcement} />
     </div>
-    </LangContext.Provider>
   );
 }

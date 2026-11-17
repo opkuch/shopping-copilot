@@ -25,7 +25,7 @@ function setup() {
 
 const group: Group = {
   label: "shoes", status: "results", match: "exact",
-  query: { category: null, noun: "shoes", attributes: [], priceMin: null, priceMax: null, sort: "relevance", inStock: false, gender: null, categoryStated: false, top: false, within: null, purpose: null, offset: 0 },
+  query: { category: null, noun: "shoes", attributes: [], priceMin: null, priceMax: null, sort: "relevance", inStock: false, gender: null, categoryStated: false, top: false, within: null, purpose: null, exclude: [], offset: 0 },
   products: [], total: 0,
 };
 const payload: Payload = { groups: [group], detail: null };
@@ -258,4 +258,28 @@ test("withTransaction rolls back on throw", () => {
     throw new Error("boom");
   }));
   assert.equal(s.db.prepare("SELECT COUNT(*) AS n FROM conversations").get()?.n, 0);
+});
+
+test("a database another process holds is not corrupt: startup fails loudly and history stays where it is", () => {
+  const path = tmpPath();
+  openDatabase(path).db.close();
+  const holder = new DatabaseSync(path);
+  holder.exec("PRAGMA locking_mode = EXCLUSIVE");
+  holder.exec("BEGIN EXCLUSIVE");
+  try {
+    assert.throws(() => openDatabase(path));
+    assert.equal(readdirSync(join(path, "..")).filter((f) => f.includes(".broken-")).length, 0);
+    assert.ok(existsSync(path));
+  } finally {
+    holder.exec("ROLLBACK");
+    holder.close();
+  }
+});
+
+test("only damage counts as corruption, not a lock or a permission error", async () => {
+  const { isCorruption } = await import("../src/store/db.ts");
+  assert.equal(isCorruption(Object.assign(new Error("file is not a database"), { errcode: 26 })), true);
+  assert.equal(isCorruption(Object.assign(new Error("database disk image is malformed"), { errcode: 11 })), true);
+  assert.equal(isCorruption(Object.assign(new Error("database is locked"), { errcode: 5 })), false);
+  assert.equal(isCorruption(Object.assign(new Error("unable to open database file"), { errcode: 14 })), false);
 });

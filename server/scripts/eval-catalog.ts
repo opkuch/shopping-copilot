@@ -6,11 +6,18 @@ import { CATEGORY_DESCRIPTIONS } from "../src/catalog/categories.ts";
 import { SLUGS } from "../src/messages/schema.ts";
 
 export type CatalogCheck = { name: string; pass: boolean; detail: string };
-type Api = Pick<CatalogApi, "categories" | "search" | "byCategory">;
+type Api = Pick<CatalogApi, "categories" | "byCategory">;
+/** How many products DummyJSON's own /products/search returns for q. The app doesn't use it; this checks why. */
+type SearchCount = (q: string) => Promise<number>;
+
+const liveSearchCount: SearchCount = async (q) => {
+  const res = await fetch(`https://dummyjson.com/products/search?q=${encodeURIComponent(q)}&limit=0&select=id`);
+  return ((await res.json()) as { products: unknown[] }).products.length;
+};
 
 const SELECTED = ["id", "title", "description", "price", "thumbnail", "rating", "category", "stock"] as const;
 
-export async function checkCatalog(api: Api, ctx: CallCtx = { budget: createBudget(60_000), trace: { event() {} } }): Promise<CatalogCheck[]> {
+export async function checkCatalog(api: Api, searchCount: SearchCount = liveSearchCount, ctx: CallCtx = { budget: createBudget(60_000), trace: { event() {} } }): Promise<CatalogCheck[]> {
   const results: CatalogCheck[] = [];
   // A thrown call is a failed check, not a crash, so the other checks still report.
   const run = async (name: string, fn: () => Promise<{ pass: boolean; detail: string }>) => {
@@ -44,9 +51,9 @@ export async function checkCatalog(api: Api, ctx: CallCtx = { budget: createBudg
     return { pass: lacking.length === 0, detail: lacking.length === 0 ? "all described" : `no description: ${lacking.join(", ")}` };
   });
 
-  await run("q is still phrase-matched", async () => {
-    const forward = (await api.search("red lipstick", ctx)).products.length;
-    const reversed = (await api.search("lipstick red", ctx)).products.length;
+  await run("/products/search still matches q as one phrase (why the app matches words itself)", async () => {
+    const forward = await searchCount("red lipstick");
+    const reversed = await searchCount("lipstick red");
     return {
       pass: forward >= 1 && reversed === 0,
       detail: `search("red lipstick") = ${forward} (want >= 1), search("lipstick red") = ${reversed} (want 0)`,

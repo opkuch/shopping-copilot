@@ -1,62 +1,18 @@
-// Every fixed sentence of the reply, per language.
-// Used when no model writes the text, and when the prose call fails or is skipped.
-// Category display names come from the cached list passed in; with no cache we show the slug,
-// never a name from model memory. Product titles, labels, and category names are catalog data and
-// stay in English in every language; the sentence around them is translated.
-import type { Group, PurposeContext, Query, Slug } from "../messages/schema.ts";
-import { ILS_PER_USD } from "../pipeline/currency.ts";
+// Every fixed sentence of a reply. Used when no model writes the text, and when the prose call fails or
+// is skipped. Category display names come from the cached list passed in; with no cache we show the slug,
+// never a name from model memory.
+import type { Group, Query, Slug } from "../messages/schema.ts";
 import type { CategoryInfo, TurnFlags } from "../pipeline/ports.ts";
-import type { Lang } from "./language.ts";
 
 export type Names = CategoryInfo[] | null;
 
 export type RelativePrice = { direction: "cheaper" | "pricier"; price: number };
 
 /**
- * `requested` is the query before retrieval: a fallback erases words from `group.query`.
+ * `requested` is the query before retrieval: a relaxed match erases words from `group.query`.
  * `keptPrevious`: the refine found nothing, so the earlier cards stay on screen under this sentence.
  */
 export type GroupView = { group: Group; requested: Query; relative: RelativePrice | null; keptPrevious?: boolean };
-
-export interface Templates {
-  greeting(): string;
-  service(): string;
-  offTopic(): string;
-  refusal(): string;
-  referNoCards(): string;
-  referUnclear(n: number): string;
-  askWhichGroup(label1: string, label2: string): string;
-  catalogOverview(names: Names): string;
-  referText(title: string, detailUnavailable: boolean): string;
-  resultsText(views: GroupView[], flags: TurnFlags, names: Names): string;
-  /** One question for a vague request; the chips under it answer it in one tap. */
-  clarify(why: "gift_budget" | "unknown_theme", ctx: PurposeContext): string;
-  /** "Show more": cards from..to of total. */
-  more(label: string, from: number, to: number, total: number): string;
-  noMore(label: string, total: number): string;
-}
-
-/** The sentence over a gift or curated browse (Query.purpose), or null for any other group. */
-function purposeSentence(q: Query, n: number, he: boolean): string | null {
-  if (q.purpose === null) return null;
-  const price = he ? hePrice(q) : enPrice(q);
-  if (q.purpose === "gift") {
-    const who = q.gender === "mens" ? (he ? " בשבילו" : " for him") : q.gender === "womens" ? (he ? " בשבילה" : " for her") : "";
-    return he ? `הנה ${n} רעיונות למתנה${who}${price}, מקטגוריות שונות. אפשר לבחור סוג מוצר כדי לצמצם.`
-      : `Here are ${n} gift ideas${who}${price}, from different categories. Pick a kind of product to narrow it down.`;
-  }
-  // Only an order the shopper asked for is named; the default order is not a claim.
-  const order = q.sort === "price_asc" ? (he ? " הזולים ביותר" : " lowest-priced") : q.sort === "rating" ? (he ? " עם דירוג גבוה" : " highly rated") : "";
-  return he ? `הנה מבחר: ${n} מוצרים${order} מקטגוריות שונות. אפשר לציין תקציב או סוג מוצר כדי לצמצם.`
-    : `Here's a varied pick: ${n}${order} products from different categories. Tell me a budget or a kind of product to narrow it down.`;
-}
-
-function enPrice(q: Query): string {
-  if (q.priceMin !== null && q.priceMax !== null) return ` between ${money(q.priceMin)} and ${money(q.priceMax)}`;
-  if (q.priceMax !== null) return ` at or under ${money(q.priceMax)}`;
-  if (q.priceMin !== null) return ` at or over ${money(q.priceMin)}`;
-  return "";
-}
 
 // ---------- shared helpers ----------
 
@@ -85,26 +41,47 @@ export function plural(word: string): string {
   return `${word}s`;
 }
 
-export function hasNoConstraint(q: Query): boolean {
+/** Group labels come from code, never the model: noun (pluralized, capitalized), else category display name, else "Products". */
+export function labelFor(query: Query, names: Names): string {
+  if (query.purpose === "gift" && query.noun === null && query.category === null) return "Gift ideas";
+  if (query.purpose === "curated" && query.noun === null && query.category === null) return "Picks";
+  if (query.noun !== null) {
+    const label = plural(query.noun);
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  }
+  if (query.category !== null) return categoryName(query.category, names);
+  return "Products";
+}
+
+function hasNoConstraint(q: Query): boolean {
   return (
     q.category === null && q.noun === null && q.attributes.length === 0 &&
     q.priceMin === null && q.priceMax === null && !q.inStock
   );
 }
 
-// ---------- English ----------
+function priceRange(q: Pick<Query, "priceMin" | "priceMax">): string {
+  if (q.priceMin !== null && q.priceMax !== null) return ` between ${money(q.priceMin)} and ${money(q.priceMax)}`;
+  if (q.priceMax !== null) return ` at or under ${money(q.priceMax)}`;
+  if (q.priceMin !== null) return ` at or over ${money(q.priceMin)}`;
+  return "";
+}
+
+// ---------- fixed replies ----------
 
 const HELP = "I can help you find products in our catalog.";
 
-export const greeting = () => HELP;
+// Read after "hi" and after "thanks" alike; the chips under it carry the next step.
+export const greeting = () => "Happy to help. Tell me what you're looking for.";
 // One reply for every service: a flight, a booking, "where is my order?". It names both kinds, since the router
 // does not tell them apart, then says what we can do; the chips under it are example searches.
 export const service = () => "I can't book trips or other services, or check on orders and deliveries; for an order, please contact the store's customer service. I can help you find products. Try one of these:";
 export const offTopic = () => "That's outside what I can help with. I find products in this shop's catalog. Try one of these:";
 export const refusal = () => `I can't help with that. ${HELP}`;
 export const referNoCards = () => "There are no products on screen yet. What are you looking for?";
-export const referUnclear = (n: number) => `Which one? You can say a number from 1 to ${n} or a product name.`;
-export const askWhichGroup = (label1: string, label2: string) => `Which one should I change: ${label1} or ${label2}?`;
+export const referUnclear = (n: number) =>
+  n === 1 ? "Only one product is shown. Ask me about it, or tell me what else to look for."
+  : `Which one? You can say a number from 1 to ${n} or a product name.`;
 
 export function catalogOverview(names: Names): string {
   if (names === null || names.length === 0) return `${HELP} The category list is unavailable right now.`;
@@ -115,6 +92,20 @@ export function referText(title: string, detailUnavailable: boolean): string {
   const base = `Here are more details about ${title}.`;
   return detailUnavailable ? `${base} More details are unavailable right now.` : base;
 }
+
+/** The ask-once question when several searches are on screen and a change doesn't say which; chips answer it. */
+export function whichGroup(labels: string[], op: "refine" | "remove"): string {
+  const list = labels.length <= 1 ? labels.join("") : `${labels.slice(0, -1).join(", ")} or ${labels.at(-1)}`;
+  return op === "remove" ? `Which one should I remove: ${list}?` : `Which one should I change: ${list}?`;
+}
+export const removed = (label: string, left: string[]) => `Removed ${label}. Still on your list: ${left.join(", ")}.`;
+export const removeOnly = () => "That's the only search on screen. Tell me what to look for instead.";
+
+export const more = (label: string, from: number, to: number, total: number) =>
+  from === to ? `Here is ${label} ${from} of ${total}.` : `Here are ${label} ${from} to ${to} of ${total}.`;
+export const noMore = (label: string, total: number) => `That's all ${total} ${label} we have.`;
+
+// ---------- results ----------
 
 // Categories whose name is a countable thing. The rest ("Skin Care", "Groceries", "Mobile
 // Accessories") are places, so a sentence counts "products in Skin Care", never "3 skin care".
@@ -142,26 +133,19 @@ function subject(q: Query, names: Names, one = false): string {
   return one ? "product" : "products";
 }
 
-/** "red laptops at or under $50", built only from the query that was applied. */
+/** "red laptops at or under $50, not Apple", built only from the query that was applied. */
 export function constraints(q: Query, names: Names): string {
   const parts = [...q.attributes, subject(q, names)];
-  if (q.priceMin !== null && q.priceMax !== null) parts.push(`between ${money(q.priceMin)} and ${money(q.priceMax)}`);
-  else if (q.priceMax !== null) parts.push(`at or under ${money(q.priceMax)}`);
-  else if (q.priceMin !== null) parts.push(`at or over ${money(q.priceMin)}`);
+  const price = priceRange(q).trim();
+  if (price !== "") parts.push(price);
   if (q.inStock) parts.push("that are in stock");
-  return parts.join(" ");
+  const text = parts.join(" ");
+  return q.exclude.length > 0 ? `${text}, not ${q.exclude.join(" or ")}` : text;
 }
 
 export const miss = (q: Query, names: Names) => `I couldn't find ${constraints(q, names)} in our catalog.`;
 export const nothingCheaper = (price: number) => `Nothing in this search is cheaper than ${money(price)}.`;
 export const nothingPricier = (price: number) => `Nothing in this search costs more than ${money(price)}.`;
-
-// The words are quoted: they are what the user typed, not a noun phrase ("battery" in "a phone with
-// good battery" read as "I couldn't find battery in Smartphones").
-export function categoryFallback(words: string[], category: string): string {
-  return `Nothing in ${category} matches "${words.join(" ")}". Here are other products in ${category}.`;
-}
-
 export const keptPrevious = () => "The earlier results are still below.";
 
 /** `kept`: the asked words every shown card still has. None kept: other products of the kind. */
@@ -174,13 +158,25 @@ export function attributesRelaxed(attributes: string[], things: string, kept: st
 export const droppedAttributes = (requested: Query, applied: Query): string[] =>
   requested.attributes.filter((a) => !applied.attributes.includes(a));
 
+/** The sentence over a gift or curated browse (Query.purpose), or null for any other group. */
+function purposeSentence(q: Query, n: number): string | null {
+  if (q.purpose === null) return null;
+  if (q.purpose === "gift") {
+    const who = q.gender === "mens" ? " for him" : q.gender === "womens" ? " for her" : "";
+    return `Here are ${n} gift ideas${who}${priceRange(q)}, from different categories. Pick a budget or a kind of product to narrow it down.`;
+  }
+  // Only an order the shopper asked for is named; the default order is not a claim.
+  const order = q.sort === "price_asc" ? " lowest-priced" : q.sort === "rating" ? " highly rated" : "";
+  return `Here's a varied pick: ${n}${order} products from different categories. Tell me a budget or a kind of product to narrow it down.`;
+}
+
 export function resultsSentence(group: Group, names: Names): string {
   const q = group.query;
   const n = group.products.length;
   const { total } = group;
-  const purposeLine = purposeSentence(q, n, false);
+  const purposeLine = purposeSentence(q, n);
   if (purposeLine !== null) return purposeLine;
-  // A browse shows one product per category (retrieval "browse_diverse"), so say so.
+  // A browse shows one product per category (retrieval row "browse"), so say so.
   if (hasNoConstraint(q)) {
     const ask = "Tell me a category or a budget to narrow it down";
     if (q.sort === "price_asc") return `Here are the lowest-priced products from ${n} different categories. ${ask}.`;
@@ -214,150 +210,44 @@ function groupSentence(view: GroupView, names: Names): string | null {
     if (relative?.direction === "pricier") return nothingPricier(relative.price);
     return view.keptPrevious ? `${miss(group.query, names)} ${keptPrevious()}` : miss(group.query, names);
   }
-  if (group.match === "attributes_relaxed" && group.query.noun === null && requested.noun !== null) {
-    return `I couldn't find ${[...requested.attributes, plural(requested.noun)].join(" ")}. Here are other ${group.query.attributes.join(" ")} products.`;
-  }
   if (group.match === "attributes_relaxed") return attributesRelaxed(requested.attributes, subject(group.query, names), group.query.attributes);
-  if (group.match === "category_fallback" && group.query.category !== null) {
-    const words = [...(requested.noun === null ? [] : [requested.noun]), ...requested.attributes];
-    return categoryFallback(words, categoryName(group.query.category, names));
-  }
   return resultsSentence(group, names);
 }
 
-export const droppedIntents = () => "I only looked up the first two.";
-export const serviceMentioned = () => "I can't book travel or other services.";
-export const currencyNotApplied = () => "Prices are in US dollars, so I didn't apply that price limit.";
-export const currencyConverted = () => `Prices are in US dollars; I converted shekels at about ₪${ILS_PER_USD} to the dollar.`;
-export const secondPatchIgnored = () => "I changed one thing; send the other change separately.";
-export const couldNotLoad = (label: string) => `I couldn't load ${label} right now.`;
+const listOf = (labels: string[]) => (labels.length <= 1 ? labels.join("") : `${labels.slice(0, -1).join(", ")} and ${labels.at(-1)}`);
 
-/** Template text for a product turn: one sentence per fetched group, then one append per flag. */
+/**
+ * A shopping list (three or more searches) in two sentences, not one per item: what was found, and every item
+ * that found nothing, by name. The cards under each label say the rest.
+ */
+function listSentence(views: GroupView[]): string {
+  const found = views.filter((v) => v.group.status === "results").map((v) => v.group.label);
+  const missed = views.filter((v) => v.group.status === "miss").map((v) => v.group.label.toLowerCase());
+  const closest = views.filter((v) => v.group.status === "results" && v.group.match === "attributes_relaxed").map((v) => v.group.label.toLowerCase());
+  const head = found.length > 0 ? `Here's your list: ${found.length} of ${views.length} items found (${listOf(found)}).` : "I couldn't find anything on your list.";
+  const tail = [
+    ...(missed.length > 0 && found.length > 0 ? [`No match for ${listOf(missed)}.`] : []),
+    ...(closest.length > 0 ? [`For ${listOf(closest)}, these are the closest matches.`] : []),
+  ];
+  return [head, ...tail].join(" ");
+}
+
+/** Template text for a product turn: one sentence per fetched group (a summary for a list), then one append per flag. */
 export function resultsText(views: GroupView[], flags: TurnFlags, names: Names): string {
   const sentences: string[] = [];
-  for (const view of views) {
-    const s = groupSentence(view, names);
-    if (s !== null) sentences.push(s);
+  if (views.length >= 3) sentences.push(listSentence(views));
+  else {
+    for (const view of views) {
+      const s = groupSentence(view, names);
+      if (s !== null) sentences.push(s);
+    }
   }
-  if (flags.droppedIntents) sentences.push(droppedIntents());
-  if (flags.mentionsService) sentences.push(serviceMentioned());
-  if (flags.currencyNotApplied) sentences.push(currencyNotApplied());
-  if (flags.currencyConverted) sentences.push(currencyConverted());
-  if (flags.secondPatchIgnored) sentences.push(secondPatchIgnored());
+  if (flags.appliedToAll) sentences.push("I applied that to every search on screen.");
+  if (flags.droppedIntents) sentences.push(`I looked up the first ${views.length} items; send the rest separately.`);
+  if (flags.mentionsService) sentences.push("I can't book travel or other services.");
+  if (flags.currencyNotApplied) sentences.push("Prices are in US dollars, so I didn't apply that price limit.");
   for (const view of views) {
-    if (view.group.status === "unavailable") sentences.push(couldNotLoad(view.group.label));
+    if (view.group.status === "unavailable") sentences.push(`I couldn't load ${view.group.label} right now.`);
   }
   return sentences.join(" ");
 }
-
-export function clarify(why: "gift_budget" | "unknown_theme", ctx: PurposeContext): string {
-  if (why === "unknown_theme") return "I'm not sure what fits that in our catalog. What kind of product are you after? Pick one below or tell me.";
-  if (ctx.gender === null && !ctx.kid) return "Happy to help with a gift. Who is it for, and roughly what budget? Pick below or just tell me.";
-  return "Happy to help with a gift. Roughly what budget, and what do they like? Pick below or just tell me.";
-}
-
-export const en: Templates = {
-  greeting, service, offTopic, refusal, referNoCards, referUnclear, askWhichGroup, catalogOverview, referText, resultsText, clarify,
-  more: (label, from, to, total) => (from === to ? `Here is ${label} ${from} of ${total}.` : `Here are ${label} ${from} to ${to} of ${total}.`),
-  noMore: (label, total) => `That's all ${total} ${label} we have.`,
-};
-
-// ---------- Hebrew ----------
-// Whole sentences, not English fragments: Hebrew word order and plural do not follow plural().
-// Gender-neutral phrasing toward the user. Group labels ("Dresses") are catalog data and stay English.
-
-const HE_HELP = "אני יכול לעזור לך למצוא מוצרים בקטלוג שלנו.";
-
-function hePrice(q: Query): string {
-  if (q.priceMin !== null && q.priceMax !== null) return ` בין ${money(q.priceMin)} ל-${money(q.priceMax)}`;
-  if (q.priceMax !== null) return ` עד ${money(q.priceMax)}`;
-  if (q.priceMin !== null) return ` מ-${money(q.priceMin)} ומעלה`;
-  return "";
-}
-
-function heGroupSentence(view: GroupView, names: Names): string | null {
-  const { group, requested, relative } = view;
-  const label = group.label;
-  if (group.status === "unavailable") return null;
-  if (group.status === "miss") {
-    if (relative?.direction === "cheaper") return `אין בחיפוש הזה משהו זול מ-${money(relative.price)}.`;
-    if (relative?.direction === "pricier") return `אין בחיפוש הזה משהו יקר מ-${money(relative.price)}.`;
-    const what = [...group.query.attributes, label].join(" ");
-    const kept = view.keptPrevious ? " התוצאות הקודמות עדיין מוצגות למטה." : "";
-    return `לא מצאתי בקטלוג "${what}"${hePrice(group.query)}${group.query.inStock ? " במלאי" : ""}.${kept}`;
-  }
-  if (group.match === "attributes_relaxed" && group.query.noun === null && requested.noun !== null) {
-    return `לא מצאתי "${[...requested.attributes, requested.noun].join(" ")}". הנה מוצרים אחרים של ${group.query.attributes.join(" ")}.`;
-  }
-  if (group.match === "attributes_relaxed") {
-    // Worded so nothing agrees with the label's gender: the label is Hebrew (שמלות) or English (Earphones).
-    if (group.query.attributes.length > 0) return `אין התאמה מדויקת ל-"${requested.attributes.join(" ")}" בקטגוריה ${label}. אלה המוצרים הקרובים ביותר.`;
-    return `אין התאמה ל-"${requested.attributes.join(" ")}" בקטגוריה ${label}. הנה מוצרים אחרים בקטגוריה.`;
-  }
-  if (group.match === "category_fallback" && group.query.category !== null) {
-    const words = [...(requested.noun === null ? [] : [requested.noun]), ...requested.attributes].join(" ");
-    return `לא מצאתי "${words}" בקטגוריה ${categoryName(group.query.category, names)}. הנה מוצרים אחרים בקטגוריה.`;
-  }
-  const q = group.query;
-  const n = group.products.length;
-  const purposeLine = purposeSentence(q, n, true);
-  if (purposeLine !== null) return purposeLine;
-  if (hasNoConstraint(q)) {
-    const ask = "אפשר לציין קטגוריה או תקציב כדי לצמצם.";
-    if (q.sort === "price_asc") return `הנה המוצרים הזולים ביותר מ-${n} קטגוריות שונות. ${ask}`;
-    if (q.sort === "price_desc") return `הנה המוצרים היקרים ביותר מ-${n} קטגוריות שונות. ${ask}`;
-    return `הנה ${n} מוצרים עם דירוג גבוה מקטגוריות שונות. ${ask}`;
-  }
-  const first = group.products[0];
-  if (q.top && first !== undefined && group.total > 1 && q.sort !== "relevance") {
-    const word = q.sort === "price_asc" ? "הזול ביותר" : q.sort === "price_desc" ? "היקר ביותר" : "המדורג ביותר";
-    const next = n > 1 ? " אחריו מוצגים הבאים בתור." : "";
-    return `${word} מבין ${group.total} התוצאות עבור ${label} הוא ${first.title} ב-${money(first.price)}.${next}`;
-  }
-  const head = n === 1 && group.total === 1 ? `הנה תוצאה אחת עבור ${label}`
-    : n === group.total ? `הנה ${n} תוצאות עבור ${label}` : `הנה ${n} מתוך ${group.total} תוצאות עבור ${label}`;
-  if (q.sort === "price_asc") return `${head}, מהזול ליקר.`;
-  if (q.sort === "price_desc") return `${head}, מהיקר לזול.`;
-  return `${head}.`;
-}
-
-export const he: Templates = {
-  greeting: () => HE_HELP,
-  service: () => "אני לא יכול להזמין נסיעות או שירותים אחרים, או לבדוק הזמנות ומשלוחים; בעניין הזמנה כדאי לפנות לשירות הלקוחות של החנות. אשמח לעזור למצוא מוצרים. אפשר לנסות:",
-  offTopic: () => "זה מחוץ למה שאני יכול לעזור בו. אני מוצא מוצרים בקטלוג של החנות. אפשר לנסות:",
-  refusal: () => `אני לא יכול לעזור בזה. ${HE_HELP}`,
-  referNoCards: () => "עדיין אין מוצרים על המסך. מה לחפש?",
-  referUnclear: (n) => `על איזה מוצר מדובר? אפשר לציין מספר בין 1 ל-${n} או את שם המוצר.`,
-  askWhichGroup: (label1, label2) => `מה לשנות: ${label1} או ${label2}?`,
-  more: (label, from, to, total) => (from === to ? `הנה ${label} ${from} מתוך ${total}.` : `הנה ${label} ${from} עד ${to} מתוך ${total}.`),
-  noMore: (label, total) => `אלה כל ${total} התוצאות עבור ${label}.`,
-  clarify: (why, ctx) => {
-    if (why === "unknown_theme") return "לא בטוח מה הכי מתאים לזה בקטלוג שלנו. איזה סוג מוצר מחפשים? אפשר לבחור למטה או לכתוב.";
-    if (ctx.gender === null && !ctx.kid) return "בשמחה אעזור עם מתנה. למי היא, ומה התקציב בערך? אפשר לבחור למטה או פשוט לכתוב.";
-    return "בשמחה אעזור עם מתנה. מה התקציב בערך, ובמה להתמקד? אפשר לבחור למטה או פשוט לכתוב.";
-  },
-  catalogOverview: (names) =>
-    names === null || names.length === 0
-      ? `${HE_HELP} רשימת הקטגוריות לא זמינה כרגע.`
-      : `${HE_HELP} הקטגוריות כוללות: ${names.map((c) => c.name).join(", ")}.`,
-  referText: (title, unavailable) =>
-    unavailable ? `הנה פרטים נוספים על ${title}. פרטים מלאים לא זמינים כרגע.` : `הנה פרטים נוספים על ${title}.`,
-  resultsText(views, flags, names) {
-    const sentences: string[] = [];
-    for (const view of views) {
-      const s = heGroupSentence(view, names);
-      if (s !== null) sentences.push(s);
-    }
-    if (flags.droppedIntents) sentences.push("חיפשתי רק את שני הדברים הראשונים.");
-    if (flags.mentionsService) sentences.push("אני לא יכול להזמין טיסות או שירותים אחרים.");
-    if (flags.currencyNotApplied) sentences.push("המחירים בדולרים, לכן לא החלתי את מגבלת המחיר.");
-    if (flags.currencyConverted) sentences.push(`המחירים בדולרים; המרתי משקלים לפי כ-${ILS_PER_USD} ₪ לדולר.`);
-    if (flags.secondPatchIgnored) sentences.push("שיניתי דבר אחד; שלחו את השינוי השני בנפרד.");
-    for (const view of views) {
-      if (view.group.status === "unavailable") sentences.push(`לא הצלחתי לטעון את ${view.group.label} כרגע.`);
-    }
-    return sentences.join(" ");
-  },
-};
-
-export const templatesFor = (lang: Lang): Templates => (lang === "he" ? he : en);

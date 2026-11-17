@@ -6,6 +6,7 @@ import type { Decision } from "openai/resources/decisions";
 import { buildInput, buildQuestions, createRouterClient, parseDecision } from "../src/router/classify.ts";
 import { createSlotClient, parseExtractionResponse } from "../src/slots/extract.ts";
 import { createBudget } from "../src/pipeline/budget.ts";
+import { VERSION as ROUTER_VERSION } from "../src/prompts/router.ts";
 import { CallFailed } from "../src/pipeline/ports.ts";
 import type { RouterInput, TraceSink } from "../src/pipeline/ports.ts";
 import type { Query } from "../src/messages/schema.ts";
@@ -13,7 +14,7 @@ import type { Query } from "../src/messages/schema.ts";
 const fixture = <T>(name: string) => JSON.parse(readFileSync(new URL(`./fixtures/model/${name}.json`, import.meta.url), "utf8")) as T;
 const trace: TraceSink = { event() {} };
 
-const query: Query = { category: "laptops", noun: null, attributes: [], priceMin: null, priceMax: null, sort: "relevance", inStock: false, gender: null, categoryStated: false, top: false, within: null, purpose: null, offset: 0 };
+const query: Query = { category: "laptops", noun: null, attributes: [], priceMin: null, priceMax: null, sort: "relevance", inStock: false, gender: null, categoryStated: false, top: false, within: null, purpose: null, exclude: [], offset: 0 };
 const cards = [
   { index: 1, id: 1, title: "Laptop A", category: "laptops", price: 999 },
   { index: 2, id: 2, title: "Rolex", category: "mens-watches", price: 5000 },
@@ -163,16 +164,22 @@ test("fixture: bad JSON and bad schema throw CallFailed parse", () => {
   assert.throws(() => parseExtractionResponse(wrongShape), (e) => e instanceof CallFailed && e.kind === "parse");
 });
 
-test("extraction clamps droppedIntentCount and slices intents to 2", () => {
+test("extraction slices intents to MAX_GROUPS (6) and counts the cut ones as dropped, whatever the model said", () => {
   // The recorded body may start with a reasoning item; the extraction is the message item's text.
   const good = (fixture<{ output: Array<{ content?: Array<{ text: string }> }> }>("response-extraction")).output.find((o) => (o as { type?: string }).type === "message")!.content![0]!.text;
   const intent = (JSON.parse(good) as { intents: unknown[] }).intents[0];
   const body = (text: unknown) => ({ output: [{ type: "message", content: [{ type: "output_text", text: JSON.stringify(text) }] }] });
-  const r = parseExtractionResponse(body({ intents: [intent, intent, intent], droppedIntentCount: -3 }));
+  const r = parseExtractionResponse(body({ intents: Array.from({ length: 8 }, () => intent), droppedIntentCount: -3 }));
   assert.ok(!r.refused);
   if (r.refused) return;
-  assert.equal(r.extraction.intents.length, 2);
-  assert.equal(r.extraction.droppedIntentCount, 0);
+  assert.equal(r.extraction.intents.length, 6);
+  // 8 sent, 6 kept: 2 dropped even though the model reported -3 (and the same for a reported 0)
+  assert.equal(r.extraction.droppedIntentCount, 2);
+  const seven = parseExtractionResponse(body({ intents: Array.from({ length: 7 }, () => intent), droppedIntentCount: 0 }));
+  assert.ok(!seven.refused && seven.extraction.droppedIntentCount === 1);
+  // a count larger than the cut is kept: the model may have dropped items before writing intents
+  const told = parseExtractionResponse(body({ intents: [intent], droppedIntentCount: 2 }));
+  assert.ok(!told.refused && told.extraction.droppedIntentCount === 2);
 });
 
 test("router client passes model gpt-6-luna and maxRetries 0, traces the prompt version", async () => {
@@ -188,7 +195,7 @@ test("router client passes model gpt-6-luna and maxRetries 0, traces the prompt 
   assert.equal(seen[0]?.body.model, "gpt-6-luna");
   assert.equal(seen[0]?.opts.maxRetries, 0);
   assert.ok(seen[0]?.opts.signal instanceof AbortSignal);
-  assert.equal(events.find((e) => e.kind === "router")?.data.prompt, "router.v7");
+  assert.equal(events.find((e) => e.kind === "router")?.data.prompt, ROUTER_VERSION);
 });
 
 test("slot client passes model, reasoning low, strict format, maxRetries 0", async () => {
@@ -208,4 +215,16 @@ test("the real SDK client satisfies the adapter client types", () => {
   const openai = new OpenAI({ apiKey: "test", maxRetries: 0 });
   createRouterClient(openai);
   createSlotClient(openai);
+});
+
+test("router: which search is a choice per search on screen, read as its number; a low-confidence pick is unclear", () => {
+  const three: RouterInput = { ...twoGroups, storedQueries: [...twoGroups.storedQueries, { label: "Eggs", query }] };
+  const q = buildQuestions(three).find((x) => x.name === "target_group") as { choices: Array<{ value: string; description: string }> };
+  assert.deepEqual(q.choices.map((c) => c.value), ["group_1", "group_2", "group_3", "all", "unclear"]);
+  assert.equal(q.choices[2]?.description, "3. Eggs");
+  const pick = (choice: string, confidence: number) => parseDecision(withAnswers(fixture<Decision>("decision-refer"), (a) => (a.name === "target_group" ? { ...a, choice, confidence } : a)), three).targetGroup;
+  assert.equal(pick("group_3", 0.9), 3);
+  assert.equal(pick("all", 0.9), "all");
+  assert.equal(pick("group_3", 0.4), "unclear", "below the measured confidence floor");
+  assert.equal(pick("group_9", 0.9), "unclear", "a search that isn't on screen");
 });

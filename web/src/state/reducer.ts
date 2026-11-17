@@ -21,6 +21,8 @@ export type Sent = {
   text: string;
   conversationId: string | null; // null for the first message of a new chat
   revision: number; // 0 for a new chat
+  /** A click on a card: the product the message asks about, so the server opens it without guessing. */
+  productId?: number;
 };
 
 /** What the client knows about an unanswered last message. */
@@ -30,8 +32,7 @@ export type State = {
   route: Route;
   list: ListState;
   conversation: ConversationState;
-  /** At most one send at a time, app-wide. */
-  /** `preview`: the cards, shown before the reply sentence is written (cards first). */
+  /** At most one send at a time, app-wide. `preview`: the cards, shown before the reply sentence is written (cards first). */
   inflight: (Sent & { stage: Stage; preview?: Preview | null }) | null;
   /** A network failure: the server may never have received this message. */
   notSent: Sent | null;
@@ -126,6 +127,10 @@ export function mergeMessages(existing: Message[], incoming: Message[]): Message
 
 export const hasMessage = (view: ConversationView, messageId: string) => view.messages.some((m) => m.id === messageId);
 
+/** Same cards and sentence: the server's preview is plain JSON, so its text is a fair identity. */
+const samePreview = (a: Preview | null, b: Preview | null) =>
+  a === b || (a !== null && b !== null && a.text === b.text && JSON.stringify(a.groups) === JSON.stringify(b.groups));
+
 const sameRoute = (a: Route, b: Route) => openId(a) === openId(b) && a.view === b.view;
 
 /** The conversation a send belongs to is on screen: its id is open, or it is a new chat and we are home. */
@@ -184,7 +189,8 @@ export function reducer(state: State, action: Action): State {
       if (state.inflight?.messageId !== action.messageId) return state;
       // A preview is kept once seen: a later poll without one must not take the cards away.
       const preview = action.preview ?? state.inflight.preview ?? null;
-      if (state.inflight.stage === action.stage && preview === (state.inflight.preview ?? null)) return state;
+      // Each poll parses a new object; an unchanged preview keeps the old one, so nothing re-renders.
+      if (state.inflight.stage === action.stage && samePreview(preview, state.inflight.preview ?? null)) return state;
       return { ...state, inflight: { ...state.inflight, stage: action.stage, preview } };
     }
 

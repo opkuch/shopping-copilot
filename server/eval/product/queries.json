@@ -2,7 +2,7 @@
   {
     "id": "c01",
     "author": "claude",
-    "text": "אני מחפש מחשב נייד עד 1500 דולר",
+    "text": "looking for a laptop under $1500",
     "expect": "results",
     "relevant": [
       80,
@@ -12,12 +12,12 @@
     "forbidden": {
       "maxPrice": 1500
     },
-    "notes": "price bound in Hebrew"
+    "notes": "price bound"
   },
   {
     "id": "c02",
     "author": "claude",
-    "text": "בושם לגבר",
+    "text": "perfume for men",
     "expect": "results",
     "relevant": [
       6
@@ -28,7 +28,7 @@
   {
     "id": "c03",
     "author": "claude",
-    "text": "שעון יד לאישה עד 200",
+    "text": "women's watch under 200",
     "expect": "results",
     "relevant": [
       194
@@ -43,7 +43,7 @@
   {
     "id": "c04",
     "author": "claude",
-    "text": "נעלי ספורט",
+    "text": "sports shoes",
     "expect": "results",
     "relevant": [
       88,
@@ -57,7 +57,7 @@
   {
     "id": "c05",
     "author": "claude",
-    "text": "משקפי שמש זולים",
+    "text": "cheap sunglasses",
     "expect": "results",
     "relevant": [
       157,
@@ -71,7 +71,7 @@
   {
     "id": "c06",
     "author": "claude",
-    "text": "אוזניות אלחוטיות",
+    "text": "wireless headphones",
     "expect": "results",
     "relevant": [
       100,
@@ -84,7 +84,7 @@
   {
     "id": "c07",
     "author": "claude",
-    "text": "כדור כדורסל",
+    "text": "a basketball",
     "expect": "results",
     "relevant": [
       140
@@ -95,7 +95,7 @@
   {
     "id": "c08",
     "author": "claude",
-    "text": "משהו לבית",
+    "text": "something for the home",
     "expect": "results",
     "relevant": [
       43,
@@ -117,7 +117,7 @@
   {
     "id": "c09",
     "author": "claude",
-    "text": "רהיטים לסלון",
+    "text": "living room furniture",
     "expect": "results",
     "relevant": [
       12,
@@ -135,7 +135,7 @@
   {
     "id": "c10",
     "author": "claude",
-    "text": "טלפון סמסונג",
+    "text": "Samsung phone",
     "expect": "results",
     "relevant": [
       131,
@@ -147,7 +147,7 @@
   {
     "id": "c11",
     "author": "claude",
-    "text": "מוצרי אפל",
+    "text": "Apple products",
     "expect": "results",
     "relevant": [
       78,
@@ -175,7 +175,7 @@
   {
     "id": "c12",
     "author": "claude",
-    "text": "תיק יד שחור מעור",
+    "text": "black leather handbag",
     "expect": "results",
     "relevant": [
       176,
@@ -186,7 +186,7 @@
   {
     "id": "c13",
     "author": "claude",
-    "text": "קרם לחות לפנים",
+    "text": "face moisturizer",
     "expect": "results",
     "relevant": [
       120
@@ -196,7 +196,7 @@
   {
     "id": "c14",
     "author": "claude",
-    "text": "שמלה לבנה",
+    "text": "a white dress",
     "expect": "results",
     "relevant": [
       162,
@@ -213,7 +213,7 @@
   {
     "id": "c15",
     "author": "claude",
-    "text": "עגילים",
+    "text": "earrings",
     "expect": "results",
     "relevant": [
       182,
@@ -225,7 +225,7 @@
   {
     "id": "c16",
     "author": "claude",
-    "text": "שרשרת זהב",
+    "text": "gold necklace",
     "expect": "miss",
     "relevant": [],
     "forbidden": {
@@ -238,7 +238,7 @@
   {
     "id": "c17",
     "author": "claude",
-    "text": "מחבת לבישול",
+    "text": "a pan for cooking",
     "expect": "results",
     "relevant": [
       68,
@@ -249,7 +249,7 @@
   {
     "id": "c18",
     "author": "claude",
-    "text": "סכין למטבח",
+    "text": "kitchen knife",
     "expect": "results",
     "relevant": [
       64
@@ -259,7 +259,7 @@
   {
     "id": "c19",
     "author": "claude",
-    "text": "קפה",
+    "text": "coffee",
     "expect": "results",
     "relevant": [
       34
@@ -269,7 +269,7 @@
   {
     "id": "c20",
     "author": "claude",
-    "text": "אוכל לכלב",
+    "text": "dog food",
     "expect": "results",
     "relevant": [
       22
@@ -279,7 +279,7 @@
   {
     "id": "c21",
     "author": "claude",
-    "text": "רכב משפחתי",
+    "text": "a family car",
     "expect": "results",
     "relevant": [
       171,
@@ -291,7 +291,7 @@
   {
     "id": "c22",
     "author": "claude",
-    "text": "טאבלט של סמסונג עד 400",
+    "text": "Samsung tablet under 400",
     "expect": "results",
     "relevant": [
       161
@@ -303,7 +303,7 @@
   {
     "id": "c23",
     "author": "claude",
-    "text": "מטען לאייפון",
+    "text": "a charger for my iPhone",
     "expect": "results",
     "relevant": [
       104,
@@ -315,7 +315,7 @@
   {
     "id": "c24",
     "author": "claude",
-    "text": "שעון חכם",
+    "text": "smartwatch",
     "expect": "results",
     "relevant": [
       106
@@ -325,7 +325,7 @@
   {
     "id": "c25",
     "author": "claude",
-    "text": "חולצה משובצת לגבר",
+    "text": "checkered shirt for men",
     "expect": "results",
     "relevant": [
       83,
@@ -497,7 +497,7 @@
   {
     "id": "c40",
     "author": "claude",
-    "text": "תיק גב לבית ספר",
+    "text": "a backpack for school",
     "expect": "results",
     "relevant": [
       175
@@ -507,7 +507,7 @@
   {
     "id": "a01",
     "author": "agent",
-    "text": "אייפון זול בבקשה",
+    "text": "a cheap iPhone please",
     "expect": "results",
     "relevant": [
       121,
@@ -525,7 +525,7 @@
   {
     "id": "a02",
     "author": "agent",
-    "text": "airpods יש?",
+    "text": "got airpods?",
     "expect": "results",
     "relevant": [
       100,
@@ -537,7 +537,7 @@
   {
     "id": "a03",
     "author": "agent",
-    "text": "נעלי נייקי לגבר",
+    "text": "men's Nike shoes",
     "expect": "results",
     "relevant": [
       88,
@@ -553,7 +553,7 @@
   {
     "id": "a04",
     "author": "agent",
-    "text": "שעון רולקס לבעלי",
+    "text": "a Rolex for my husband",
     "expect": "results",
     "relevant": [
       95,
@@ -571,7 +571,7 @@
   {
     "id": "a05",
     "author": "agent",
-    "text": "תביא לי משהו של דיור",
+    "text": "show me something from Dior",
     "expect": "results",
     "relevant": [
       8
@@ -582,7 +582,7 @@
   {
     "id": "a06",
     "author": "agent",
-    "text": "תיק של פראדה לאשתי",
+    "text": "a Prada bag for my wife",
     "expect": "results",
     "relevant": [
       174
@@ -593,7 +593,7 @@
   {
     "id": "a07",
     "author": "agent",
-    "text": "עגילים לאשתי",
+    "text": "earrings for my wife",
     "expect": "results",
     "relevant": [
       182,
@@ -613,7 +613,7 @@
   {
     "id": "a08",
     "author": "agent",
-    "text": "הסמסונג הכי זול שיש לכם",
+    "text": "what's the cheapest Samsung you have",
     "expect": "results",
     "relevant": [
       131,
@@ -645,7 +645,7 @@
   {
     "id": "a10",
     "author": "agent",
-    "text": "מקרר",
+    "text": "fridge",
     "expect": "miss",
     "relevant": [],
     "forbidden": {
@@ -658,7 +658,7 @@
   {
     "id": "a11",
     "author": "agent",
-    "text": "פלייסטיישן",
+    "text": "playstation",
     "expect": "miss",
     "relevant": [],
     "forbidden": {
@@ -674,7 +674,7 @@
   {
     "id": "a12",
     "author": "agent",
-    "text": "נעלי עקב לגבר",
+    "text": "high heels for men",
     "expect": "miss",
     "relevant": [],
     "forbidden": {
@@ -700,7 +700,7 @@
   {
     "id": "a14",
     "author": "agent",
-    "text": "שמלה לילדה בת 6",
+    "text": "a dress for a 6 year old girl",
     "expect": "results",
     "relevant": [
       163
@@ -715,7 +715,7 @@
   {
     "id": "a15",
     "author": "agent",
-    "text": "שמלת ערב שחורה",
+    "text": "black evening dress",
     "expect": "results",
     "relevant": [
       177
@@ -740,7 +740,7 @@
   {
     "id": "a17",
     "author": "agent",
-    "text": "כדורגל",
+    "text": "soccer ball",
     "expect": "results",
     "relevant": [
       147
@@ -751,7 +751,7 @@
   {
     "id": "a18",
     "author": "agent",
-    "text": "מחבת לטיגון",
+    "text": "a frying pan",
     "expect": "results",
     "relevant": [
       68,
@@ -775,7 +775,7 @@
   {
     "id": "a20",
     "author": "agent",
-    "text": "מיטה זוגית",
+    "text": "a double bed",
     "expect": "results",
     "relevant": [
       11
@@ -811,7 +811,7 @@
   {
     "id": "a23",
     "author": "agent",
-    "text": "טאבלט סמסונג",
+    "text": "Samsung tablet",
     "expect": "results",
     "relevant": [
       160,
@@ -823,7 +823,7 @@
   {
     "id": "a24",
     "author": "agent",
-    "text": "רמקול חכם לסלון",
+    "text": "smart speaker for the living room",
     "expect": "results",
     "relevant": [
       99,
@@ -835,7 +835,7 @@
   {
     "id": "a25",
     "author": "agent",
-    "text": "סוללה ניידת לטלפון",
+    "text": "portable battery for my phone",
     "expect": "results",
     "relevant": [
       105
@@ -857,7 +857,7 @@
   {
     "id": "a27",
     "author": "agent",
-    "text": "לק אדום",
+    "text": "red nail polish",
     "expect": "results",
     "relevant": [
       5
@@ -868,7 +868,7 @@
   {
     "id": "a28",
     "author": "agent",
-    "text": "אני רוצה סמסונג שיש במלאי",
+    "text": "I want a Samsung that's in stock",
     "expect": "results",
     "relevant": [
       131,
@@ -882,7 +882,7 @@
   {
     "id": "a29",
     "author": "agent",
-    "text": "תביא לי טלפון עד 1000 שקל",
+    "text": "get me a phone under $300",
     "expect": "results",
     "relevant": [
       128,
@@ -896,23 +896,23 @@
       129
     ],
     "forbidden": {},
-    "notes": "shekel budget: no maxPrice; roughly up to $300; reply should say prices are in dollars"
+    "notes": "dollar budget: phones at or under $300; no maxPrice set (was ₪1000)"
   },
   {
     "id": "a30",
     "author": "agent",
-    "text": "שעון לגבר בשביל 300 שקל",
+    "text": "men's watch for about $100",
     "expect": "results",
     "relevant": [
       93
     ],
     "forbidden": {},
-    "notes": "shekel budget (about $85-90): only the Brown Leather Belt Watch is near; reply should explain dollars"
+    "notes": "budget about $100: only the Brown Leather Belt Watch (89.99) fits (was ₪300)"
   },
   {
     "id": "a31",
     "author": "agent",
-    "text": "היי מה נשמע",
+    "text": "hey what's up",
     "expect": "chat",
     "relevant": [],
     "forbidden": {},
@@ -921,7 +921,7 @@
   {
     "id": "a32",
     "author": "agent",
-    "text": "תזמין לי טיסה לאילת",
+    "text": "book me a flight to Eilat",
     "expect": "service",
     "relevant": [],
     "forbidden": {},
@@ -930,7 +930,7 @@
   {
     "id": "a33",
     "author": "agent",
-    "text": "אפשר משלוח עד הבית מחר בבוקר?",
+    "text": "can I get home delivery tomorrow morning?",
     "expect": "service",
     "relevant": [],
     "forbidden": {},
@@ -948,7 +948,7 @@
   {
     "id": "a35",
     "author": "agent",
-    "text": "מה מזג האוויר מחר בחיפה",
+    "text": "what's the weather in Haifa tomorrow",
     "expect": "off_topic",
     "relevant": [],
     "forbidden": {},
@@ -957,7 +957,7 @@
   {
     "id": "a36",
     "author": "agent",
-    "text": "אייפון ואוזניות עד 200 דולר",
+    "text": "an iPhone and headphones under $200",
     "expect": "results",
     "relevant": [
       121,
@@ -972,7 +972,7 @@
   {
     "id": "a37",
     "author": "agent",
-    "text": "משקפי שמש ותיק יד לאישה",
+    "text": "sunglasses and a women's handbag",
     "expect": "results",
     "relevant": [
       154,
@@ -1007,7 +1007,7 @@
   {
     "id": "a39",
     "author": "agent",
-    "text": "בושם הכי זול",
+    "text": "cheapest perfume",
     "expect": "results",
     "relevant": [
       6,
@@ -1023,7 +1023,7 @@
   {
     "id": "a40",
     "author": "agent",
-    "text": "נעליים אדומות",
+    "text": "red shoes",
     "expect": "results",
     "relevant": [
       189,
@@ -1037,7 +1037,7 @@
   {
     "id": "x01",
     "author": "agent-dev",
-    "text": "יש לכם בלנדר? משהו לשייקים",
+    "text": "got a blender? something for smoothies",
     "expect": "results",
     "relevant": [
       51,
@@ -1049,7 +1049,7 @@
   {
     "id": "x02",
     "author": "agent-dev",
-    "text": "אחי אני מחפש אופנוע עד 4000 דולר",
+    "text": "dude I'm looking for a motorcycle under $4000",
     "expect": "results",
     "relevant": [
       113,
@@ -1063,7 +1063,7 @@
   {
     "id": "x03",
     "author": "agent-dev",
-    "text": "מנורה לשולחן ליד המיטה",
+    "text": "a lamp for my bedside table",
     "expect": "results",
     "relevant": [
       47
@@ -1074,7 +1074,7 @@
   {
     "id": "x04",
     "author": "agent-dev",
-    "text": "מיטה זוגית חדשה",
+    "text": "a new double bed",
     "expect": "results",
     "relevant": [
       11
@@ -1085,7 +1085,7 @@
   {
     "id": "x05",
     "author": "agent-dev",
-    "text": "ויוו עד 300 דולר, מה יש?",
+    "text": "vivo under $300, what do you have?",
     "expect": "results",
     "relevant": [
       134,
@@ -1097,12 +1097,12 @@
         "groceries"
       ]
     },
-    "notes": "Vivo transliteration plus price (from the first holdout, which was seen; now development data)"
+    "notes": "Vivo by brand name plus price (from the first holdout, which was seen; now development data)"
   },
   {
     "id": "x06",
     "author": "agent-dev",
-    "text": "נעלי עקב לאירוע",
+    "text": "heels for an event",
     "expect": "results",
     "relevant": [
       186
@@ -1117,7 +1117,7 @@
   {
     "id": "x07",
     "author": "agent-dev",
-    "text": "אוזניות גדולות כאלה שמכסות את כל האוזן",
+    "text": "big headphones, the kind that cover your whole ear",
     "expect": "results",
     "relevant": [
       101
@@ -1128,7 +1128,7 @@
   {
     "id": "x08",
     "author": "agent-dev",
-    "text": "איזה תיק לאישה הכי מדורג אצלכם",
+    "text": "which women's bag is your top rated",
     "expect": "results",
     "relevant": [
       173,
@@ -1149,7 +1149,7 @@
   {
     "id": "x09",
     "author": "agent-dev",
-    "text": "רמקול חכם לסלון",
+    "text": "smart speaker for the living room",
     "expect": "results",
     "relevant": [
       99,
@@ -1161,7 +1161,7 @@
   {
     "id": "x10",
     "author": "agent-dev",
-    "text": "שמלת ערב שחורה ארוכה",
+    "text": "long black evening dress",
     "expect": "results",
     "relevant": [
       177
@@ -1172,16 +1172,16 @@
   {
     "id": "x11",
     "author": "agent-dev",
-    "text": "יש מכונת כביסה? בא לי משהו עד 2000 שקל",
+    "text": "got a washing machine? looking for something under $500",
     "expect": "miss",
     "relevant": [],
     "forbidden": {},
-    "notes": "no appliances of this kind (from the first holdout, which was seen; now development data)"
+    "notes": "no appliances of this kind (from the first holdout, which was seen; now development data) (was ₪2000)"
   },
   {
     "id": "x12",
     "author": "agent-dev",
-    "text": "מזרן אורתופדי",
+    "text": "orthopedic mattress",
     "expect": "miss",
     "relevant": [],
     "forbidden": {},
@@ -1190,16 +1190,23 @@
   {
     "id": "x13",
     "author": "agent-dev",
-    "text": "צריכה משהו לחתונה של חברה",
-    "expect": "clarify",
+    "text": "need something for a friend's wedding",
+    "expect": "results",
     "relevant": [],
-    "forbidden": {},
-    "notes": "too open: outfit, bag, perfume, jewellery (from the first holdout, which was seen; now development data)"
+    "forbidden": {
+      "categories": [
+        "groceries",
+        "vehicle",
+        "motorcycle",
+        "kitchen-accessories"
+      ]
+    },
+    "notes": "relabelled 2026-11-17: an occasion is a gift: ideas at once"
   },
   {
     "id": "x15",
     "author": "agent-dev",
-    "text": "ההזמנה שלי לא הגיעה כבר שבועיים, איפה היא??",
+    "text": "my order still hasn't arrived after two weeks, where is it??",
     "expect": "service",
     "relevant": [],
     "forbidden": {},

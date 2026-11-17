@@ -1,4 +1,4 @@
-import { useT } from "../i18n.ts";
+import { t } from "../strings.ts";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
 import { MAX_TEXT } from "../api/types.ts";
@@ -27,7 +27,6 @@ type Props = {
 };
 
 export function Composer({ draftKey, canSend, autoFocus = false, onSend }: Props) {
-  const t = useT();
   const [text, setText] = useState(() => getDraft(draftKey));
   const area = useRef<HTMLTextAreaElement>(null);
 
@@ -94,7 +93,7 @@ export function Composer({ draftKey, canSend, autoFocus = false, onSend }: Props
       <textarea
         id="composer-input"
         ref={area}
-        dir="auto"
+       
         rows={1}
         value={text}
         placeholder={t.placeholder}

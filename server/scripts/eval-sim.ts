@@ -18,11 +18,11 @@ import { join } from "node:path";
 import OpenAI from "openai";
 import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod";
+import { MODEL } from "../src/llm/openai.ts";
 
 const DIR = new URL("../eval/sim/", import.meta.url);
-const MODEL = "gpt-6-luna";
 
-type Goal = { id: string; lang: "he" | "en"; goal: string; style: string; accept: number[]; acceptAll?: number[][]; impossible?: boolean; hard?: boolean; maxTurns?: number };
+type Goal = { id: string; goal: string; style: string; accept: number[]; acceptAll?: number[][]; impossible?: boolean; hard?: boolean; maxTurns?: number };
 type Card = { id: number; title: string; price: number; category: string; inStock: boolean; rating: number | null };
 type Screen = { reply: string; cards: Card[]; suggestions: string[]; detail: Card | null; ms: number };
 type Session = { send(text: string): Promise<Screen> };
@@ -38,7 +38,7 @@ type Move = z.infer<typeof Move>;
 const SIM_INSTRUCTIONS = (g: Goal) => `You play a real shopper chatting with an online shop's assistant. Stay in character.
 Your goal (secret, the assistant does not know it): ${g.goal}
 How you talk: ${g.style}
-Write in ${g.lang === "he" ? "Hebrew" : "English"}, the way people type in a chat: short, informal, one thing at a time. Never mention that you are simulated or that you have a "goal".
+Write in English, the way people type in a chat: short, informal, one thing at a time. Never mention that you are simulated or that you have a "goal".
 Each turn you see the assistant's last reply, the product cards it showed (id, title, price, rating, in stock), any product detail, and tappable suggestions. React to what you actually see:
 - If the assistant asks a question, answer it (briefly).
 - If the cards are wrong or off, say so the way a person would, and steer.
@@ -172,7 +172,7 @@ function baselineTarget(openai: OpenAI): Target {
   const SYSTEM = `You are the shopping assistant of a small online shop. You only sell what is in this catalog (id|title|category|brand|price USD|rating|stock|tags):
 ${list}
 
-Reply in the user's language, briefly. Show up to 4 matching products by id (best first) when the user is shopping; the user sees them as cards with title and price, so don't repeat every price. Respect price limits (1 USD = 3.7 ILS), stock, and gender. If the shop doesn't sell what they want, say so plainly and don't show unrelated products. Ask one short question only when the request is too open to pick products. Set detailId when the user asks about one specific product. You can't book, deliver, or track orders.`;
+Reply in English, briefly. Show up to 4 matching products by id (best first) when the user is shopping; the user sees them as cards with title and price, so don't repeat every price. Respect price limits, stock, and gender. If the shop doesn't sell what they want, say so plainly and don't show unrelated products. Ask one short question only when the request is too open to pick products. Set detailId when the user asks about one specific product. You can't book, deliver, or track orders.`;
   const byId = new Map(products.map((p) => [p.id, p]));
   const card = (p: P): Card => ({ id: p.id, title: p.title, price: p.price, category: p.category, inStock: p.stock > 0, rating: p.rating });
   return {

@@ -1,9 +1,6 @@
-// What every action of a turn shares: the dependencies, the trace, the reply language, and the three
-// ways a turn ends (commit a reply, fail, or answer with a fixed template). runTurn.ts builds it.
-import type { ConversationMemory, ExtractedIntent, Group, Payload, Preview, Stage } from "../messages/schema.ts";
-import type { Templates } from "../reply/templates.ts";
-import type { Lang } from "../reply/language.ts";
-import { starterSuggestions } from "./purpose.ts";
+// What every action of a turn shares: the dependencies, the trace, and the three ways a turn ends (commit a
+// reply, fail, or answer with a fixed template). runTurn.ts builds it.
+import type { ConversationMemory, ExtractedIntent, Group, Payload, Preview, Query, Stage, Suggestion } from "../messages/schema.ts";
 import { CallFailed } from "./ports.ts";
 import type {
   CallCtx, CatalogApi, CategoryInfo, CategoryNames, ReplyWriter, Retriever, RouterClient, SlotClient, Store, TraceSink, TurnOutcome,
@@ -15,7 +12,7 @@ export type TurnDeps = {
   slots: SlotClient;
   retriever: Retriever;
   categories: CategoryNames;
-  /** Only for the product detail fetch; list retrieval goes through `retriever`. */
+  /** Only for product details; list retrieval goes through `retriever`. */
   catalog: CatalogApi;
   writer: ReplyWriter;
   now?: () => number;
@@ -29,9 +26,6 @@ export type Turn = {
   /** The turn's facts for the trace (GET /api/messages/:id/trace). */
   summary: Record<string, unknown>;
   text: string;
-  /** The reply's language follows this message, not the conversation: a user may switch mid-chat. */
-  language: Lang;
-  L: Templates;
   setStage(stage: Stage): void;
   setPreview(preview: Preview): void;
   /** Cancels extraction once the turn knows it will not need it. */
@@ -41,7 +35,8 @@ export type Turn = {
   memory: ConversationMemory | null;
   commit(text: string, payload: Payload | null): TurnOutcome;
   failed(reason: string, err?: unknown): TurnOutcome;
-  template(reason: string, text: string): TurnOutcome;
+  /** A fixed reply with no model call; chips are the next steps to offer under it. */
+  template(reason: string, text: string, chips?: Suggestion[]): TurnOutcome;
   /** Category display names. A load failure means "no names", never a failed turn. */
   loadNames(): Promise<CategoryInfo[] | null>;
 };
@@ -63,15 +58,18 @@ export const describe = (err: unknown) =>
 // An intent that says nothing: used when extraction found no intent, and to re-run a refine unchanged.
 export const EMPTY_INTENT: ExtractedIntent = {
   category: null, noun: null, attributes: null, priceMin: null, priceMax: null,
-  currency: null, relativePrice: null, sort: null, inStock: null, clear: [], gift: null, theme: null,
+  currency: null, relativePrice: null, sort: null, inStock: null, clear: [], exclude: null, gift: null,
 };
 
 /** An intent that changes nothing: every slot null and nothing cleared. */
 export function isEmptyIntent(i: ExtractedIntent): boolean {
-  return i.category === null && i.noun === null && (i.attributes === null || i.attributes.length === 0) &&
+  return i.category === null && i.noun === null && (i.attributes ?? []).length === 0 && (i.exclude ?? []).length === 0 &&
     i.priceMin === null && i.priceMax === null && i.relativePrice === null && i.sort === null &&
     i.inStock === null && i.clear.length === 0;
 }
+
+/** Cards per group: four, and three (the best match and two alternatives) once a list puts three or more groups on screen. */
+export const cardsPerGroup = (groups: number): number => (groups >= 3 ? 3 : 4);
 
 /** The group without the drawing marks of the message it was stored in. */
 export function withoutMarks(group: Group): Group {
@@ -84,16 +82,23 @@ export function asRepeat(group: Group): Group {
   return { ...withoutMarks(group), repeat: true };
 }
 
+/** The search a follow-up changes: what the user asked for, including words a relaxed match left out. */
+export function requestedQuery(group: Group): Query {
+  const dropped = group.dropped ?? [];
+  if (dropped.length === 0) return group.query;
+  return { ...group.query, attributes: [...new Set([...group.query.attributes, ...dropped])] };
+}
+
 /** The end of a turn: store the reply (or record why not) and shape the outcome for the route. */
 export function createEndings(args: {
   store: Store;
   conversationId: string;
   revision: number;
   userMessage: { id: string; text: string; createdAt: string };
-  language: Lang;
   summary: Record<string, unknown>;
   snapshot(outcome: string): unknown;
   attempt(): number;
+  memory(): ConversationMemory | null;
   extractAbort: AbortController;
 }): Pick<Turn, "commit" | "failed" | "template"> {
   const { store, conversationId, revision, userMessage, summary, snapshot } = args;
@@ -131,13 +136,14 @@ export function createEndings(args: {
     };
   };
 
-  // Template replies end the turn without a model call; extraction is no longer needed.
-  const template = (reason: string, text: string): TurnOutcome => {
+  // Template replies end the turn without a model call; extraction is no longer needed. The memory is
+  // carried over, so "thanks" between two requests doesn't forget that this is a gift for her.
+  const template = (reason: string, text: string, chips: Suggestion[] = []): TurnOutcome => {
     args.extractAbort.abort();
     summary.template = reason;
-    // A reply that cannot help still offers a next step: example searches as chips.
-    const starters = reason === "service" || reason === "off_topic";
-    return commit(text, starters ? { groups: [], detail: null, suggestions: starterSuggestions(args.language) } : null);
+    const memory = args.memory();
+    if (chips.length === 0 && memory === null) return commit(text, null);
+    return commit(text, { groups: [], detail: null, ...(chips.length > 0 ? { suggestions: chips } : {}), ...(memory ? { memory } : {}) });
   };
 
   return { commit, failed, template };

@@ -1,6 +1,6 @@
 import type { RawProduct } from "../pipeline/ports.ts";
-import type { ProductCard, Sort } from "../messages/schema.ts";
-import { brandKey, matchesAll, matchesNoun, productGender, titleHits } from "./match.ts";
+import type { Gender, ProductCard, Sort } from "../messages/schema.ts";
+import { brandKey, matchedWords, matchesAll, matchesNoun, productGender, titleHits } from "./match.ts";
 
 export type FilterSpec = {
   /** Words that must all appear in title, description, or tags; a word that is a brand must be the brand. */
@@ -11,7 +11,9 @@ export type FilterSpec = {
   /** Products in categories with this prefix are out ("womens-" for a men's request). */
   excludeCategoryPrefix?: string | null;
   /** Products made for the other gender are out, in any category (a women's perfume for "perfume for men"). */
-  gender?: import("../messages/schema.ts").Gender | null;
+  gender?: Gender | null;
+  /** Brands or words ruled out ("not Chanel"): a product with any of them, as its brand or in its text, is out. */
+  exclude?: string[];
   priceMin: number | null;
   priceMax: number | null;
   inStock: boolean;
@@ -32,7 +34,8 @@ export function applyFilters(products: RawProduct[], q: FilterSpec): RawProduct[
       !(q.gender && productGender(p) !== null && productGender(p) !== q.gender) &&
       matchesNoun(p, q.noun ?? null, q.nounCategories ?? []) &&
       brandWords.every((w) => brandKey(p) === w) &&
-      matchesAll(p, textWords),
+      matchesAll(p, textWords) &&
+      !(q.exclude ?? []).some((w) => brandKey(p) === w || matchedWords(p, [w]).length > 0),
   );
 }
 
@@ -106,6 +109,6 @@ export function toCard(raw: RawProduct): ProductCard {
   };
 }
 
-export function cap4<T>(items: T[]): T[] {
-  return items.slice(0, 4);
+export function firstPage<T>(items: T[], size = 4): T[] {
+  return items.slice(0, size);
 }

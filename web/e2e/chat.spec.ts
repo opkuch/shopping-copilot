@@ -200,14 +200,13 @@ test("8. reloading mid-turn resumes the same turn: one user message, one reply",
   await expect(page.getByText("No reply yet.")).toHaveCount(0);
 });
 
-// axe on the states a shopper sees: the home page, results with chips and filters, a product detail; in English
-// and in a Hebrew chat (Hebrew interface, right to left).
+// axe on the states a shopper sees: the home page, results with chips and filters, a product detail.
 async function axe(page: Page, where: string) {
   const { violations } = await new AxeBuilder({ page }).analyze();
   expect(violations.map((v) => `${where}: ${v.id} (${v.nodes.length}) ${v.help}`)).toEqual([]);
 }
 
-test("12. accessibility: no axe violations in English and in a Hebrew chat", async ({ page }) => {
+test("12. accessibility: no axe violations on the home page, results and a product detail", async ({ page }) => {
   // Fresh cards fade in; axe would measure their colors mid-fade. Reduced motion shows them settled.
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
@@ -218,22 +217,19 @@ test("12. accessibility: no axe violations in English and in a Hebrew chat", asy
   await send(page, "tell me about the first one");
   await expect(log(page).locator("article.product-detail")).toBeVisible();
   await axe(page, "detail");
+});
 
-  await page.getByRole("link", { name: "New chat" }).click();
-  // in a Hebrew chat the composer is labelled in Hebrew; the id stays the same
-  const box = page.locator("#composer-input");
-  await box.fill("משקפי שמש זולים");
-  await box.press("Enter");
-  await page.waitForURL(/\/c\/[^/]+$/);
-  await expect(cards(page).first()).toBeVisible();
-  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-  await expect(page.locator("html")).toHaveAttribute("lang", "he");
-  await expect(page.getByRole("button", { name: "שליחה" })).toBeVisible();
-  await expect(page.locator(".group-header h2").first()).toHaveText("משקפי שמש");
-  await axe(page, "hebrew results");
-  await expect(page.getByRole("textbox", { name: "הודעה" })).toBeVisible();
-  await box.fill("ספר לי על הראשון");
-  await box.press("Enter");
-  await expect(page.getByRole("log", { name: "שיחה" }).locator("article.product-detail")).toBeVisible();
-  await axe(page, "hebrew detail");
+test("13. a card from an older reply still opens: the click names the product, so no model has to guess", async ({ page }) => {
+  await newChat(page, "cheap sunglasses");
+  await expect(cards(page)).toHaveCount(4);
+  await send(page, "a laptop and a fragrance under 50");
+  await expect(log(page).locator(".message.assistant")).toHaveCount(2);
+  // the sunglasses are no longer the working search: unnumbered, but still a button
+  const older = log(page).locator(".message.assistant").first().locator("article.product-card").nth(1);
+  const title = (await older.getByRole("heading").textContent()) ?? "";
+  await expect(older.locator(".product-number")).toHaveCount(0);
+  await older.getByRole("button").click();
+  const detail = log(page).locator("article.product-detail");
+  await expect(detail).toBeVisible();
+  await expect(detail.getByRole("heading")).toHaveText(title);
 });

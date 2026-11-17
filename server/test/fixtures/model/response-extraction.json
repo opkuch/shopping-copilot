@@ -31,7 +31,7 @@
           "type": "output_text",
           "annotations": [],
           "logprobs": [],
-          "text": "{\"intents\":[{\"category\":\"laptops\",\"noun\":\"laptop\",\"attributes\":[\"red\"],\"priceMin\":null,\"priceMax\":1000,\"currency\":\"USD\",\"relativePrice\":null,\"anchor\":null,\"sort\":null,\"inStock\":null,\"clear\":[],\"gift\":null,\"theme\":null,\"exclude\":null}],\"droppedIntentCount\":0}"
+          "text": "{\"intents\":[{\"category\":\"laptops\",\"noun\":\"laptop\",\"attributes\":[\"red\"],\"priceMin\":null,\"priceMax\":1000,\"currency\":\"USD\",\"relativePrice\":null,\"sort\":null,\"inStock\":null,\"clear\":[],\"gift\":null,\"exclude\":null}],\"droppedIntentCount\":0}"
         }
       ],
       "phase": "final_answer",
@@ -139,7 +139,6 @@
                       "type": "string",
                       "enum": [
                         "USD",
-                        "ILS",
                         "other"
                       ]
                     },
@@ -161,12 +160,6 @@
                     {
                       "type": "null"
                     }
-                  ]
-                },
-                "anchor": {
-                  "type": [
-                    "string",
-                    "null"
                   ]
                 },
                 "sort": {
@@ -211,12 +204,6 @@
                     "null"
                   ]
                 },
-                "theme": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
                 "exclude": {
                   "type": [
                     "boolean",
@@ -232,12 +219,10 @@
                 "priceMax",
                 "currency",
                 "relativePrice",
-                "anchor",
                 "sort",
                 "inStock",
                 "clear",
                 "gift",
-                "theme",
                 "exclude"
               ],
               "additionalProperties": false
@@ -300,5 +285,5 @@
   },
   "user": null,
   "metadata": {},
-  "output_text": "{\"intents\":[{\"category\":\"laptops\",\"noun\":\"laptop\",\"attributes\":[\"red\"],\"priceMin\":null,\"priceMax\":1000,\"currency\":\"USD\",\"relativePrice\":null,\"anchor\":null,\"sort\":null,\"inStock\":null,\"clear\":[],\"gift\":null,\"theme\":null,\"exclude\":null}],\"droppedIntentCount\":0}"
+  "output_text": "{\"intents\":[{\"category\":\"laptops\",\"noun\":\"laptop\",\"attributes\":[\"red\"],\"priceMin\":null,\"priceMax\":1000,\"currency\":\"USD\",\"relativePrice\":null,\"sort\":null,\"inStock\":null,\"clear\":[],\"gift\":null,\"exclude\":null}],\"droppedIntentCount\":0}"
 }

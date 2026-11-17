@@ -90,6 +90,15 @@ describe("sending", () => {
     expect(s.inflight?.preview).toBe(preview);
   });
 
+  test("a poll with the same preview (a new object, same content) changes nothing, so nothing re-renders", () => {
+    let s = reducer(ready(), { type: "send_started", sent });
+    s = reducer(s, { type: "stage", messageId: "m1", stage: "writing", preview: { groups: [group()], text: "Here are 4." } });
+    const again = reducer(s, { type: "stage", messageId: "m1", stage: "writing", preview: { groups: [group()], text: "Here are 4." } });
+    expect(again).toBe(s);
+    const changed = reducer(s, { type: "stage", messageId: "m1", stage: "writing", preview: { groups: [group()], text: "Here are 5." } });
+    expect(changed).not.toBe(s);
+  });
+
   test("a 200 merges both messages and takes the new revision", () => {
     let s = reducer(ready(), { type: "send_started", sent });
     s = reducer(s, { type: "turn_completed", sent, response: response() });

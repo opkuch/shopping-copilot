@@ -1,4 +1,4 @@
-import { useT } from "../i18n.ts";
+import { t } from "../strings.ts";
 import type { Stage } from "../api/types.ts";
 
 /**
@@ -6,7 +6,6 @@ import type { Stage } from "../api/types.ts";
  * chips will be, so the finished reply swaps one row for the other instead of growing.
  */
 export function PendingRow({ stage }: { stage: Stage }) {
-  const t = useT();
   return (
     <div className="pending-row">
       <span className="dots" aria-hidden="true">
@@ -15,7 +14,8 @@ export function PendingRow({ stage }: { stage: Stage }) {
         <span />
       </span>
       <span role="status" className="pending-label">
-        {t.stage[stage]}
+        {/* Keyed by the stage, so each new label fades in rather than the words swapping in place. */}
+        <span key={stage} className="pending-text">{t.stage[stage]}</span>
       </span>
     </div>
   );
@@ -27,7 +27,7 @@ export function RetryNote({ text, onRetry, disabled }: { text: string; onRetry()
     <div className="retry-note">
       <span>{text}</span>
       <button type="button" className="button small" onClick={onRetry} disabled={disabled}>
-        {useT().retry}
+        {t.retry}
       </button>
     </div>
   );

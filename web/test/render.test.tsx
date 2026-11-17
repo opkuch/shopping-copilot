@@ -2,14 +2,14 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import type { AssistantMessage as Assistant, ConversationView } from "../src/api/types.ts";
 import { Transcript } from "../src/components/Conversation.tsx";
-import { Home, STARTER_PROMPTS } from "../src/components/Home.tsx";
+import { Home } from "../src/components/Home.tsx";
 import { AssistantMessage } from "../src/components/Messages.tsx";
-import { STRINGS } from "../src/i18n.ts";
+import { t } from "../src/strings.ts";
 import { assistant, card, conversation, detail, group, missGroup, unavailableGroup, user } from "./fixtures/messages.ts";
 
 afterEach(cleanup);
 
-const noTurn = { inflight: null, notSent: null, tail: null, canRetry: true, onRetry: () => {}, onSuggest: () => {} };
+const noTurn = { inflight: null, notSent: null, tail: null, canRetry: true, onRetry: () => {}, onSuggest: () => {}, onOpenCard: () => {} };
 const renderView = (view: ConversationView) =>
   render(<Transcript messages={view.messages} conversationId={view.id} revision={view.revision} {...noTurn} />);
 
@@ -51,7 +51,7 @@ describe("group states", () => {
     [4, 4, "4 results"],
     [1, 1, "1 result"],
   ])("countOf(%i, %i) is %s", (shown, total, label) => {
-    expect(STRINGS.en.countOf(shown, total)).toBe(label);
+    expect(t.countOf(shown, total)).toBe(label);
   });
 
   test("results render a header with the count and the cards", () => {
@@ -110,11 +110,6 @@ describe("message text and safety", () => {
     expect(container.querySelector("img")).toBeNull();
   });
 
-  test("message text and titles carry dir=auto for right-to-left input", () => {
-    renderView(conversation({ messages: [user({ text: "משקפי שמש זולים" }), assistant()] }));
-    expect(screen.getByText("משקפי שמש זולים").getAttribute("dir")).toBe("auto");
-    expect(screen.getByText(/Here are 4 of 23/).getAttribute("dir")).toBe("auto");
-  });
 });
 
 describe("transcript", () => {
@@ -156,13 +151,16 @@ describe("working search", () => {
     expect(within(ck).getByText("3")).toBeTruthy();
   });
 
-  test("clicking a card of the latest search asks about it; older cards are not buttons; nothing opens while a reply is pending", () => {
-    const onSuggest = vi.fn();
-    const { rerender } = render(<Transcript messages={messages} conversationId="c1" revision={3} {...noTurn} onSuggest={onSuggest} />);
+  test("clicking any card asks about that product by id, older replies' cards too; nothing opens while a reply is pending", () => {
+    const onOpenCard = vi.fn();
+    const { rerender } = render(<Transcript messages={messages} conversationId="c1" revision={3} {...noTurn} onOpenCard={onOpenCard} />);
     fireEvent.click(screen.getByRole("button", { name: "Lenovo Yoga" }));
-    expect(onSuggest).toHaveBeenCalledWith("tell me about the Lenovo Yoga");
-    expect(screen.queryByRole("button", { name: "Party Glasses" })).toBeNull();
-    rerender(<Transcript messages={messages} conversationId="c1" revision={3} {...noTurn} canRetry={false} onSuggest={onSuggest} />);
+    expect(onOpenCard).toHaveBeenLastCalledWith(12, "tell me about the Lenovo Yoga");
+    // a card from an older reply opens too; it just isn't numbered ("the second one" means the latest search)
+    const olderCard = screen.getAllByRole("article").find((a) => !a.querySelector(".product-number")) as HTMLElement;
+    fireEvent.click(within(olderCard).getByRole("button"));
+    expect(onOpenCard).toHaveBeenCalledTimes(2);
+    rerender(<Transcript messages={messages} conversationId="c1" revision={3} {...noTurn} canRetry={false} onOpenCard={onOpenCard} />);
     expect(screen.queryByRole("button", { name: "Lenovo Yoga" })).toBeNull();
   });
 });
@@ -172,9 +170,9 @@ describe("home", () => {
     const onSend = vi.fn();
     const { rerender } = render(<Home canSend onSend={onSend} />);
     const buttons = screen.getAllByRole("button");
-    expect(buttons.map((b) => b.textContent)).toEqual(STARTER_PROMPTS);
+    expect(buttons.map((b) => b.textContent)).toEqual(t.starters);
     fireEvent.click(buttons[0] as HTMLElement);
-    expect(onSend).toHaveBeenCalledWith(STARTER_PROMPTS[0]);
+    expect(onSend).toHaveBeenCalledWith(t.starters[0]);
     rerender(<Home canSend={false} onSend={onSend} />);
     expect(screen.getAllByRole("button").every((b) => (b as HTMLButtonElement).disabled)).toBe(true);
   });
@@ -269,6 +267,17 @@ describe("cards are drawn once", () => {
     expect(screen.getByText(/the products above are still the matches/)).toBeTruthy();
   });
 
+  test("a change to one item of a list draws only that group; the unchanged ones are in the message above", () => {
+    const eggs = group({ label: "Eggs", repeat: true, products: [card({ id: 23, title: "Eggs" })], total: 1 });
+    const watches = group({ label: "Watches", products: [card({ id: 7, title: "Brown Leather Belt Watch" })], total: 1 });
+    const balls = group({ label: "Balls", repeat: true, products: [card({ id: 151, title: "Tennis Ball" })], total: 1 });
+    render(<Transcript messages={[user(), assistant({ groups: [eggs, watches, balls], text: "Here is 1 watch." })]} conversationId="c1" revision={1} {...noTurn} />);
+    expect(screen.getAllByRole("article")).toHaveLength(1);
+    expect(screen.queryByText(/still the matches/)).toBeNull();
+    // the changed group keeps its place in the list's numbering: the eggs above are card 1
+    expect(document.querySelector(".product-number")?.textContent).toBe("2");
+  });
+
   test("show more draws only the cards it added", () => {
     const products = [card({ id: 1, title: "A" }), card({ id: 2, title: "B" }), card({ id: 3, title: "C" }), card({ id: 4, title: "D" }), card({ id: 5, title: "E" })];
     renderMessage(assistant({ groups: [group({ products, total: 5, shownFrom: 4 })] }));
@@ -281,4 +290,24 @@ describe("cards are drawn once", () => {
 test("a kept group that had no cards draws nothing (there is nothing 'above' to point at)", () => {
   renderMessage(assistant({ groups: [group({ repeat: true, status: "miss", products: [], total: 0 })], text: "Nothing cheaper." }));
   expect(screen.queryByText(/still the matches/)).toBeNull();
+});
+
+describe("Toast", () => {
+  test("a toast dismissed while hovered doesn't leave the next one stuck: it still goes away on its own", async () => {
+    vi.useFakeTimers();
+    try {
+      const { Toast } = await import("../src/components/Toast.tsx");
+      const onDismiss = vi.fn();
+      const { rerender } = render(<Toast toast={{ id: 1, text: "first" }} onDismiss={onDismiss} />);
+      fireEvent.mouseEnter(screen.getByText("first").parentElement as HTMLElement);
+      // × removes the node under the pointer: no mouseleave ever fires
+      rerender(<Toast toast={null} onDismiss={onDismiss} />);
+      rerender(<Toast toast={{ id: 2, text: "second" }} onDismiss={onDismiss} />);
+      onDismiss.mockClear();
+      vi.advanceTimersByTime(6000);
+      expect(onDismiss).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

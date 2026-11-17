@@ -10,11 +10,11 @@ import type { RouterInput, StoredQuery, TraceSink } from "../src/pipeline/ports.
 import { createRouterClient } from "../src/router/classify.ts";
 import type { DecisionsClient } from "../src/router/classify.ts";
 import { createSlotClient } from "../src/slots/extract.ts";
-import type { ResponsesClient } from "../src/slots/extract.ts";
+import type { ResponsesClient } from "../src/llm/openai.ts";
 
 export type FixtureTarget = { name: string; kind: "decision" | "extraction"; input: RouterInput };
 
-const laptops: StoredQuery = { label: "Laptops", query: { category: "laptops", noun: null, attributes: [], priceMin: null, priceMax: null, sort: "price_asc", inStock: false, gender: null, categoryStated: false, top: false, within: null, purpose: null, offset: 0 } };
+const laptops: StoredQuery = { label: "Laptops", query: { category: "laptops", noun: null, attributes: [], priceMin: null, priceMax: null, sort: "price_asc", inStock: false, gender: null, categoryStated: false, top: false, within: null, purpose: null, exclude: [], offset: 0 } };
 
 export function fixtureTargets(): FixtureTarget[] {
   const search: RouterInput = { utterance: "a red laptop under 1000", storedQueries: [], shownCards: [] };

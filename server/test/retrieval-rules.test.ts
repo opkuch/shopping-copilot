@@ -1,8 +1,8 @@
-// Retrieval rules, each from a failure seen in testing: compounds, generic nouns, superlatives, shekels, partial attributes.
+// Retrieval rules, each from a failure seen in testing: compounds, generic nouns, superlatives, prices, exclusions, partial attributes.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { ExtractedIntent } from "../src/messages/schema.ts";
-import { asksForTop, foldCompound, intentToQuery, patchQuery, superlativeSort } from "../src/pipeline/merge.ts";
+import { approximate, asksForTop, foldCompound, intentToQuery, patchQuery, superlativeSort } from "../src/pipeline/merge.ts";
 import type { RawProduct } from "../src/pipeline/ports.ts";
 import { bestPartial } from "../src/retrieval/port.ts";
 import { matchesAll } from "../src/retrieval/match.ts";
@@ -10,7 +10,7 @@ import { singularize } from "../src/slots/normalize.ts";
 
 const intent = (o: Partial<ExtractedIntent> = {}): ExtractedIntent => ({
   category: null, noun: null, attributes: null, priceMin: null, priceMax: null, currency: null,
-  relativePrice: null, sort: null, inStock: null, clear: [], gift: null, theme: null, ...o,
+  relativePrice: null, sort: null, inStock: null, clear: [], exclude: null, gift: null, ...o,
 });
 
 const product = (id: number, title: string, description = "", tags: string[] = []): RawProduct =>
@@ -36,12 +36,11 @@ test("a generic noun is no noun: 'tennis gear' searches tennis", () => {
 });
 
 test("singular superlatives ask for the top product; plural ones do not", () => {
-  assert.equal(asksForTop("הסמסונג הכי זול שיש לכם"), true);
-  assert.equal(asksForTop("איזה תיק לאישה הכי מדורג אצלכם"), true);
   assert.equal(asksForTop("the most expensive men's Rolex"), true);
   assert.equal(asksForTop("the cheapest Samsung"), true);
+  assert.equal(asksForTop("which bag is the best rated?"), true);
   assert.equal(asksForTop("the cheapest phones"), false);
-  assert.equal(asksForTop("הטלפונים הכי זולים"), false);
+  assert.equal(asksForTop("what are the cheapest headphones?"), false);
   assert.equal(asksForTop("cheap phones"), false);
 });
 
@@ -52,16 +51,41 @@ test("a refine without a superlative is a list again", () => {
   assert.equal(next.top, false);
 });
 
-test("shekel bounds become dollars at the stated rate; other currencies are not applied", () => {
-  const ils = intentToQuery(intent({ noun: "phone", priceMax: 1000, currency: "ILS" }), "טלפון עד 1000 שקל");
-  assert.equal(ils.query.priceMax, 270);
-  assert.equal(ils.currencyConverted, true);
-  assert.equal(ils.currencyNotApplied, false);
+test("prices are dollars; a bound in another currency is not applied, and the reply says so", () => {
   const eur = intentToQuery(intent({ noun: "phone", priceMax: 1000, currency: "other" }), "phone under 1000 euros");
   assert.equal(eur.query.priceMax, null);
   assert.equal(eur.currencyNotApplied, true);
   const usd = intentToQuery(intent({ noun: "phone", priceMax: 1000, currency: "USD" }), "phone under 1000");
-  assert.equal(usd.currencyConverted, false);
+  assert.equal(usd.query.priceMax, 1000);
+  assert.equal(usd.currencyNotApplied, false);
+});
+
+test("'around $300' is a range: down to half, up by a quarter; a plain bound stays as it is", () => {
+  assert.deepEqual(approximate(300, 300, "a watch around $300"), { priceMin: 150, priceMax: 375 });
+  assert.deepEqual(approximate(null, 60, "a budget of about $60"), { priceMin: 30, priceMax: 75 });
+  assert.deepEqual(approximate(null, 300, "under 300"), { priceMin: null, priceMax: 300 });
+  assert.deepEqual(approximate(20, 40, "between 20 and 40"), { priceMin: 20, priceMax: 40 });
+  assert.deepEqual(approximate(null, 1000, "a laptop around 1k"), { priceMin: 500, priceMax: 1250 });
+});
+
+test("'around' widens only the bound written right after it, never a ceiling elsewhere in the message", () => {
+  assert.deepEqual(approximate(null, 50, "about 3 shirts under $50"), { priceMin: null, priceMax: 50 });
+  assert.deepEqual(approximate(null, 50, "a laptop around $300 and a perfume under 50"), { priceMin: null, priceMax: 50 });
+  assert.deepEqual(approximate(10, null, "~5 items over $10"), { priceMin: 10, priceMax: null });
+  assert.deepEqual(approximate(300, 300, "a laptop around $300 and a perfume under 50"), { priceMin: 150, priceMax: 375 });
+});
+
+test("an empty attribute list on a refine keeps the stored words; only `clear` removes them", () => {
+  const first = intentToQuery(intent({ noun: "handbag", attributes: ["black"] }), "a black handbag").query;
+  assert.deepEqual(patchQuery(first, intent({ attributes: [] }), "cheaper", []).query.attributes, ["black"]);
+  assert.deepEqual(patchQuery(first, intent({ attributes: [], clear: ["attributes"] }), "any color", []).query.attributes, []);
+});
+
+test("exclusions come from the extraction and add up on a refine: 'not Chanel', then 'not Dior either'", () => {
+  const first = intentToQuery(intent({ noun: "perfume", exclude: ["Chanel"] }), "perfume but not Chanel").query;
+  assert.deepEqual(first.exclude, ["chanel"]);
+  const next = patchQuery(first, intent({ exclude: ["dior"] }), "not dior either", []).query;
+  assert.deepEqual(next.exclude, ["chanel", "dior"]);
 });
 
 test("a phrase matches when all its words are there", () => {
@@ -88,7 +112,8 @@ test("partial attributes: the products with the most asked words win", () => {
 
 // ---------- the retrieval ladder ----------
 
-import type { CallCtx, RetrievalQuery } from "../src/pipeline/ports.ts";
+import type { CallCtx } from "../src/pipeline/ports.ts";
+import type { Query } from "../src/messages/schema.ts";
 import { createRetriever } from "../src/retrieval/port.ts";
 import { createFixtureApi } from "./fakes/catalog.ts";
 
@@ -96,9 +121,9 @@ const ctx = (): { ctx: CallCtx; events: Array<{ kind: string; data: Record<strin
   const events: Array<{ kind: string; data: Record<string, unknown> }> = [];
   return { events, ctx: { budget: { remaining: () => 1e9, timeoutFor: (t) => t }, trace: { event: (kind, data) => void events.push({ kind, data }) } } };
 };
-const rq = (o: Partial<RetrievalQuery>): RetrievalQuery => ({
+const rq = (o: Partial<Query>): Query => ({
   category: null, noun: null, attributes: [], priceMin: null, priceMax: null, sort: "relevance",
-  inStock: false, categoryStated: false, gender: null, top: false, within: null, purpose: null, offset: 0, ...o,
+  inStock: false, categoryStated: false, gender: null, top: false, within: null, purpose: null, exclude: [], offset: 0, ...o,
 });
 
 test("face cream is the face lotion by its keyword, not Ice Cream by the word cream", async () => {
@@ -128,12 +153,17 @@ test("the Air Jordan is a sneaker by its keyword head ('basketball sneaker')", a
   assert.deepEqual(r.products.map((p) => p.title), ["Nike Air Jordan 1 Red And Black"]);
 });
 
-test("a brand outranks the noun: no Nike boot, so Nike's other shoes, not a Puma", async () => {
+test("a brand and the product type are both kept: no Nike boot is a miss, never a Puma or another Nike shoe", async () => {
   const { ctx: c } = ctx();
   const r = await createRetriever(createFixtureApi()).retrieve(rq({ category: "mens-shoes", noun: "boot", attributes: ["nike"] }), c);
+  assert.equal(r.status, "miss");
+});
+
+test("an excluded brand is never shown: perfume but not Chanel", async () => {
+  const { ctx: c } = ctx();
+  const r = await createRetriever(createFixtureApi()).retrieve(rq({ category: "fragrances", exclude: ["chanel"] }), c);
   assert.ok(r.products.length > 0);
-  assert.ok(r.products.every((p) => p.title.startsWith("Nike")));
-  assert.equal(r.applied.noun, null);
+  assert.ok(r.products.every((p) => !/chanel/i.test(p.title) && p.brand?.toLowerCase() !== "chanel"), r.products.map((p) => p.title).join(", "));
 });
 
 test("partial attributes: the black bag and the leather bag each keep one word", async () => {
@@ -162,7 +192,7 @@ test("enrichment: a whole keyword is the product type, a word inside a phrase is
 });
 
 test("a superlative says which order it asks for, so 'the cheapest one' can pick a shown card", () => {
-  assert.equal(superlativeSort("אני רוצה את הכי זול"), "price_asc");
+  assert.equal(superlativeSort("I want the cheapest one"), "price_asc");
   assert.equal(superlativeSort("the most expensive one"), "price_desc");
   assert.equal(superlativeSort("which is the best rated?"), "rating");
   assert.equal(superlativeSort("tell me about the second one"), null);
@@ -187,7 +217,7 @@ test("a tag names what a product is by its head: a 'camera accessory' is not a c
   assert.equal(r.status, "miss");
 });
 
-test("the category fallback never drops a brand: no Samsung phone under $250 is a miss", async () => {
+test("a relaxed match never drops a brand: no Samsung phone under $250 is a miss", async () => {
   const { ctx: c } = ctx();
   const r = await createRetriever(createFixtureApi()).retrieve(
     rq({ category: "smartphones", categoryStated: true, attributes: ["samsung"], priceMax: 250 }), c);
@@ -223,11 +253,35 @@ test("'a laptop under 1000 and a perfume' copied onto both: the bound stays on t
   assert.equal(perfume?.priceMax, null);
 });
 
+test("the bound is placed by its own number, not by a model number or a count before it", () => {
+  const [phone, ear] = scopePrices(two({ noun: "iphone", priceMax: 200 }, { noun: "earphone", priceMax: 200 }), "an iphone 15 and earphones under $200");
+  assert.deepEqual([phone?.priceMax, ear?.priceMax], [null, 200]);
+  const [laptops, perfume] = scopePrices(two({ noun: "laptop", priceMax: 200 }, { noun: "perfume", priceMax: 200 }), "2 laptops and a perfume under 200");
+  assert.deepEqual([laptops?.priceMax, perfume?.priceMax], [null, 200]);
+  const [laptop, scent] = scopePrices(two({ noun: "laptop", priceMax: 1000 }, { noun: "perfume", priceMax: 1000 }), "a laptop under 1,000 and a perfume");
+  assert.deepEqual([laptop?.priceMax, scent?.priceMax], [1000, null]);
+});
+
 test("a bound the message says covers both stays on both: 'both under 50', 'under 50: a laptop and a perfume'", () => {
-  for (const text of ["a laptop and a perfume, both under 50", "a laptop and a perfume under 50 each", "under 50: a laptop and a perfume"]) {
+  for (const text of ["a laptop and a perfume, both under 50", "a laptop and a perfume under 50 each", "under 50: a laptop and a perfume", "a laptop and a perfume, all under 50"]) {
     const out = scopePrices(two({ noun: "laptop", priceMax: 50 }, { noun: "perfume", priceMax: 50 }), text);
     assert.deepEqual(out.map((i) => i.priceMax), [50, 50], text);
   }
+});
+
+test("'all' or 'every' that isn't about the price doesn't spread a bound: 'an all-purpose cleaner'", () => {
+  const out = scopePrices(two({ noun: "laptop", priceMax: 20 }, { noun: "cleaner", priceMax: 20 }), "a laptop and an all-purpose cleaner under 20");
+  assert.deepEqual(out.map((i) => i.priceMax), [null, 20]);
+});
+
+test("a bound equal to a model number is placed by its price word: 'an iphone 15 case and a charger under 15'", () => {
+  const out = scopePrices(two({ noun: "case", attributes: ["iphone"], priceMax: 15 }, { noun: "charger", priceMax: 15 }), "an iphone 15 case and a charger under 15");
+  assert.deepEqual(out.map((i) => i.priceMax), [null, 15]);
+});
+
+test("a noun the user didn't write is placed by an attribute they did: 'running kicks' -> sneaker + running", () => {
+  const out = scopePrices(two({ noun: "laptop", priceMax: 60 }, { noun: "sneaker", attributes: ["running"], priceMax: 60 }), "a laptop and running kicks under 60");
+  assert.deepEqual(out.map((i) => i.priceMax), [null, 60]);
 });
 
 test("price scoping changes nothing it cannot place: different bounds, one intent, or a product word not in the text", () => {
@@ -235,9 +289,9 @@ test("price scoping changes nothing it cannot place: different bounds, one inten
   assert.equal(scopePrices(different, "a laptop under 1000 and a perfume under 50"), different);
   const one = [intent({ noun: "laptop", priceMax: 50 })];
   assert.equal(scopePrices(one, "a laptop under 50"), one);
-  // Hebrew: the extracted nouns are English, so their position in the message is unknown
-  const he = two({ noun: "laptop", priceMax: 50 }, { noun: "perfume", priceMax: 50 });
-  assert.equal(scopePrices(he, "מחשב נייד ובושם עד 50"), he);
+  // the extracted nouns are not the words the user wrote, so their position is unknown
+  const other = two({ noun: "laptop", priceMax: 50 }, { noun: "perfume", priceMax: 50 });
+  assert.equal(scopePrices(other, "a notebook and a scent under 50"), other);
 });
 
 test("a product-line word among the attributes still guesses its category: 'iphone' -> smartphones", () => {
@@ -246,10 +300,13 @@ test("a product-line word among the attributes still guesses its category: 'ipho
   assert.deepEqual(r.attributes, ["iphone"]);
 });
 
-test("a reply that says a converted shekel limit was not applied is rejected for the template", async () => {
-  const { contradictsDraft } = await import("../src/reply/compose.ts");
-  const input = { kind: "results" as const, language: "he" as const, message: "שעונים לגבר עד 5000 שקל", previous: null, groups: [],
-    draft: "הנה תוצאה אחת עבור שעונים. המחירים בדולרים; המרתי משקלים לפי כ-3.7 ₪ לדולר." };
-  assert.equal(contradictsDraft("המחיר מוצג בדולרים, והבקשה עד 5,000 ₪ לא הוחלה.", input), true);
-  assert.equal(contradictsDraft("מצאתי שעון אחד עד כ-$1,351.", input), false);
+test("a price copied onto every item of a list stays on the item written before it; a second bound is left alone", () => {
+  const list = [intent({ noun: "egg", priceMax: 10 }), intent({ noun: "case", priceMax: 10 }), intent({ noun: "ball", priceMax: 10 }), intent({ noun: "mug", priceMax: 10 })];
+  const out = scopePrices(list, "eggs, an iphone case, a tennis ball under $10 and a mug");
+  assert.deepEqual(out.map((i) => i.priceMax), [null, null, 10, null]);
+  // two different bounds written next to their items: nothing to move
+  const own = [intent({ noun: "egg", priceMax: 5 }), intent({ noun: "case", priceMax: 40 }), intent({ noun: "mug" })];
+  assert.equal(scopePrices(own, "eggs under 5, a case under 40 and a mug"), own);
+  // one bound before the list covers every item
+  assert.deepEqual(scopePrices(list, "under $10: eggs, a case, a ball and a mug").map((i) => i.priceMax), [10, 10, 10, 10]);
 });

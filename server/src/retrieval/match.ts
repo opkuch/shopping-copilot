@@ -24,18 +24,7 @@ export function matchedWords(product: Text, words: string[]): string[] {
     ...tokenize(`${product.title} ${product.description} ${tagText(product)}`),
     ...(enriched(product)?.tokens ?? []),
   ]);
-  return words.filter((w) => tokenize(w).every((t) => tokens.has(t) || (agentPartner(t) !== null && tokens.has(agentPartner(t) as string))));
-}
-
-/**
- * "training" and "trainer" are one word for search ("training sneakers" must find the Trainers). Only the
- * -ing / -er pair is swapped, never the bare stem: "designer" -> "design" matched 54 products. The stem
- * keeps at least four letters, so "ring" and "string" stay whole words.
- */
-export function agentPartner(word: string): string | null {
-  if (word.endsWith("ing") && word.length - 3 >= 4) return `${word.slice(0, -3)}er`;
-  if (word.endsWith("er") && word.length - 2 >= 4) return `${word.slice(0, -2)}ing`;
-  return null;
+  return words.filter((w) => tokenize(w).every((t) => tokens.has(t)));
 }
 
 export function matchesAll(product: Text, words: string[]): boolean {

@@ -44,6 +44,21 @@ export type OpenResult = {
 
 const SNAPSHOT = ".pre-open";
 
+// SQLite's primary result codes that mean the file itself is damaged or not a database.
+const SQLITE_CORRUPT = 11;
+const SQLITE_NOTADB = 26;
+
+/** The file is unreadable as a database, as opposed to busy, locked, or not permitted. */
+export function isCorruption(err: unknown): boolean {
+  const code = (err as { errcode?: unknown } | null)?.errcode;
+  if (typeof code === "number") return [SQLITE_CORRUPT, SQLITE_NOTADB].includes(code & 0xff);
+  return /malformed|not a database|corrupt/i.test(err instanceof Error ? err.message : String(err));
+}
+
+/**
+ * The open database, or null when the file is corrupt. Any other failure (another process holding a lock,
+ * no permission, a full disk) is thrown: moving history aside for a temporary problem would hide it.
+ */
 function tryOpen(path: string): DatabaseSync | null {
   let db: DatabaseSync | null = null;
   try {
@@ -52,15 +67,22 @@ function tryOpen(path: string): DatabaseSync | null {
     const rows = db.prepare("PRAGMA quick_check").all();
     const first = rows[0] as Record<string, unknown> | undefined;
     if (rows.length === 1 && first && Object.values(first)[0] === "ok") return db;
-  } catch {
-    // fall through to close
+  } catch (err) {
+    closeQuietly(db);
+    if (!isCorruption(err)) throw err;
+    return null;
   }
+  // quick_check ran and listed problems: corrupt.
+  closeQuietly(db);
+  return null;
+}
+
+function closeQuietly(db: DatabaseSync | null): void {
   try {
     db?.close();
   } catch {
     // already unusable
   }
-  return null;
 }
 
 function moveAside(path: string, now: () => Date): string {
@@ -107,7 +129,12 @@ export function openDatabase(path: string, opts: { now?: () => Date } = {}): Ope
   const existed = existsSync(path);
   if (existed) {
     for (const suffix of ["-wal", "-shm"]) {
-      if (existsSync(path + suffix)) copyFileSync(path + suffix, path + suffix + SNAPSHOT);
+      // Best effort: the copy only matters if the file turns out corrupt, so a full disk must not stop startup.
+      try {
+        if (existsSync(path + suffix)) copyFileSync(path + suffix, path + suffix + SNAPSHOT);
+      } catch {
+        rmSync(path + suffix + SNAPSHOT, { force: true });
+      }
     }
   }
   let db = existed ? tryOpen(path) : null;

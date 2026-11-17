@@ -40,14 +40,6 @@ export const SCRIPT: Record<string, Row> = {
     router: routerResult({ act: "refer", domain: "catalog", referTarget: 1 }),
     extraction: NO_INTENTS,
   },
-  "משקפי שמש זולים": {
-    router: routerResult({ act: "new_search", domain: "catalog" }),
-    extraction: extraction([intent({ category: "sunglasses", sort: "price_asc" })]),
-  },
-  "ספר לי על הראשון": {
-    router: routerResult({ act: "refer", domain: "catalog", referTarget: 1 }),
-    extraction: NO_INTENTS,
-  },
   "fail once": {
     router: routerResult({ act: "new_search", domain: "catalog" }),
     extraction: laptops,
@@ -68,6 +60,7 @@ const rowFor = (input: RouterInput | ExtractInput): Row => SCRIPT[normalize(inpu
 export function createScriptedModels(opts: { slowMs?: number } = {}): { router: RouterClient; slots: SlotClient } {
   const slowMs = opts.slowMs ?? 3000;
   const calls = new Map<string, number>();
+  const extractCalls = new Map<string, number>();
   return {
     router: {
       async route(input) {
@@ -82,7 +75,13 @@ export function createScriptedModels(opts: { slowMs?: number } = {}): { router: 
     },
     slots: {
       async extract(input) {
-        return structuredClone(rowFor(input).extraction);
+        const row = rowFor(input);
+        const key = normalize(input.utterance);
+        const n = (extractCalls.get(key) ?? 0) + 1;
+        extractCalls.set(key, n);
+        // Both models down together: with only the router failing, a product search falls back to extraction.
+        if (row.failEveryOtherCall && n % 2 === 1) throw new CallFailed("http", "scripted failure", 503);
+        return structuredClone(row.extraction);
       },
     },
   };

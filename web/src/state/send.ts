@@ -33,6 +33,7 @@ export function useSend(
               messageId: sent.messageId,
               text: sent.text,
               revision: sent.revision,
+              ...(sent.productId !== undefined ? { productId: sent.productId } : {}),
             });
 
       const plan = planOutcome(sent, result, isShowing(stateRef.current, sent));

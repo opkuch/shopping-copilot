@@ -16,7 +16,7 @@ export const card = (over: Partial<ProductCard> = {}): ProductCard => ({
 });
 
 const query: Group["query"] = {
-  category: "sunglasses", noun: null, attributes: [], priceMin: null, priceMax: null, sort: "price_asc", inStock: false, gender: null, categoryStated: true, top: false, within: null, purpose: null, offset: 0,
+  category: "sunglasses", noun: null, attributes: [], priceMin: null, priceMax: null, sort: "price_asc", inStock: false, gender: null, categoryStated: true, top: false, within: null, purpose: null, exclude: [], offset: 0,
 };
 
 export const group = (over: Partial<Group> = {}): Group => ({

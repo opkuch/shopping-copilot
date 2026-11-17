@@ -1,5 +1,5 @@
-import { useT } from "../i18n.ts";
-import type { Strings } from "../i18n.ts";
+import { t } from "../strings.ts";
+import type { Strings } from "../strings.ts";
 import type { ProductDetail as Detail } from "../api/types.ts";
 import { formatPrice } from "../format.ts";
 import { OutOfStock, Rating } from "./ProductCard.tsx";
@@ -14,7 +14,6 @@ const FIELDS: Array<[keyof Detail, keyof Strings["fields"]]> = [
 ];
 
 export function ProductDetail({ detail }: { detail: Detail }) {
-  const t = useT();
   const facts = FIELDS.flatMap(([key, field]) => {
     const value = detail[key];
     return typeof value === "string" && value.trim() !== "" ? [{ label: t.fields[field], value }] : [];
@@ -23,7 +22,7 @@ export function ProductDetail({ detail }: { detail: Detail }) {
     <article className="product-detail" aria-label={detail.title}>
       <ProductImage src={detail.thumbnail} alt={detail.title} />
       <div className="product-body">
-        <h2 className="product-title" dir="auto">
+        <h2 className="product-title">
           {detail.title}
         </h2>
         <div className="product-meta">
@@ -31,7 +30,7 @@ export function ProductDetail({ detail }: { detail: Detail }) {
           <Rating rating={detail.rating} reviewCount={detail.reviewCount} />
         </div>
         {!detail.inStock && <OutOfStock />}
-        <p className="detail-description" dir="auto">
+        <p className="detail-description">
           {detail.description}
         </p>
         {facts.length > 0 && (
@@ -39,7 +38,7 @@ export function ProductDetail({ detail }: { detail: Detail }) {
             {facts.map((f) => (
               <div key={f.label}>
                 <dt>{f.label}</dt>
-                <dd dir="auto">{f.value}</dd>
+                <dd>{f.value}</dd>
               </div>
             ))}
           </dl>

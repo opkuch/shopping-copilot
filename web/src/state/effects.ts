@@ -60,13 +60,6 @@ export function useConversation(
 export const POLL_MS = 400;
 
 /**
- * User message ids whose cards were already shown early (cards first). Their final reply must not play
- * the arrival animation again: the shopper saw the cards appear once, and a second deal reads as a
- * re-render. Module-level, like `resumed` below.
- */
-export const previewed = new Set<string>();
-
-/**
  * Polls the stage of the send in flight, for the progress label. A failed poll is ignored.
  * The next poll is scheduled only after the previous one answers, so a slow server never has more
  * than one poll waiting, and a hidden tab skips the request (nobody is looking at the label).
@@ -83,7 +76,6 @@ export function useProgress(client: ApiClient, dispatch: Dispatch<Action>, messa
       if (document.visibilityState === "hidden") return schedule();
       void client.getProgress(messageId, controller.signal).then((res) => {
         if (res.ok) {
-          if (res.data.preview) previewed.add(messageId);
           dispatch({ type: "stage", messageId, stage: res.data.stage, preview: res.data.preview ?? null });
         }
         schedule();

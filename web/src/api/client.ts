@@ -18,14 +18,15 @@ export type Result<T> = { ok: true; data: T } | ({ ok: false } & Failure);
 
 export type ConversationList = { conversations: ConversationListItem[]; warning: string | null };
 export type CreateBody = { messageId: string; text: string };
-export type SendBody = CreateBody & { revision: number };
+/** `productId`: a click on a card names the product it asks about. */
+export type SendBody = CreateBody & { revision: number; productId?: number };
 
 export type ApiClient = {
   listConversations(signal?: AbortSignal): Promise<Result<ConversationList>>;
   getConversation(id: string, signal?: AbortSignal): Promise<Result<ConversationView>>;
   createConversation(body: CreateBody, signal?: AbortSignal): Promise<Result<TurnResponse>>;
   sendMessage(conversationId: string, body: SendBody, signal?: AbortSignal): Promise<Result<TurnResponse>>;
-  /** `preview`: the cards and template sentence, once retrieval is done (absent from older servers). */
+  /** `preview`: the cards and template sentence, once retrieval is done (cards first). */
   getProgress(messageId: string, signal?: AbortSignal): Promise<Result<{ stage: Stage; preview?: Preview | null }>>;
 };
 

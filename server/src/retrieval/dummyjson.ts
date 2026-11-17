@@ -84,25 +84,15 @@ export function createDummyJsonApi(opts: {
     throw failure ?? new CallFailed("network", `DummyJSON request failed for ${path}`);
   }
 
-  async function list(path: string, ctx: CallCtx): Promise<{ products: RawProduct[]; total: number; endpoint: string }> {
+  async function list(path: string, ctx: CallCtx): Promise<{ products: RawProduct[] }> {
     const body = (await get(path, ctx)) as ListBody;
     if (!body || !Array.isArray(body.products)) throw new CallFailed("parse", `Unexpected list shape for ${path}`);
-    return { products: body.products, total: body.total ?? body.products.length, endpoint: path };
+    return { products: body.products };
   }
 
   return {
-    async byCategory(slug, ctx) {
-      const { products, endpoint } = await list(`/products/category/${encodeURIComponent(slug)}?limit=0&${SELECT}`, ctx);
-      return { products, endpoint };
-    },
-    async search(q, ctx) {
-      const { products, endpoint } = await list(`/products/search?q=${encodeURIComponent(q)}&limit=0&${SELECT}`, ctx);
-      return { products, endpoint };
-    },
-    async all(ctx) {
-      const { products, endpoint } = await list(`/products?limit=0&${SELECT}`, ctx);
-      return { products, endpoint };
-    },
+    byCategory: (slug, ctx) => list(`/products/category/${encodeURIComponent(slug)}?limit=0&${SELECT}`, ctx),
+    all: (ctx) => list(`/products?limit=0&${SELECT}`, ctx),
     async product(id, ctx) {
       return (await get(`/products/${id}`, ctx)) as RawProductFull;
     },

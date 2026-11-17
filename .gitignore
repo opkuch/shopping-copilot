@@ -8,9 +8,3 @@ coverage/
 .DS_Store
 .vscode/
 .idea/
-
-# Private working notes, never part of the submission
-REVIEW*.md
-server/PLAN.md
-web/PLAN.md
-DEMO.md

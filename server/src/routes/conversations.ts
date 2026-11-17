@@ -24,6 +24,9 @@ export function registerRoutes(app: FastifyInstance, deps: RouteDeps): void {
 
   app.setErrorHandler((err, req, reply) => {
     const status = (err as { statusCode?: number }).statusCode;
+    // A body too large (413) or not JSON (415) keeps its status, so the client can tell it from a bad field.
+    if (status === 413) return sendError(reply, 413, "validation", "The request body is too large.");
+    if (status === 415) return sendError(reply, 415, "validation", "Send the request body as JSON.");
     if (typeof status === "number" && status >= 400 && status < 500) {
       return sendError(reply, 400, "validation", "Request could not be read as JSON of the expected shape.");
     }
@@ -35,8 +38,8 @@ export function registerRoutes(app: FastifyInstance, deps: RouteDeps): void {
 
   app.setNotFoundHandler((_req, reply) => sendError(reply, 404, "not_found", "No such route."));
 
-  async function runAccepted(reply: FastifyReply, a: Accepted) {
-    const outcome = await runner.run({ conversationId: a.conversationId, revision: a.revision, userMessage: a.userMessage });
+  async function runAccepted(reply: FastifyReply, a: Accepted, productId?: number) {
+    const outcome = await runner.run({ conversationId: a.conversationId, revision: a.revision, userMessage: a.userMessage, ...(productId !== undefined ? { productId } : {}) });
     switch (outcome.kind) {
       case "completed":
         return reply.code(200).send(outcome.response);
@@ -56,7 +59,7 @@ export function registerRoutes(app: FastifyInstance, deps: RouteDeps): void {
     }
   }
 
-  async function handleAccept(reply: FastifyReply, accept: () => AcceptResult) {
+  async function handleAccept(reply: FastifyReply, accept: () => AcceptResult, productId?: number) {
     let result: AcceptResult;
     try {
       result = accept();
@@ -74,7 +77,7 @@ export function registerRoutes(app: FastifyInstance, deps: RouteDeps): void {
           conversation: result.conversation,
         });
       case "accepted":
-        return runAccepted(reply, result);
+        return runAccepted(reply, result, productId);
       case "exists": {
         const state = store.resendState(result.messageId);
         if (!state) return sendError(reply, 404, "not_found", "Conversation not found.");
@@ -91,16 +94,23 @@ export function registerRoutes(app: FastifyInstance, deps: RouteDeps): void {
             conversation: state.conversation,
           });
         }
-        return runAccepted(reply, state);
+        return runAccepted(reply, state, productId);
       }
     }
   }
 
-  // New turns only: a resend of an accepted message joins its run and costs nothing. Checked before the
-  // message is stored, so a refused message leaves no unanswered tail; the client puts the text back.
+  // A resend that costs no model call is free: one already answered, or one that joins its run in flight.
+  // A resend of an unanswered message with no run (it failed, or the server restarted) runs the models again,
+  // so it counts like a new message: a client stuck retrying against a failing model is limited too.
+  // Checked before the message is stored, so a refused message leaves no unanswered tail; the client puts
+  // the text back.
   const limiter = deps.limiter ?? createRateLimiter();
+  const free = (messageId: string) => {
+    const state = store.resendState(messageId);
+    return state !== null && (state.kind !== "unanswered_tail" || runner.stage(messageId) !== "idle");
+  };
   const limited = (reply: FastifyReply, messageId: string, key: string) => {
-    if (store.resendState(messageId) || limiter.allow(key)) return null;
+    if (free(messageId) || limiter.allow(key)) return null;
     void reply.header("retry-after", String(limiter.retryAfter(key)));
     return sendError(reply, 429, "rate_limited", "Too many messages at once. Wait a moment and try again.");
   };
@@ -130,10 +140,20 @@ export function registerRoutes(app: FastifyInstance, deps: RouteDeps): void {
   app.post<{ Params: { id: string } }>("/api/conversations/:id/messages", async (req, reply) => {
     const body = SendMessageBody.safeParse(req.body);
     if (!body.success) return invalid(reply);
-    const { messageId, text, revision } = body.data;
+    const { messageId, text, revision, productId } = body.data;
+    // One run per conversation, on the server too: while another message's reply is still being made (a
+    // second tab sent it), a new message would leave that reply nowhere to go and two questions in a row.
+    // Checked and accepted with no await in between, so no other request can slip in.
+    const running = store.unansweredTail(req.params.id);
+    if (running !== null && running !== messageId && runner.stage(running) !== "idle") {
+      const conversation = store.getConversation(req.params.id);
+      if (conversation) {
+        return sendError(reply, 409, "revision_conflict", "A reply to another message is still on its way; here is the current transcript.", { conversation });
+      }
+    }
     const refused = limited(reply, messageId, req.params.id);
     if (refused) return refused;
-    return handleAccept(reply, () => store.acceptMessage(req.params.id, messageId, text, revision));
+    return handleAccept(reply, () => store.acceptMessage(req.params.id, messageId, text, revision), productId);
   });
 
   app.get<{ Params: { messageId: string } }>("/api/messages/:messageId/progress", async (req) => ({

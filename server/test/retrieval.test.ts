@@ -1,9 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import type { CallCtx, RawProduct, RetrievalQuery } from "../src/pipeline/ports.ts";
+import type { CallCtx, RawProduct } from "../src/pipeline/ports.ts";
+import type { Query } from "../src/messages/schema.ts";
 import { CallFailed } from "../src/pipeline/ports.ts";
 import { createRetriever } from "../src/retrieval/port.ts";
-import { applyFilters, cap4, sortProducts, toCard } from "../src/retrieval/filter.ts";
+import { applyFilters, firstPage, sortProducts, toCard } from "../src/retrieval/filter.ts";
 import { normalizeWord, normalizeWords } from "../src/slots/normalize.ts";
 import { resolveCategory } from "../src/slots/aliases.ts";
 import { createFixtureApi } from "./fakes/catalog.ts";
@@ -17,9 +18,9 @@ function makeCtx() {
   return { ctx, events };
 }
 
-const query = (o: Partial<RetrievalQuery> = {}): RetrievalQuery => ({
+const query = (o: Partial<Query> = {}): Query => ({
   category: null, noun: null, attributes: [], priceMin: null, priceMax: null,
-  sort: "relevance", inStock: false, categoryStated: true, gender: null, top: false, within: null, purpose: null, offset: 0, ...o,
+  sort: "relevance", inStock: false, categoryStated: true, gender: null, top: false, within: null, purpose: null, exclude: [], offset: 0, ...o,
 });
 const titles = (r: { products: Array<{ title: string }> }) => r.products.map((p) => p.title);
 
@@ -35,7 +36,8 @@ test("filter, sort, then cap at 4 with total before the cap", async () => {
   const all = (await api.byCategory("mobile-accessories", ctx)).products.filter((p) => p.price <= 100);
   assert.equal(r.total, all.length);
   assert.ok(r.total > 4);
-  assert.equal(cap4([1, 2, 3, 4, 5]).length, 4);
+  assert.equal(firstPage([1, 2, 3, 4, 5]).length, 4);
+  assert.equal(firstPage([1, 2, 3, 4, 5], 3).length, 3);
 });
 
 test("in-stock products rank before out-of-stock under every sort", async () => {
@@ -46,7 +48,7 @@ test("in-stock products rank before out-of-stock under every sort", async () => 
   assert.equal(oos.length, 4);
 
   // motorcycle: Sportbike (id 117, stock 0) would be first or mid-pack by price/rating on its own
-  const cases: Array<[Partial<RetrievalQuery>, number[]]> = [
+  const cases: Array<[Partial<Query>, number[]]> = [
     [{ sort: "price_asc", priceMin: 7000 }, [114, 115, 117]],
     [{ sort: "price_desc", priceMin: 2000, priceMax: 8000 }, [113, 116, 117]],
     [{ sort: "rating", priceMin: 7000 }, [114, 115, 117]],
@@ -111,15 +113,11 @@ test("search q is always one word", async () => {
   assert.equal(r.applied.noun, "lipstick");
   assert.ok(events.some((e) => e.kind === "noun_multiword"));
   for (const noun of ["lipstick", "charger", "watch", "zzzz"]) await retriever.retrieve(query({ noun }), ctx);
-  for (const c of api.calls) if (c.method === "search") assert.doesNotMatch(String(c.arg), /\s/);
 });
 
-test("fake mirrors the measured phrase-search behavior", async () => {
+test("fake list responses carry only the selected fields, like select=", async () => {
   const api = createFixtureApi();
   const { ctx } = makeCtx();
-  assert.equal((await api.search("red lipstick", ctx)).products.length, 1);
-  assert.equal((await api.search("lipstick red", ctx)).products.length, 0);
-  assert.ok((await api.search("ring", ctx)).products.length > 20, "substring noise");
   const select = (await api.byCategory("beauty", ctx)).products[0];
   assert.deepEqual(Object.keys(select ?? {}).sort(), ["brand", "category", "description", "discountPercentage", "id", "price", "rating", "stock", "tags", "thumbnail", "title"]);
 });
@@ -161,7 +159,7 @@ test("all() is called for any uncategorized query; a category alone fetches only
   const api = createFixtureApi();
   const { ctx } = makeCtx();
   const retriever = createRetriever(api);
-  const others: Array<Partial<RetrievalQuery>> = [
+  const others: Array<Partial<Query>> = [
     { category: "laptops" },
     { category: "laptops", attributes: ["red"], priceMax: 1 },
   ];
@@ -169,7 +167,6 @@ test("all() is called for any uncategorized query; a category alone fetches only
   assert.equal(api.calls.filter((c) => c.method === "all").length, 0);
   for (const o of [{ noun: "charger" }, { noun: "zzzz" }]) await retriever.retrieve(query(o), ctx);
   assert.equal(api.calls.filter((c) => c.method === "all").length, 2);
-  assert.equal(api.calls.filter((c) => c.method === "search").length, 0);
   api.reset();
 
   const r = await retriever.retrieve(query({ attributes: ["red"] }), ctx);
@@ -191,17 +188,13 @@ test("no category and no hits is a miss", async () => {
   assert.equal(r.total, 0);
 });
 
-test("inferred category with a noun the category lacks searches the whole catalog", async () => {
+test("a category the noun doesn't fit is an honest miss, never the category's other products", async () => {
   const api = createFixtureApi();
   const { ctx } = makeCtx();
   const r = await createRetriever(api).retrieve(
     query({ category: "smartphones", noun: "charger", categoryStated: false }), ctx);
-  assert.equal(r.status, "results");
-  assert.equal(r.match, "noun_outside_category");
-  assert.equal(r.applied.category, null);
-  assert.equal(r.applied.noun, "charger");
-  assert.ok(titles(r).includes("Apple iPhone Charger"));
-  assert.deepEqual(api.calls.map((c) => c.method), ["byCategory", "all"]);
+  assert.equal(r.status, "miss");
+  assert.deepEqual(api.calls.map((c) => c.method), ["byCategory"]);
 });
 
 test("a guessed category and a noun missing everywhere is a miss, not a page of that category", async () => {
@@ -298,7 +291,7 @@ test("a noun naming the category itself resolves to the category: skin care with
   const { ctx } = makeCtx();
   const r = await createRetriever(createFixtureApi()).retrieve(query(resolved), ctx);
   assert.equal(r.status, "results");
-  assert.equal(r.match, "category_fallback");
+  assert.equal(r.match, "attributes_relaxed");
   assert.equal(r.total, 3);
 });
 
@@ -309,19 +302,18 @@ test("a stated category is never relaxed away: red laptops under $1 is still a m
   assert.equal(r.status, "miss");
 });
 
-test("stated category emptied by an attribute falls back inside the category without searching", async () => {
+test("a category emptied by an attribute keeps the category and drops the attribute", async () => {
   const api = createFixtureApi();
   const { ctx } = makeCtx();
   const r = await createRetriever(api).retrieve(
     query({ category: "laptops", attributes: ["red"], categoryStated: true, sort: "price_asc" }), ctx);
   assert.equal(r.status, "results");
-  assert.equal(r.match, "category_fallback");
+  assert.equal(r.match, "attributes_relaxed");
   assert.equal(r.applied.category, "laptops");
   assert.deepEqual(r.applied.attributes, []);
   assert.ok(r.products.every((p) => p.category === "laptops"));
   const prices = r.products.map((p) => p.price);
   assert.deepEqual(prices, [...prices].sort((a, b) => a - b));
-  assert.ok(!api.calls.some((c) => c.method === "search"));
 });
 
 test("category fallback keeps the price bound; nothing under it is a miss", async () => {
@@ -347,8 +339,9 @@ test("a browse (sort only) shows one product per category, in stock first, cap 4
   const r = await createRetriever(api).retrieve(query({ sort: "price_asc" }), ctx);
   assert.deepEqual(api.calls.map((c) => c.method), ["all"]);
   assert.equal(r.products.length, 4);
-  // groceries, vehicles and motorcycles are not browsed: 194 minus 37
-  assert.equal(r.total, 157);
+  // a shop window: no groceries, vehicles or motorcycles, and with no budget nothing over $1,000
+  assert.equal(r.total, 141);
+  assert.ok(r.products.every((p) => p.price <= 1000));
   assert.ok(r.products.every((p) => !["groceries", "vehicle", "motorcycle"].includes(p.category)));
   assert.ok(r.products.every((p) => p.inStock));
   assert.equal(new Set(r.products.map((p) => p.category)).size, 4, "not four groceries");

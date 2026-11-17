@@ -4,9 +4,9 @@ import OpenAI from "openai";
 import { callWithRetry, statusOf } from "../src/llm/call.ts";
 import { createBudget } from "../src/pipeline/budget.ts";
 import { CallFailed } from "../src/pipeline/ports.ts";
-import type { ProseInput, TraceSink, TurnFlags } from "../src/pipeline/ports.ts";
+import type { ProseInput, TraceSink } from "../src/pipeline/ports.ts";
 import { createReplyWriter, ungroundedAmounts } from "../src/reply/compose.ts";
-import type { ResponsesClient } from "../src/slots/extract.ts";
+import type { ResponsesClient } from "../src/llm/openai.ts";
 
 function makeTrace() {
   const events: Array<{ kind: string; data: Record<string, unknown> }> = [];
@@ -131,7 +131,7 @@ test("statusOf reads the SDK error status", () => {
 
 // ---- reply writer ----
 const proseInput: ProseInput = {
-  kind: "refer", language: "en", message: "tell me about it",
+  kind: "refer", message: "tell me about it",
   detail: {
     id: 1, title: "P", description: "d", price: 1, thumbnail: "t", rating: 4, category: "laptops", inStock: true,
     brand: null, availabilityStatus: null, warrantyInformation: null, shippingInformation: null,
@@ -182,7 +182,7 @@ test("reply writer gives up at its own timeout", async () => {
 });
 
 const resultsInput: ProseInput = {
-  kind: "results", language: "en", message: "what's the cheapest phone?", previous: null,
+  kind: "results", message: "what's the cheapest phone?", previous: null,
   draft: "Here are 4 of 16 smartphones, lowest price first.",
   groups: [{
     label: "Smartphones", outcome: "results", match: "exact", droppedWords: [], earlierCardsKept: false, totalMatches: 16,
@@ -198,7 +198,7 @@ test("ungroundedAmounts: card prices, asked bounds, and draft amounts are allowe
   assert.deepEqual(ungroundedAmounts("The cheapest is the Realme C35 at $149.99.", resultsInput), []);
   assert.deepEqual(ungroundedAmounts("Everything here is under $500; next is $199.99.", resultsInput), []);
   assert.deepEqual(ungroundedAmounts("The Realme C35 is $139.99.", resultsInput), [139.99]);
-  assert.deepEqual(ungroundedAmounts("הזול ביותר הוא Realme C35 ב-149.99$, ואחריו 99$.", { ...resultsInput, language: "he" }), [99]);
+  assert.deepEqual(ungroundedAmounts("It costs $1,399.99 or $99.", resultsInput), [1399.99, 99]);
   assert.deepEqual(ungroundedAmounts("No prices at all.", resultsInput), []);
 });
 
@@ -211,4 +211,26 @@ test("reply writer drops a results reply that quotes an invented price", async (
   const body = (calls[0] as { body: { input: Array<{ content: string }> } }).body;
   assert.match(body.input[0]?.content ?? "", /Answer the message directly/);
   assert.equal(JSON.parse(body.input[1]?.content ?? "{}").message, "what's the cheapest phone?");
+});
+
+test("ungroundedAmounts: a number the shopper typed is not invented ('around 30 bucks' answered with '$30')", () => {
+  const input = { ...resultsInput, message: "something around 30 bucks, max 1,200" };
+  assert.deepEqual(ungroundedAmounts("Around $30 there is little; nothing under $1,200 either.", input), []);
+  assert.deepEqual(ungroundedAmounts("It costs $31.", input), [31]);
+});
+
+test("ungroundedAmounts: amounts without a $ sign are checked too ('99 dollars', '99 bucks', 'USD 99')", () => {
+  for (const reply of ["It costs 99 dollars.", "About 99 bucks.", "That one is USD 99.", "Only 99 USD."]) {
+    assert.deepEqual(ungroundedAmounts(reply, resultsInput), [99], reply);
+  }
+  assert.deepEqual(ungroundedAmounts("The Realme C35 is 149.99 dollars.", resultsInput), []);
+});
+
+test("ungroundedAmounts: a model number or a count the shopper typed is not a price the reply may quote", () => {
+  const input = { ...resultsInput, message: "an iphone 15 case, or 2 cheap phones under 500" };
+  assert.deepEqual(ungroundedAmounts("The case is $15.", input), [15]);
+  assert.deepEqual(ungroundedAmounts("Two phones for $2.", input), [2]);
+  assert.deepEqual(ungroundedAmounts("Both are under $500.", input), []);
+  // "between 20 and 40": both ends are prices
+  assert.deepEqual(ungroundedAmounts("Nothing between $20 and $40.", { ...resultsInput, message: "between 20 and 40" }), []);
 });

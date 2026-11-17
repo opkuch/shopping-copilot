@@ -1,284 +1,282 @@
 # Product eval report
 
-- Date: 2026-11-16 12:32 UTC
-- Prompts: router router.v6, extract extract.v11, prose prose.v8
-- Sets: queries, dialogues, vague; runs: 1; turns scored: 182; judge: on
-- Turn pass rate (right action, precision ≥ 0.75 and recall ≥ 0.5 where labelled, no forbidden card, nothing invented): **90%**
+- Date: 2026-11-17 20:04 UTC
+- Prompts: router router.v10, extract extract.v14, prose prose.v10
+- Sets: queries, dialogues, vague; runs: 3; turns scored: 540; judge: on
+- Turn pass rate (right action, precision ≥ 0.75 and recall ≥ 0.5 where labelled, no forbidden card, nothing invented): **91%**
 
 ## Scorecard against the A- targets
 
 | Measure | Value | A- target | |
 | --- | ---: | ---: | :-: |
-| precision@shown (labelled turns) | 0.95 | ≥ 0.85 | ✅ |
-| recall@shown (labelled turns) | 0.93 | ≥ 0.80 | ✅ |
-| forbidden cards shown | 3 | 0 | ❌ |
-| right action | 95% | ≥ 95% | ✅ |
-| dead ends ("which one?" when an action was obvious) | 1 | 0 | ❌ |
+| precision@shown (labelled turns) | 0.94 | ≥ 0.85 | ✅ |
+| recall@shown (labelled turns) | 0.90 | ≥ 0.80 | ✅ |
+| forbidden cards shown | 13 | 0 | ❌ |
+| right action | 99% | ≥ 95% | ✅ |
+| dead ends ("which one?" when an action was obvious) | 0 | 0 | ✅ |
 | invented prices or titles in replies | 0 | 0 | ✅ |
 | vague requests handled (clarify or coherent) | 100% | 100% | ✅ |
-| judge: overall (1–5) | 4.34 | ≥ 4.3 | ✅ |
-| time to cards p50 / p90 | 2.6 s / 3.8 s | ≤ 2.5 s / 3.5 s | ❌ |
-| full reply p50 / p90 | 4.7 s / 5.8 s | p50 ≤ 4 s | ❌ |
+| judge: overall (1–5) | 4.43 | ≥ 4.3 | ✅ |
+| time to cards p50 / p90 | 2.3 s / 3.6 s | ≤ 2.5 s / 3.5 s | ❌ |
+| full reply p50 / p90 | 3.8 s / 5.0 s | p50 ≤ 4 s | ✅ |
+| model cost per turn, mean / p90 (judge not included) | $0.00034 / $0.00043 | – | – |
 
-Judge detail (mean 1–5): answers 4.46, accurate 4.75, honest 4.79, language 4.95, overall 4.34. Reply writer p50 1.9 s. "Time to cards" is when retrieval finished; today the cards are only sent with the full reply.
-
-## Judge calibration
-
-No hand grades match this run yet. Grade replies in the labelling page (Grade tab), then rerun.
+Judge detail (mean 1–5): answers 4.57, accurate 4.85, honest 4.83, clear 4.81, overall 4.43. The judge is gpt-6-luna grading gpt-6-luna (the only allowed model): a second opinion, not a measurement. Reply writer p50 1.6 s. "Time to cards" is when retrieval finished and the cards appear (cards first).
 
 ## queries
 
 | Case | Turn | Message | Expected | Got (per run) | P | R | Judge | Pass |
 | --- | ---: | --- | --- | --- | ---: | ---: | ---: | ---: |
-| c01 | 1 | אני מחפש מחשב נייד עד 1500 דולר | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c03 | 1 | שעון יד לאישה עד 200 | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c02 | 1 | בושם לגבר | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| c04 | 1 | נעלי ספורט | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c06 | 1 | אוזניות אלחוטיות | results | results | 1.00 | 0.67 | 5.0 | 100% |
-| c07 | 1 | כדור כדורסל | results | results | 0.50 | 1.00 | 4.0 | 0% |
-| c05 | 1 | משקפי שמש זולים | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c08 | 1 | משהו לבית | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c10 | 1 | טלפון סמסונג | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c11 | 1 | מוצרי אפל | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c09 | 1 | רהיטים לסלון | results | results | 0.25 | 0.25 | 3.0 | 0% |
-| c12 | 1 | תיק יד שחור מעור | results | results | 0.67 | 1.00 | 5.0 | 0% |
-| c13 | 1 | קרם לחות לפנים | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| c15 | 1 | עגילים | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c14 | 1 | שמלה לבנה | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| c16 | 1 | שרשרת זהב | miss | miss | n/a | n/a | 4.0 | 100% |
-| c18 | 1 | סכין למטבח | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c17 | 1 | מחבת לבישול | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c19 | 1 | קפה | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c20 | 1 | אוכל לכלב | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c21 | 1 | רכב משפחתי | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c22 | 1 | טאבלט של סמסונג עד 400 | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c23 | 1 | מטען לאייפון | results | results | 1.00 | 0.33 | 5.0 | 0% |
-| c24 | 1 | שעון חכם | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| c26 | 1 | a gaming laptop under $1000 | miss | miss | n/a | n/a | 5.0 | 100% |
-| c25 | 1 | חולצה משובצת לגבר | results | results | 1.00 | 0.33 | 5.0 | 0% |
-| c27 | 1 | red lipstick | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c29 | 1 | something to drink | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c28 | 1 | cheap tennis gear | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| c31 | 1 | a Rolex for men | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c30 | 1 | running shoes | results | results | 1.00 | 0.75 | 4.0 | 100% |
-| c33 | 1 | a sofa | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c32 | 1 | an iPhone under 300 | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c35 | 1 | Dior perfume | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c34 | 1 | wireless charger | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| c37 | 1 | book me a hotel in Eilat | service | service | n/a | n/a | 4.0 | 100% |
-| c39 | 1 | hi there! | chat | chat | n/a | n/a | 4.0 | 100% |
-| c38 | 1 | what's 17 times 23? | off_topic | off_topic | n/a | n/a | 5.0 | 100% |
-| c36 | 1 | a cricket bat and a helmet | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a02 ✍ | 1 | airpods יש? | results | results | 1.00 | 0.50 | 5.0 | 100% |
-| c40 | 1 | תיק גב לבית ספר | results | results | 1.00 | 1.00 | 3.0 | 100% |
-| a01 ✍ | 1 | אייפון זול בבקשה | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a03 ✍ | 1 | נעלי נייקי לגבר | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a06 ✍ | 1 | תיק של פראדה לאשתי | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a05 ✍ | 1 | תביא לי משהו של דיור | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a07 ✍ | 1 | עגילים לאשתי | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a04 ✍ | 1 | שעון רולקס לבעלי | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a09 ✍ | 1 | which laptop is the best rated | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a10 ✍ | 1 | מקרר | miss | miss | n/a | n/a | 4.0 | 100% |
-| a11 ✍ | 1 | פלייסטיישן | miss | miss | n/a | n/a | 4.0 | 100% |
-| a08 ✍ | 1 | הסמסונג הכי זול שיש לכם | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| a13 ✍ | 1 | do you sell an electric kettle? | miss | miss | n/a | n/a | 5.0 | 100% |
-| a12 ✍ | 1 | נעלי עקב לגבר | miss | results | n/a | n/a | 4.0 | 0% |
-| a15 ✍ | 1 | שמלת ערב שחורה | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a14 ✍ | 1 | שמלה לילדה בת 6 | results | results | 0.25 | 1.00 | 4.0 | 0% |
-| a16 ✍ | 1 | men's shirt under $25 | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a17 ✍ | 1 | כדורגל | results | results | 0.50 | 1.00 | 4.0 | 0% |
-| a19 ✍ | 1 | hand blender | results | results | 1.00 | 0.50 | 5.0 | 100% |
-| a18 ✍ | 1 | מחבת לטיגון | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| a20 ✍ | 1 | מיטה זוגית | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| a21 ✍ | 1 | office chair | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a22 ✍ | 1 | motorcycle under $5000 | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a23 ✍ | 1 | טאבלט סמסונג | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a24 ✍ | 1 | רמקול חכם לסלון | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a26 ✍ | 1 | mascara | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a25 ✍ | 1 | סוללה ניידת לטלפון | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a27 ✍ | 1 | לק אדום | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a28 ✍ | 1 | אני רוצה סמסונג שיש במלאי | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a31 ✍ | 1 | היי מה נשמע | chat | chat | n/a | n/a | 3.0 | 100% |
-| a29 ✍ | 1 | תביא לי טלפון עד 1000 שקל | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| a32 ✍ | 1 | תזמין לי טיסה לאילת | service | service | n/a | n/a | 5.0 | 100% |
-| a33 ✍ | 1 | אפשר משלוח עד הבית מחר בבוקר? | service | service | n/a | n/a | 4.0 | 100% |
-| a35 ✍ | 1 | מה מזג האוויר מחר בחיפה | off_topic | off_topic | n/a | n/a | 5.0 | 100% |
-| a34 ✍ | 1 | write me a poem about cats | off_topic | off_topic | n/a | n/a | 4.0 | 100% |
-| a30 ✍ | 1 | שעון לגבר בשביל 300 שקל | results | miss | 0.00 | 0.00 | 4.0 | 0% |
-| a38 ✍ | 1 | body lotion for men | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a36 ✍ | 1 | אייפון ואוזניות עד 200 דולר | results | results | 0.50 | 1.00 | 2.0 | 0% |
-| a37 ✍ | 1 | משקפי שמש ותיק יד לאישה | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| a39 ✍ | 1 | בושם הכי זול | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| a40 ✍ | 1 | נעליים אדומות | results | results | 1.00 | 0.25 | 5.0 | 0% |
-| x01 ✍ | 1 | יש לכם בלנדר? משהו לשייקים | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| x02 ✍ | 1 | אחי אני מחפש אופנוע עד 4000 דולר | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| x03 ✍ | 1 | מנורה לשולחן ליד המיטה | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| x04 ✍ | 1 | מיטה זוגית חדשה | results | results | 1.00 | 1.00 | 3.0 | 100% |
-| x05 ✍ | 1 | ויוו עד 300 דולר, מה יש? | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| x07 ✍ | 1 | אוזניות גדולות כאלה שמכסות את כל האוזן | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| x06 ✍ | 1 | נעלי עקב לאירוע | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| x08 ✍ | 1 | איזה תיק לאישה הכי מדורג אצלכם | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| x09 ✍ | 1 | רמקול חכם לסלון | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| x10 ✍ | 1 | שמלת ערב שחורה ארוכה | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| x11 ✍ | 1 | יש מכונת כביסה? בא לי משהו עד 2000 שקל | miss | miss | n/a | n/a | 4.0 | 100% |
-| x12 ✍ | 1 | מזרן אורתופדי | miss | miss | n/a | n/a | 5.0 | 100% |
-| x15 ✍ | 1 | ההזמנה שלי לא הגיעה כבר שבועיים, איפה היא?? | service | service | n/a | n/a | 4.0 | 100% |
-| x13 ✍ | 1 | צריכה משהו לחתונה של חברה | clarify | clarify | n/a | n/a | 4.0 | 100% |
-| x16 ✍ | 1 | do you have the Nike Air Jordan? | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| x18 ✍ | 1 | the most expensive men's Rolex | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| x17 ✍ | 1 | golf balls and clubs | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| x19 ✍ | 1 | PlayStation 5 console | miss | miss | n/a | n/a | 5.0 | 100% |
-| x20 ✍ | 1 | protein powder under $25 | results | results | 1.00 | 1.00 | 5.0 | 100% |
+| c03 | 1 | women's watch under 200 | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| c04 | 1 | sports shoes | results | results, results, results | 1.00 | 0.58 | 5.0 | 100% |
+| c01 | 1 | looking for a laptop under $1500 | results | results, results, results | 1.00 | 1.00 | 4.7 | 100% |
+| c02 | 1 | perfume for men | results | results, results, results | 1.00 | 1.00 | 4.0 | 100% |
+| c06 | 1 | wireless headphones | results | results, results, results | 1.00 | 0.67 | 5.0 | 100% |
+| c05 | 1 | cheap sunglasses | results | results, results, results | 1.00 | 1.00 | 4.7 | 100% |
+| c07 | 1 | a basketball | results | results, results, results | 0.50 | 1.00 | 5.0 | 0% |
+| c08 | 1 | something for the home | results | results, results, results | 0.50 | 0.50 | 3.7 | 0% |
+| c09 | 1 | living room furniture | results | results, results, results | 1.00 | 0.25 | 4.0 | 0% |
+| c11 | 1 | Apple products | results | results, results, results | 1.00 | 1.00 | 4.7 | 100% |
+| c10 | 1 | Samsung phone | results | results, results, results | 1.00 | 1.00 | 4.3 | 100% |
+| c12 | 1 | black leather handbag | results | results, results, results | 0.67 | 1.00 | 4.0 | 0% |
+| c13 | 1 | face moisturizer | results | results, results, results | 1.00 | 1.00 | 4.3 | 100% |
+| c15 | 1 | earrings | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| c14 | 1 | a white dress | results | results, results, results | 1.00 | 1.00 | 3.3 | 100% |
+| c16 | 1 | gold necklace | miss | miss, miss, miss | n/a | n/a | 3.3 | 100% |
+| c17 | 1 | a pan for cooking | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| c19 | 1 | coffee | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| c18 | 1 | kitchen knife | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| c20 | 1 | dog food | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| c21 | 1 | a family car | results | results, results, results | 1.00 | 1.00 | 4.7 | 100% |
+| c22 | 1 | Samsung tablet under 400 | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| c23 | 1 | a charger for my iPhone | results | results, results, results | 1.00 | 0.33 | 5.0 | 0% |
+| c24 | 1 | smartwatch | results | results, results, results | 1.00 | 1.00 | 4.7 | 100% |
+| c26 | 1 | a gaming laptop under $1000 | miss | miss, miss, miss | n/a | n/a | 5.0 | 100% |
+| c25 | 1 | checkered shirt for men | results | results, results, results | 0.75 | 1.00 | 4.0 | 100% |
+| c27 | 1 | red lipstick | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| c28 | 1 | cheap tennis gear | results | results, results, results | 1.00 | 1.00 | 4.3 | 100% |
+| c29 | 1 | something to drink | results | results, results, results | 1.00 | 1.00 | 4.7 | 100% |
+| c30 | 1 | running shoes | results | results, results, results | 1.00 | 0.75 | 4.0 | 100% |
+| c31 | 1 | a Rolex for men | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| c32 | 1 | an iPhone under 300 | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| c33 | 1 | a sofa | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| c34 | 1 | wireless charger | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| c37 | 1 | book me a hotel in Eilat | service | service, service, service | n/a | n/a | 4.0 | 100% |
+| c35 | 1 | Dior perfume | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| c38 | 1 | what's 17 times 23? | off_topic | off_topic, off_topic, off_topic | n/a | n/a | 5.0 | 100% |
+| c39 | 1 | hi there! | chat | chat, chat, chat | n/a | n/a | 5.0 | 100% |
+| c36 | 1 | a cricket bat and a helmet | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| c40 | 1 | a backpack for school | results | results, results, results | 1.00 | 1.00 | 3.7 | 100% |
+| a01 ✍ | 1 | a cheap iPhone please | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a03 ✍ | 1 | men's Nike shoes | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a02 ✍ | 1 | got airpods? | results | results, results, results | 1.00 | 0.50 | 5.0 | 100% |
+| a04 ✍ | 1 | a Rolex for my husband | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a05 ✍ | 1 | show me something from Dior | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a07 ✍ | 1 | earrings for my wife | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a06 ✍ | 1 | a Prada bag for my wife | results | results, results, results | 1.00 | 1.00 | 4.7 | 100% |
+| a08 ✍ | 1 | what's the cheapest Samsung you have | results | results, results, results | 1.00 | 1.00 | 3.7 | 100% |
+| a11 ✍ | 1 | playstation | miss | miss, miss, miss | n/a | n/a | 4.0 | 100% |
+| a09 ✍ | 1 | which laptop is the best rated | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a10 ✍ | 1 | fridge | miss | miss, miss, miss | n/a | n/a | 4.0 | 100% |
+| a12 ✍ | 1 | high heels for men | miss | miss, miss, miss | n/a | n/a | 3.7 | 100% |
+| a13 ✍ | 1 | do you sell an electric kettle? | miss | miss, miss, miss | n/a | n/a | 4.0 | 100% |
+| a14 ✍ | 1 | a dress for a 6 year old girl | results | results, results, results | 0.25 | 1.00 | 3.3 | 0% |
+| a15 ✍ | 1 | black evening dress | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a16 ✍ | 1 | men's shirt under $25 | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a17 ✍ | 1 | soccer ball | results | results, results, results | 0.67 | 1.00 | 4.0 | 33% |
+| a18 ✍ | 1 | a frying pan | results | results, results, results | 1.00 | 1.00 | 3.3 | 100% |
+| a19 ✍ | 1 | hand blender | results | results, results, results | 1.00 | 0.50 | 5.0 | 100% |
+| a20 ✍ | 1 | a double bed | results | results, results, results | 1.00 | 1.00 | 3.7 | 100% |
+| a21 ✍ | 1 | office chair | results | results, results, results | 1.00 | 1.00 | 4.0 | 100% |
+| a22 ✍ | 1 | motorcycle under $5000 | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a23 ✍ | 1 | Samsung tablet | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a24 ✍ | 1 | smart speaker for the living room | results | results, results, results | 1.00 | 0.50 | 4.3 | 100% |
+| a26 ✍ | 1 | mascara | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a25 ✍ | 1 | portable battery for my phone | results | results, results, results | 1.00 | 1.00 | 4.3 | 100% |
+| a27 ✍ | 1 | red nail polish | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a28 ✍ | 1 | I want a Samsung that's in stock | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a31 ✍ | 1 | hey what's up | chat | chat, chat, chat | n/a | n/a | 5.0 | 100% |
+| a32 ✍ | 1 | book me a flight to Eilat | service | service, service, service | n/a | n/a | 4.0 | 100% |
+| a29 ✍ | 1 | get me a phone under $300 | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a30 ✍ | 1 | men's watch for about $100 | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a33 ✍ | 1 | can I get home delivery tomorrow morning? | service | service, service, service | n/a | n/a | 4.0 | 100% |
+| a34 ✍ | 1 | write me a poem about cats | off_topic | off_topic, off_topic, off_topic | n/a | n/a | 4.7 | 100% |
+| a35 ✍ | 1 | what's the weather in Haifa tomorrow | off_topic | off_topic, off_topic, off_topic | n/a | n/a | 5.0 | 100% |
+| a36 ✍ | 1 | an iPhone and headphones under $200 | results | results, results, results | 0.50 | 1.00 | 3.3 | 0% |
+| a38 ✍ | 1 | body lotion for men | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a37 ✍ | 1 | sunglasses and a women's handbag | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| a39 ✍ | 1 | cheapest perfume | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| x01 ✍ | 1 | got a blender? something for smoothies | results | results, results, results | 1.00 | 0.83 | 5.0 | 100% |
+| a40 ✍ | 1 | red shoes | results | results, results, results | 1.00 | 0.25 | 5.0 | 0% |
+| x03 ✍ | 1 | a lamp for my bedside table | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| x02 ✍ | 1 | dude I'm looking for a motorcycle under $4000 | results | results, results, results | 1.00 | 1.00 | 4.3 | 100% |
+| x05 ✍ | 1 | vivo under $300, what do you have? | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| x04 ✍ | 1 | a new double bed | results | results, results, results | 1.00 | 1.00 | 3.7 | 100% |
+| x06 ✍ | 1 | heels for an event | results | results, results, results | 1.00 | 1.00 | 4.7 | 100% |
+| x07 ✍ | 1 | big headphones, the kind that cover your whole ear | results | results, results, results | 1.00 | 1.00 | 4.0 | 100% |
+| x08 ✍ | 1 | which women's bag is your top rated | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| x10 ✍ | 1 | long black evening dress | results | results, results, results | 0.78 | 1.00 | 4.3 | 67% |
+| x09 ✍ | 1 | smart speaker for the living room | results | results, results, results | 1.00 | 0.50 | 4.7 | 100% |
+| x11 ✍ | 1 | got a washing machine? looking for something under $500 | miss | miss, miss, miss | n/a | n/a | 5.0 | 100% |
+| x15 ✍ | 1 | my order still hasn't arrived after two weeks, where is it?? | service | service, service, service | n/a | n/a | 3.7 | 100% |
+| x12 ✍ | 1 | orthopedic mattress | miss | miss, miss, miss | n/a | n/a | 4.0 | 100% |
+| x13 ✍ | 1 | need something for a friend's wedding | results | results, results, results | n/a | n/a | 3.3 | 100% |
+| x16 ✍ | 1 | do you have the Nike Air Jordan? | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| x18 ✍ | 1 | the most expensive men's Rolex | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| x19 ✍ | 1 | PlayStation 5 console | miss | miss, miss, miss | n/a | n/a | 4.0 | 100% |
+| x17 ✍ | 1 | golf balls and clubs | results | miss, results, results | 0.67 | 0.67 | 4.0 | 67% |
+| x20 ✍ | 1 | protein powder under $25 | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
 
 ## dialogues
 
 | Case | Turn | Message | Expected | Got (per run) | P | R | Judge | Pass |
 | --- | ---: | --- | --- | --- | ---: | ---: | ---: | ---: |
-| d01 | 1 | מה הטלפון הכי זול? | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| d04 | 1 | שעונים לגברים | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| d03 | 1 | טלפונים של סמסונג | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| d02 | 1 | מחשב נייד ובושם עד 50 | results | results | 1.00 | 0.83 | 4.0 | 100% |
-| d01 | 2 | אני רוצה את הכי זול | detail | detail | n/a | n/a | 4.0 | 100% |
-| d04 | 2 | תראה עוד | more | more | n/a | n/a | 3.0 | 100% |
-| d03 | 2 | מה ההבדל בין הראשון לשני? | compare | compare | n/a | n/a | 4.0 | 100% |
-| d02 | 2 | תוזיל | ask_group | ask_group | n/a | n/a | 3.0 | 100% |
-| d01 | 3 | תודה! מה עוד יש במחיר דומה? | results | results | 0.75 | 0.75 | 4.0 | 100% |
-| d03 | 3 | ספר לי על השלישי | detail | detail | n/a | n/a | 2.0 | 100% |
-| d04 | 3 | רק מה שבמלאי | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| d02 | 3 | את המחשבים | miss | miss | n/a | n/a | 3.0 | 100% |
-| d05 | 1 | מתנה לאבא | clarify | clarify | n/a | n/a | 4.0 | 100% |
-| d01 | 4 | מה הכי זול אחרי הריל מי? | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| d06 | 1 | red headphones | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| d07 | 1 | שמלות | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| d05 | 2 | משהו עד 100 דולר | results | results | 0.75 | 0.75 | 4.0 | 100% |
-| d06 | 2 | actually, show me sunglasses | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| d01 | 5 | אני רוצה פרטים על טלפון שיותר זול מ-Realme C35 | miss | miss | n/a | n/a | 4.0 | 100% |
-| d07 | 2 | בצבע שחור | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| ad01 ✍ | 1 | טלפון סמסונג | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| d06 | 3 | only the ones in stock | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| ad02 ✍ | 1 | מחשבים ניידים | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| d07 | 3 | מתחת ל-100 | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| ad02 ✍ | 2 | תראה עוד | more | more | 1.00 | 1.25 | 4.0 | 100% |
-| ad01 ✍ | 2 | יש משהו יותר זול? | miss | miss | n/a | n/a | 5.0 | 100% |
-| ad02 ✍ | 3 | מה ההבדל בין הדל ללנובו? | compare | compare | n/a | n/a | 4.0 | 100% |
-| ad03 ✍ | 1 | בושם ושעון לאישה עד 1000 | results | results | 1.00 | 0.86 | 4.0 | 100% |
-| d07 | 4 | ומה עם נעליים? | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| ad01 ✍ | 3 | טוב אז רק מה שיש במלאי | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| ad04 ✍ | 1 | אני צריך מתנה לאשתי | clarify | clarify | n/a | n/a | 5.0 | 100% |
-| ad02 ✍ | 4 | תודה. ומשהו עד 1200? | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| ad01 ✍ | 4 | ספר לי על הראשון | detail | detail | n/a | n/a | 2.0 | 100% |
-| ad03 ✍ | 2 | תוזיל | ask_group | miss | n/a | n/a | 4.0 | 0% |
-| ad02 ✍ | 5 | ספר לי עליו | detail | detail | n/a | n/a | 2.0 | 100% |
-| ad03 ✍ | 3 | את השעונים | miss | dead_end | n/a | n/a | 2.0 | 0% |
-| ad04 ✍ | 2 | היא אוהבת תכשיטים ובשמים, תקציב עד 100 דולר | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| ad01 ✍ | 5 | ומה עם אייפון במחיר דומה? | results | results | 0.50 | 1.00 | 4.0 | 0% |
-| ad05 ✍ | 1 | נעלי ספורט לגבר | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| ad04 ✍ | 3 | ספר לי על הגוצ'י | detail | detail | n/a | n/a | 3.0 | 100% |
-| ad03 ✍ | 4 | ומה עם תיק לאישה עד 100? | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| ad06 ✍ | 1 | ציוד לטניס | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| ad05 ✍ | 2 | עד 120 דולר | results | results | 1.00 | 0.75 | 5.0 | 100% |
-| ad07 ✍ | 1 | שעון לגבר | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| ad04 ✍ | 4 | ומה עם משהו מתחת ל-30? | results | results | 1.00 | 1.00 | 3.0 | 100% |
-| ad04 ✍ | 5 | תודה! זה מושלם | chat | chat | n/a | n/a | 3.0 | 100% |
-| ad06 ✍ | 2 | ומה יש בגולף? | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| ad05 ✍ | 3 | יש בלבן? | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| ad07 ✍ | 2 | רק עד 2000 | results | results | 1.00 | 0.50 | 5.0 | 100% |
-| ad08 ✍ | 1 | תיק לאישה | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| ad06 ✍ | 3 | ובכדורסל? | results | results | 0.67 | 1.00 | 5.0 | 0% |
-| ad07 ✍ | 3 | מה ההבדל ביניהם? | compare | detail | n/a | n/a | 2.0 | 0% |
-| ad05 ✍ | 4 | תוזיל קצת | miss | miss | n/a | n/a | 4.0 | 100% |
-| ad08 ✍ | 2 | תביא פרטים על התיק השחור | detail | detail | n/a | n/a | 3.0 | 100% |
-| ad06 ✍ | 4 | ספר לי על הטבעת | detail | miss | n/a | n/a | 1.0 | 0% |
-| ad08 ✍ | 3 | תוכל להזמין לי מונית לחנות? | service | service | n/a | n/a | 4.0 | 100% |
-| ad05 ✍ | 5 | אוקיי, תן לי פרטים על הזול | detail | detail | n/a | n/a | 4.0 | 100% |
-| ad07 ✍ | 4 | תספר לי על הלונג'ין | detail | results | n/a | n/a | 4.0 | 0% |
-| ad08 ✍ | 4 | טוב, תודה | chat | chat | n/a | n/a | 5.0 | 100% |
-| u02 ✍ | 1 | אני רוצה לקנות מתנה לחברה שלי | clarify | clarify | n/a | n/a | 5.0 | 100% |
-| u01 ✍ | 1 | אני רוצה אוזנוית | results | results | 1.00 | 0.67 | 5.0 | 100% |
-| ad08 ✍ | 5 | ומה עם נעליים בזהב? | results | results | 1.00 | 1.00 | 5.0 | 100% |
-| u01 ✍ | 2 | אוזניות ביטס | detail | detail | n/a | n/a | 4.0 | 100% |
-| ad07 ✍ | 5 | תודה, ומה עם משהו לאישה? | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| u03 ✍ | 1 | אני רוצה לקנות מתנה ליום האהבה | clarify | clarify | n/a | n/a | 5.0 | 100% |
-| u01 ✍ | 3 | אהה בעצם אוזניות אפל | results | detail | 0.00 | 0.00 | 4.0 | 0% |
-| u02 ✍ | 2 | תכשיטים | results | results | 1.00 | 1.00 | 4.0 | 100% |
-| u03 ✍ | 2 | עד 200 דולר | results | results | 1.00 | 1.00 | 3.0 | 100% |
-| u02 ✍ | 3 | אהה בעצם משהו אחר עד 100 דולר | results | results | 1.00 | 1.00 | 3.0 | 100% |
-| u03 ✍ | 3 | בלי הגבלת מחיר | results | results | 1.00 | 1.00 | 3.0 | 100% |
-| u02 ✍ | 4 | לא תכשיטים משהו אחר | results | results | 1.00 | 1.00 | 3.0 | 100% |
+| d01 | 1 | what's the cheapest phone? | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| d03 | 1 | Samsung phones | results | results, results, results | 1.00 | 1.00 | 4.7 | 100% |
+| d04 | 1 | men's watches | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| d02 | 1 | a laptop and perfume under 50 | results | results, results, results | 1.00 | 0.83 | 3.3 | 100% |
+| d01 | 2 | I want the cheapest one | detail | detail, detail, detail | n/a | n/a | 2.7 | 100% |
+| d03 | 2 | tell me about the third one | detail | detail, detail, detail | n/a | n/a | 5.0 | 100% |
+| d04 | 2 | show more | more | more, more, more | n/a | n/a | 3.3 | 100% |
+| d02 | 2 | cheaper | ask_group | ask_group, ask_group, ask_group | n/a | n/a | 4.7 | 100% |
+| d01 | 3 | I want details on a phone cheaper than the Realme C35 | miss | miss, miss, miss | n/a | n/a | 2.3 | 100% |
+| d05 | 1 | a gift for my dad | results | results, results, results | n/a | n/a | 4.0 | 100% |
+| d04 | 3 | only what's in stock | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| d06 | 1 | red headphones | results | results, results, results | 1.00 | 1.00 | 3.7 | 100% |
+| d02 | 3 | the laptops | miss | miss, miss, miss | n/a | n/a | 4.0 | 100% |
+| d05 | 2 | something under $100 | results | results, results, results | 0.50 | 0.50 | 4.0 | 0% |
+| d07 | 1 | dresses | results | results, results, results | 0.92 | 0.92 | 4.3 | 100% |
+| d06 | 2 | actually, show me sunglasses | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| ad01 ✍ | 1 | Samsung phone | results | results, results, results | 1.00 | 1.00 | 4.7 | 100% |
+| ad02 ✍ | 1 | laptops | results | results, results, results | 1.00 | 1.00 | 4.7 | 100% |
+| d07 | 2 | in black | results | results, results, results | 0.67 | 0.67 | 4.7 | 67% |
+| ad01 ✍ | 2 | is there anything cheaper? | miss | miss, miss, miss | n/a | n/a | 4.7 | 100% |
+| ad02 ✍ | 2 | show more | more | more, more, more | 1.00 | 1.25 | 2.0 | 100% |
+| d06 | 3 | only the ones in stock | results | results, results, results | 1.00 | 1.00 | 4.0 | 100% |
+| ad01 ✍ | 3 | ok then just what's in stock | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| ad02 ✍ | 3 | thanks. and anything under 1200? | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| d07 | 3 | under 100 | results | results, results, results | 0.67 | 0.67 | 4.7 | 67% |
+| ad03 ✍ | 1 | perfume and a watch for a woman, up to 1000 | results | results, results, results | 1.00 | 0.86 | 3.7 | 100% |
+| ad01 ✍ | 4 | tell me about the first one | detail | detail, detail, detail | n/a | n/a | 5.0 | 100% |
+| ad02 ✍ | 4 | tell me about it | detail | detail, detail, detail | n/a | n/a | 5.0 | 100% |
+| d07 | 4 | and what about shoes? | results | results, results, results | 1.00 | 1.00 | 4.3 | 100% |
+| ad03 ✍ | 2 | cheaper | ask_group | ask_group, ask_group, ask_group | n/a | n/a | 4.0 | 100% |
+| ad04 ✍ | 1 | I need a gift for my wife | results | results, results, results | n/a | n/a | 3.7 | 100% |
+| ad05 ✍ | 1 | men's sports shoes | results | results, results, results | 1.00 | 0.58 | 5.0 | 100% |
+| ad06 ✍ | 1 | tennis gear | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| ad05 ✍ | 2 | up to $120 | results | results, results, results | 1.00 | 0.58 | 5.0 | 100% |
+| ad03 ✍ | 3 | the watches | miss | miss, miss, miss | n/a | n/a | 4.7 | 100% |
+| ad04 ✍ | 2 | she likes jewelry and perfume, budget up to $100 | results | results, results, results | 1.00 | 0.75 | 4.7 | 100% |
+| ad06 ✍ | 2 | and what do you have for golf? | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| ad05 ✍ | 3 | any in white? | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| ad03 ✍ | 4 | and what about a women's bag under 100? | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| ad05 ✍ | 4 | a bit cheaper | miss | miss, miss, miss | n/a | n/a | 4.0 | 100% |
+| ad06 ✍ | 3 | and basketball? | results | results, results, results | 0.78 | 1.00 | 5.0 | 33% |
+| ad04 ✍ | 3 | tell me about the Gucci | detail | results, results, results | n/a | n/a | 4.3 | 0% |
+| ad07 ✍ | 1 | a men's watch | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| ad05 ✍ | 5 | ok, give me details on the cheaper one | detail | detail, detail, detail | n/a | n/a | 5.0 | 100% |
+| ad06 ✍ | 4 | tell me about the hoop | detail | detail, detail, detail | n/a | n/a | 5.0 | 100% |
+| ad04 ✍ | 4 | what about something under 30? | results | miss, miss, miss | 0.00 | 0.00 | 4.0 | 0% |
+| ad07 ✍ | 2 | only up to 2000 | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| u01 ✍ | 1 | I want headphnoes | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| ad04 ✍ | 5 | thanks! that's perfect | chat | chat, chat, chat | n/a | n/a | 4.3 | 100% |
+| ad08 ✍ | 1 | a women's bag | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| ad07 ✍ | 3 | tell me about the Longines | detail | detail, detail, detail | n/a | n/a | 5.0 | 100% |
+| u01 ✍ | 2 | Beats headphones | detail | detail, detail, detail | n/a | n/a | 5.0 | 100% |
+| ad08 ✍ | 2 | give me details on the black bag | detail | detail, detail, detail | n/a | n/a | 5.0 | 100% |
+| u02 ✍ | 1 | I want to buy a gift for my girlfriend | results | results, results, results | n/a | n/a | 4.0 | 100% |
+| ad08 ✍ | 3 | can you order me a taxi to the store? | service | service, service, service | n/a | n/a | 4.7 | 100% |
+| u01 ✍ | 3 | ahh actually Apple headphones | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| ad08 ✍ | 4 | ok, thanks | chat | chat, chat, chat | n/a | n/a | 5.0 | 100% |
+| ad07 ✍ | 4 | thanks, what about something for women? | results | results, results, results | 1.00 | 0.50 | 3.7 | 100% |
+| u03 ✍ | 1 | I want to buy a Valentine's Day gift | results | results, results, results | n/a | n/a | 3.3 | 100% |
+| u02 ✍ | 2 | jewelry | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| ad08 ✍ | 5 | and what about gold shoes? | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
+| l01 | 1 | I need eggs, an iPhone case, a red lipstick, tennis balls and a kettle | results | results, results, results | 1.00 | 1.00 | 4.3 | 100% |
+| l01 | 2 | remove the kettle | remove | remove, remove, remove | n/a | n/a | 3.7 | 100% |
+| u03 ✍ | 2 | up to $200 | results | results, results, results | 0.25 | 0.25 | 4.0 | 0% |
+| u02 ✍ | 3 | ahh actually something else, up to $100 | results | results, results, results | 0.50 | 0.50 | 3.7 | 33% |
+| l02 | 1 | eggs, an iPhone case, sunglasses under $25 and a tennis racket | results | results, results, results | 1.00 | 1.00 | 4.0 | 100% |
+| l01 | 3 | other options for the iPhone case? | more | more, more, more | n/a | n/a | 2.3 | 100% |
+| u03 ✍ | 3 | no price limit | results | results, results, results | 0.50 | 0.50 | 3.7 | 0% |
+| l03 | 1 | a laptop, a perfume and a watch | results | results, results, results | 1.00 | 1.00 | 4.0 | 100% |
+| u02 ✍ | 4 | not jewelry, something else | results | results, results, results | 1.00 | 1.00 | 4.3 | 100% |
+| l03 | 2 | make the perfume under $60 | results | results, results, results | 1.00 | 1.00 | 5.0 | 100% |
 
 ## vague
 
 | Case | Turn | Message | Expected | Got (per run) | P | R | Judge | Pass |
 | --- | ---: | --- | --- | --- | ---: | ---: | ---: | ---: |
-| v01 | 1 | מתנה לאבא | clarify | clarify | n/a | n/a | 4.0 | 100% |
-| v03 | 1 | משהו לרכב שלי | clarify | clarify | n/a | n/a | 3.0 | 100% |
-| v02 | 1 | something cheap and cool | results | results | n/a | n/a | 4.0 | 100% |
-| av01 ✍ | 1 | מתנה לאמא ליום האם | clarify | clarify | n/a | n/a | 4.0 | 100% |
-| av02 ✍ | 1 | משהו לחנוכת בית של חברה | results | results | n/a | n/a | 4.0 | 100% |
-| av03 ✍ | 1 | משהו למשרד | clarify | clarify | n/a | n/a | 4.0 | 100% |
-| av04 ✍ | 1 | משהו לים | results | results | n/a | n/a | 4.0 | 100% |
-| av05 ✍ | 1 | תפתיע אותי | results | results | n/a | n/a | 5.0 | 100% |
-| av07 ✍ | 1 | מתנה לחבר טוב | clarify | clarify | n/a | n/a | 4.0 | 100% |
-| av08 ✍ | 1 | something nice for my girlfriend's birthday | clarify | clarify | n/a | n/a | 4.0 | 100% |
-| av06 ✍ | 1 | מתנה לילד בן 10 עד 50 דולר | results | results | n/a | n/a | 3.0 | 100% |
-| x14 ✍ | 1 | תמליץ לי על משהו טוב | results | results | n/a | n/a | 3.0 | 100% |
+| v01 | 1 | a gift for my dad | results | results, results, results | n/a | n/a | 4.0 | 100% |
+| v02 | 1 | something cheap and cool | results | results, results, results | n/a | n/a | 3.3 | 100% |
+| av01 ✍ | 1 | a Mother's Day gift for my mom | results | results, results, results | n/a | n/a | 3.3 | 100% |
+| v03 | 1 | something for my car | results | results, results, results | n/a | n/a | 2.0 | 100% |
+| av03 ✍ | 1 | something for the office | results | results, results, results | n/a | n/a | 4.0 | 100% |
+| av06 ✍ | 1 | a gift for a 10 year old boy, under $50 | results | results, results, results | n/a | n/a | 3.0 | 100% |
+| av05 ✍ | 1 | surprise me | results | results, results, results | n/a | n/a | 4.3 | 100% |
+| av07 ✍ | 1 | a gift for a good friend | results | results, results, results | n/a | n/a | 3.7 | 100% |
+| av08 ✍ | 1 | something nice for my girlfriend's birthday | results | results, results, results | n/a | n/a | 3.7 | 100% |
+| x14 ✍ | 1 | recommend me something good | results | results, results, results | n/a | n/a | 4.3 | 100% |
 
 ## Failures (first run of each)
 
-- **c07#1** "כדור כדורסל": precision 0.50
-  - reply: מצאתי את Basketball ב-$14.99 וגם את Basketball Rim ב-$39.99.
+- **c07#1** "a basketball": precision 0.50
+  - reply: I found a Basketball for $14.99.
   - cards: Basketball $14.99 · Basketball Rim $39.99
-- **c09#1** "רהיטים לסלון": precision 0.25; recall 0.25
-  - reply: מצאתי 5 פריטי ריהוט, ובהם Knoll Saarinen Executive Conference Chair ב-$499.99 ו-Annibale Colombo Sofa ב-$2,499.99.
-  - cards: Knoll Saarinen Executive Conference Chair $499.99 · Annibale Colombo Bed $1899.99 · Annibale Colombo Sofa $2499.99 · Wooden Bathroom Sink With Mirror $799.99
-- **c12#1** "תיק יד שחור מעור": precision 0.67
-  - reply: לא נמצאה התאמה לתיק יד שהוא גם שחור וגם מעור, אבל יש תיק עור לנשים, Heshe Women's Leather Bag, ב-$129.99, וגם תיק יד שחור.
+- **c08#1** "something for the home": precision 0.50
+  - reply: Here are 4 of 9 products, including the House Showpiece Plant and Family Tree Photo Frame.
+  - cards: Amazon Echo Plus $99.99 · House Showpiece Plant $39.99 · Apple HomePod Mini Cosmic Grey $99.99 · Family Tree Photo Frame $29.99
+- **c09#1** "living room furniture": recall 0.25
+  - reply: I found the Annibale Colombo Sofa for $2,499.99.
+  - cards: Annibale Colombo Sofa $2499.99
+- **c12#1** "black leather handbag": precision 0.67
+  - reply: I couldn’t find a black leather handbag. The closest matches are a women’s leather bag and a black women’s handbag.
   - cards: Heshe Women's Leather Bag $129.99 · White Faux Leather Backpack $39.99 · Women Handbag Black $59.99
-- **c23#1** "מטען לאייפון": recall 0.33
-  - reply: מצאתי את Apple iPhone Charger במחיר $19.99.
+- **c23#1** "a charger for my iPhone": recall 0.33
+  - reply: The Apple iPhone Charger is $19.99.
   - cards: Apple iPhone Charger $19.99
-- **c25#1** "חולצה משובצת לגבר": recall 0.33
-  - reply: מצאתי חולצה משובצת לגבר: Man Plaid Shirt במחיר $34.99.
-  - cards: Man Plaid Shirt $34.99
-- **a12#1** "נעלי עקב לגבר": action results (expected miss)
-  - reply: לא נמצאו נעלי עקב לגבר, אבל יש נעלי גברים אחרות, כמו Puma Future Rider Trainers.
-  - cards: Puma Future Rider Trainers $89.99 · Nike Air Jordan 1 Red And Black $149.99 · Sports Sneakers Off White & Red $119.99 · Sports Sneakers Off White Red $109.99
-- **a14#1** "שמלה לילדה בת 6": precision 0.25
-  - reply: לא מצאתי התאמה לגיל 6; יש כאן שמלות לילדות, כולל Girl Summer Dress ב־$19.99.
+- **a14#1** "a dress for a 6 year old girl": precision 0.25
+  - reply: Here are 4 of the 5 dresses, including the Girl Summer Dress for $19.99. The titles don’t specify an age.
   - cards: Girl Summer Dress $19.99 · Tartan Dress $39.99 · Gray Dress $34.99 · Blue Frock $29.99
-- **a17#1** "כדורגל": precision 0.50
-  - reply: מצאתי 2 כדורים: American Football ב־$19.99 ו־Football ב־$17.99.
-  - cards: American Football $19.99 · Football $17.99
-- **a30#1** "שעון לגבר בשביל 300 שקל": action miss (expected results); precision 0.00; recall 0.00
-  - reply: לא מצאתי בקטלוג "שעונים" עד $81. המחירים בדולרים; המרתי משקלים לפי כ-3.7 ₪ לדולר.
-  - cards: none
-- **a36#1** "אייפון ואוזניות עד 200 דולר": precision 0.50; 3 forbidden card(s)
-  - reply: ל-iPhone נמצאו 4 תוצאות, אבל אף אחת מהתוצאות המוצגות אינה עד 200 דולר; באוזניות יש 2 אפשרויות עד 200 דולר, כולל Beats Flex Wireless Earphones ב-$49.99.
+- **a36#1** "an iPhone and headphones under $200": precision 0.50; 3 forbidden card(s)
+  - reply: The iPhone 5s is $199.99, but the store lists it separately from the headphones under $200: Beats Flex Wireless Earphones are $49.99, and Apple Airpods are $129.99.
   - cards: iPhone 13 Pro $1099.99 · iPhone 6 $299.99 · iPhone 5s $199.99 · iPhone X $899.99 · Beats Flex Wireless Earphones $49.99 · Apple Airpods $129.99
-- **a40#1** "נעליים אדומות": recall 0.25
-  - reply: מצאתי נעליים אדומות: Red Shoes במחיר $34.99.
+- **a40#1** "red shoes": recall 0.25
+  - reply: I found one red shoe: Red Shoes for $34.99.
   - cards: Red Shoes $34.99
-- **ad03#2** "תוזיל": action miss (expected ask_group)
-  - reply: אין בשמים זולים מ-$49.99, ואין שעוני נשים זולים מ-$129.99. הכרטיסים הקודמים עדיין מוצגים: Calvin Klein CK One ב-$49.99 ו-Women's Wrist Watch ב-$129.99.
-  - cards: Calvin Klein CK One $49.99 · Chanel Coco Noir Eau De $129.99 · Dolce Shine Eau de $69.99 · Dior J'adore $89.99 · Women's Wrist Watch $129.99 · Watch Gold for Women $799.99
-- **ad03#3** "את השעונים": action dead_end (expected miss)
-  - reply: על איזה מוצר מדובר? אפשר לציין מספר בין 1 ל-6 או את שם המוצר.
+- **x17#1** "golf balls and clubs": action miss (expected results); precision 0.00; recall 0.00
+  - reply: I couldn't find golfballs in our catalog. I couldn't find golfclubs in our catalog.
   - cards: none
-- **ad01#5** "ומה עם אייפון במחיר דומה?": precision 0.50
-  - reply: מצאתי כמה מכשירי iPhone; הראשון הוא iPhone 6 במחיר $299.99. גם iPhone 5s זמין ב־$199.99.
-  - cards: iPhone 6 $299.99 · iPhone 5s $199.99 · iPhone X $899.99 · iPhone 13 Pro $1099.99
-- **ad06#3** "ובכדורסל?": precision 0.67
-  - reply: בכדורסל מצאתי שלושה פריטים, ובהם Basketball ב־$14.99 ו-Basketball Rim ב־$39.99.
+- **d05#2** "something under $100": precision 0.50
+  - reply: The Amazon Echo Plus is $99.99, and the Puma Future Rider Trainers are $89.99; both are under $100.
+  - cards: Amazon Echo Plus $99.99 · Puma Future Rider Trainers $89.99 · Cricket Wicket $29.99 · Green and Black Glasses $34.99
+- **d07#2** "in black": precision 0.00; recall 0.00
+  - reply: I couldn’t find black dresses, but here are other dresses, starting with the Girl Summer Dress for $19.99.
+  - cards: Girl Summer Dress $19.99 · Tartan Dress $39.99 · Gray Dress $34.99 · Blue Frock $29.99
+- **d07#3** "under 100": precision 0.00; recall 0.00
+  - reply: Here are 4 of 5 dresses under $100, starting with the Girl Summer Dress for $19.99.
+  - cards: Girl Summer Dress $19.99 · Tartan Dress $39.99 · Gray Dress $34.99 · Blue Frock $29.99
+- **ad06#3** "and basketball?": precision 0.67
+  - reply: I found three basketball products, including Basketball for $14.99 and Basketball Rim for $39.99.
   - cards: Basketball $14.99 · Basketball Rim $39.99 · Nike Air Jordan 1 Red And Black $149.99
-- **ad07#3** "מה ההבדל ביניהם?": action detail (expected compare)
-  - reply: אין כאן מידע על מוצר נוסף להשוואה. Brown Leather Belt Watch הוא שעון בעיצוב קלאסי, עם רצועת עור אמיתי וחוגה אלגנטית.
-  - cards: none
-- **ad06#4** "ספר לי על הטבעת": action miss (expected detail)
-  - reply: לא מצאתי טבעות בקטלוג.
-  - cards: none
-- **ad07#4** "תספר לי על הלונג'ין": action results (expected detail)
-  - reply: Longines Master Collection הוא שעון גברים, במחיר $1,499.99 ובדירוג 3.87.
-  - cards: Longines Master Collection $1499.99
-- **u01#3** "אהה בעצם אוזניות אפל": action detail (expected results); precision 0.00; recall 0.00
-  - reply: Apple Airpods מבית Apple הן אוזניות אלחוטיות עם צימוד קל, צליל באיכות גבוהה ושילוב עם Siri. הן במלאי, עם אחריות ל־3 שנים ומשלוח בתוך 3–5 ימי עסקים.
-  - cards: none
+- **ad04#3** "tell me about the Gucci": action results (expected detail)
+  - reply: The Gucci Bloom Eau de is listed as a fragrance for $79.99.
+  - cards: Gucci Bloom Eau de $79.99
+- **ad04#4** "what about something under 30?": action miss (expected results); precision 0.00; recall 0.00; 1 forbidden card(s)
+  - reply: I couldn't find gucci fragrances at or under $30 in our catalog. The earlier results are still below.
+  - cards: Gucci Bloom Eau de $79.99
+- **u03#2** "up to $200": precision 0.25; recall 0.25
+  - reply: Here are gift ideas at or under $200, including the Amazon Echo Plus for $99.99 and Chanel Coco Noir Eau De for $129.99.
+  - cards: Amazon Echo Plus $99.99 · Chanel Coco Noir Eau De $129.99 · Decoration Swing $59.99 · Powder Canister $14.99
+- **u02#3** "ahh actually something else, up to $100": precision 0.25; recall 0.25
+  - reply: Here are some different options up to $100, including Amazon Echo Plus for $99.99 and American Football for $19.99.
+  - cards: Amazon Echo Plus $99.99 · American Football $19.99 · House Showpiece Plant $39.99 · Powder Canister $14.99
+- **u03#3** "no price limit": precision 0.50
+  - reply: Here are gift ideas with no price limit, including the Amazon Echo Plus for $99.99 and the House Showpiece Plant for $39.99.
+  - cards: Amazon Echo Plus $99.99 · House Showpiece Plant $39.99 · Powder Canister $14.99 · Green and Black Glasses $34.99
+- **a17#1** "soccer ball": precision 0.50
+  - reply: Here are two footballs: American Football for $19.99 and Football for $17.99.
+  - cards: American Football $19.99 · Football $17.99
+- **x10#1** "long black evening dress": precision 0.33
+  - reply: I couldn’t find a long black evening dress, but the closest match is Corset With Black Skirt for $79.99.
+  - cards: Corset With Black Skirt $79.99 · Marni Red & Black Suit $179.99 · Black Women's Gown $129.99

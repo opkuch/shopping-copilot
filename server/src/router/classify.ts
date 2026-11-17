@@ -1,15 +1,14 @@
 import type { Decision, DecisionCreateParams } from "openai/resources/decisions";
 import { callWithRetry } from "../llm/call.ts";
-import type { Act, Domain, RouterResult, TargetGroup } from "../messages/schema.ts";
+import type { Act, Domain, RouterResult } from "../messages/schema.ts";
 import { CallFailed } from "../pipeline/ports.ts";
 import type { RouterClient, RouterInput } from "../pipeline/ports.ts";
-import { describeMemory } from "../pipeline/purpose.ts";
+import { MODEL } from "../llm/openai.ts";
+import { turnContext } from "../prompts/context.ts";
 import {
   ACT_CHOICES, CHAT_KIND_CHOICES, DOMAIN_CHOICES, QUESTIONS, REFER_UNCLEAR, ROUTER_INSTRUCTIONS,
   TARGET_GROUP_CHOICES, VERSION,
 } from "../prompts/router.ts";
-
-const MODEL = "gpt-6-luna";
 
 type Question = DecisionCreateParams["questions"][number];
 type Choices = Record<string, string>;
@@ -30,8 +29,11 @@ export function buildQuestions(input: RouterInput): Question[] {
     choiceQuestion("chat_kind", QUESTIONS.chat_kind, CHAT_KIND_CHOICES),
     { type: "predicate", name: "mentions_service", instructions: QUESTIONS.mentions_service },
   ];
-  if (input.storedQueries.length === 2) {
-    questions.push(choiceQuestion("target_group", QUESTIONS.target_group, TARGET_GROUP_CHOICES));
+  // Which search: one choice per search on screen, like the cards below, so it can't name one that isn't there.
+  if (input.storedQueries.length >= 2) {
+    const groups: Choices = {};
+    input.storedQueries.forEach((q, i) => { groups[`group_${i + 1}`] = `${i + 1}. ${q.label}`; });
+    questions.push(choiceQuestion("target_group", QUESTIONS.target_group, { ...groups, ...TARGET_GROUP_CHOICES }));
   }
   if (input.shownCards.length > 0) {
     const cards: Choices = {};
@@ -45,18 +47,12 @@ export function buildQuestions(input: RouterInput): Question[] {
 
 // Stable instructions first (prompt caching), per-turn data last.
 export function buildInput(input: RouterInput): DecisionCreateParams["input"] {
-  const context = {
-    previousExchange: input.previous ?? null,
-    conversation: describeMemory(input.memory ?? null),
-    storedQueries: input.storedQueries,
-    shownCards: input.shownCards,
-  };
   return [
     { role: "developer", content: ROUTER_INSTRUCTIONS },
     {
       role: "user",
       content: [
-        { type: "input_text", text: `Context:\n${JSON.stringify(context)}` },
+        { type: "input_text", text: `Context:\n${turnContext(input)}` },
         { type: "input_text", text: `Latest message:\n${input.utterance}` },
       ],
     },
@@ -66,9 +62,14 @@ export function buildInput(input: RouterInput): DecisionCreateParams["input"] {
 type Answer = Decision["answers"][number];
 type RouterAnswers = RouterResult["answers"];
 
-const ACTS: readonly string[] = ["chat", "refer", "refine", "new_search", "more", "reject"];
+const ACTS: readonly string[] = ["chat", "refer", "refine", "new_search", "more", "reject", "remove"];
 const DOMAINS: readonly string[] = ["catalog", "service", "off_topic"];
-const TARGETS: readonly string[] = ["first", "second", "both", "unclear"];
+/**
+ * Which search a change is for, below this confidence, is read as unclear (the turn then asks once). Measured
+ * on router.v6: "make it cheaper" with two searches on screen came back "both" at 0.25-0.59 and was wrong 9
+ * times out of 9.
+ */
+export const TARGET_GROUP_MIN_CONFIDENCE = 0.6;
 
 export function parseDecision(decision: Decision, input: RouterInput): RouterResult {
   const byName = new Map<string, Answer>();
@@ -114,8 +115,13 @@ export function parseDecision(decision: Decision, input: RouterInput): RouterRes
     answers.mentions_service = { value: null, probability: null, refused: true };
   }
 
-  const asksGroup = input.storedQueries.length === 2;
-  const targetGroup = asksGroup ? ((choice("target_group", TARGETS) ?? "unclear") as TargetGroup) : null;
+  let targetGroup: RouterResult["targetGroup"] = null;
+  if (input.storedQueries.length >= 2) {
+    const allowed = ["all", "unclear", ...input.storedQueries.map((_, i) => `group_${i + 1}`)];
+    const group = choice("target_group", allowed);
+    const sure = (answers.target_group?.probability ?? 0) >= TARGET_GROUP_MIN_CONFIDENCE;
+    targetGroup = group === null || !sure || group === "unclear" ? "unclear" : group === "all" ? "all" : Number(group.slice(6));
+  }
 
   let referTarget: RouterResult["referTarget"] = null;
   if (input.shownCards.length > 0) {

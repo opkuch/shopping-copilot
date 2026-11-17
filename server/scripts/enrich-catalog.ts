@@ -7,7 +7,7 @@ import { writeFileSync } from "node:fs";
 import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod";
 import { createOpenAIClient } from "../src/llm/openai.ts";
-import { readResponse } from "../src/slots/extract.ts";
+import { readResponse } from "../src/llm/openai.ts";
 
 const MODEL = "gpt-6-luna";
 const BATCH = 20;

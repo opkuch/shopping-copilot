@@ -72,12 +72,10 @@ test("every list request carries select and the documented shape", async () => {
   const { api } = makeApi();
   const { ctx } = makeCtx();
   await api.byCategory("laptops", ctx);
-  await api.search("red lipstick", ctx);
   await api.all(ctx);
   const select = "select=title,description,price,thumbnail,rating,category,stock,brand,tags,discountPercentage";
   assert.deepEqual(requests, [
     `/products/category/laptops?limit=0&${select}`,
-    `/products/search?q=red%20lipstick&limit=0&${select}`,
     `/products?limit=0&${select}`,
   ]);
   assert.equal((await api.product(1, ctx)).id, 1);

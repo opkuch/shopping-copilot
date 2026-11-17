@@ -204,6 +204,13 @@ test("invalid bodies are 400 validation and store nothing", async () => {
   });
   assert.equal(malformed.statusCode, 400);
   assert.equal(malformed.json().error.code, "validation");
+  // too large and not JSON keep their own status, still with the validation code
+  const huge = await post(app, "/api/conversations", { messageId: randomUUID(), text: "x".repeat(20_000) });
+  assert.equal(huge.statusCode, 413);
+  assert.equal(huge.json().error.code, "validation");
+  const form = await app.inject({ method: "POST", url: "/api/conversations", headers: { "content-type": "application/x-www-form-urlencoded" }, payload: "text=hi" });
+  assert.equal(form.statusCode, 415);
+  assert.equal(form.json().error.code, "validation");
   assert.deepEqual(store.listConversations().conversations, []);
   assert.equal(state.calls, 0);
 
@@ -310,4 +317,40 @@ test("too many new turns in a minute: 429 with retry-after, nothing stored; a re
   now += 60_000;
   const later = await post(app, `/api/conversations/${id}/messages`, { messageId: randomUUID(), text: "three", revision });
   assert.equal(later.statusCode, 200);
+});
+
+test("a resend that would run the models again (its run failed) counts against the limit", async () => {
+  let now = 0;
+  const { app, state } = setup({ limiter: createRateLimiter({ perConversation: 100, total: 1, now: () => now }) });
+  state.mode = "reply_failed";
+  const failed = await create(app, "one");
+  assert.equal(failed.res.statusCode, 503);
+  // the limit allows one model run a minute: the retry would be the second
+  state.mode = "complete";
+  const retry = await post(app, "/api/conversations", { messageId: failed.messageId, text: "one" });
+  assert.equal(retry.statusCode, 429);
+  now += 60_000;
+  const later = await post(app, "/api/conversations", { messageId: failed.messageId, text: "one" });
+  assert.equal(later.statusCode, 200);
+  // once answered, resending it costs nothing and is never refused
+  assert.equal((await post(app, "/api/conversations", { messageId: failed.messageId, text: "one" })).statusCode, 200);
+});
+
+test("a new message while another message's reply is still running (a second tab): 409, and that reply is kept", async () => {
+  const { app, state, store } = setup();
+  const { body: first } = await create(app);
+  let release!: () => void;
+  state.gate = new Promise((r) => (release = r));
+  state.stage = "searching";
+  const a = post(app, `/api/conversations/${first.conversationId}/messages`, { messageId: randomUUID(), text: "from A", revision: first.revision });
+  await new Promise((r) => setTimeout(r, 20));
+  // B saw A's message (revision 2) but not its reply
+  const b = await post(app, `/api/conversations/${first.conversationId}/messages`, { messageId: randomUUID(), text: "from B", revision: 2 });
+  assert.equal(b.statusCode, 409);
+  assert.equal(b.json().error.code, "revision_conflict");
+  state.stage = "idle";
+  release();
+  assert.equal((await a).statusCode, 200);
+  const roles = store.getConversation(first.conversationId)?.messages.map((m) => m.role);
+  assert.deepEqual(roles, ["user", "assistant", "user", "assistant"], "no two questions in a row, A's reply stored");
 });

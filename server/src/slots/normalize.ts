@@ -5,6 +5,9 @@ const IRREGULAR: Record<string, string> = {
   knives: "knife", leaves: "leaf", shelves: "shelf", halves: "half", wives: "wife", mice: "mouse",
   // Not a plural, but the same word for search: "gold shoes" must find "Golden Shoes".
   golden: "gold",
+  // Eyewear is "glasses", not more than one "glass": "party glasses" must not find a drinking glass.
+  // Applied to catalog titles alike, so "Sun Glasses" and "Party Glasses" still match "glasses".
+  glasses: "glasses",
 };
 // Stems whose singular ends in "-ie", not "-y": "cookies" is "cookie", not "cooky".
 const IE_STEMS = new Set(["cook", "mov", "hood", "self", "smooth", "brown", "rook", "calor", "zomb"]);

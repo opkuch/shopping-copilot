@@ -81,7 +81,7 @@ export function routerResult(over: Partial<RouterResult> = {}): RouterResult {
 export function intent(over: Partial<ExtractedIntent> = {}): ExtractedIntent {
   return {
     category: null, noun: null, attributes: null, priceMin: null, priceMax: null, currency: null,
-    relativePrice: null, sort: null, inStock: null, clear: [], gift: null, theme: null, ...over,
+    relativePrice: null, sort: null, inStock: null, clear: [], exclude: null, gift: null, ...over,
   };
 }
 

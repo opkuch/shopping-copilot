@@ -1,11 +1,10 @@
 // In-memory CatalogApi over test/fixtures/catalog.json that mirrors real DummyJSON semantics:
-//  - search: the WHOLE q is one lowercase phrase, substring-matched on title or description
 //  - byCategory: exact slug match; all: everything
 //  - list responses carry only the selected fields (plus id), like `select=`
 //
 // Usage:
 //   const api = createFixtureApi();
-//   await api.search("ring", ctx);  api.calls  // [{ method: "search", arg: "ring" }]
+//   await api.byCategory("laptops", ctx);  api.calls  // [{ method: "byCategory", arg: "laptops" }]
 //   api.failNext.byCategory = new CallFailed("network", "boom");   // fails the next byCategory call once
 //   const api2 = createFixtureApi({ failWhen: (method, arg) => method === "all" ? new CallFailed("timeout", "t") : null });
 //   api.reset();   // clears calls and pending failNext entries
@@ -15,7 +14,7 @@ import type {
   CallCtx, CatalogApi, CategoryInfo, RawProduct, RawProductFull,
 } from "../../src/pipeline/ports.ts";
 
-type Method = "byCategory" | "search" | "all" | "product" | "categories";
+type Method = "byCategory" | "all" | "product" | "categories";
 export type FixtureCall = { method: Method; arg: unknown };
 export type FixtureApi = CatalogApi & {
   calls: FixtureCall[];
@@ -64,17 +63,11 @@ export function createFixtureApi(opts: { failWhen?: (method: Method, arg: unknow
     },
     async byCategory(slug, _ctx: CallCtx) {
       enter("byCategory", slug);
-      return { products: list(FULL.filter((p) => p.category === slug)), endpoint: `/products/category/${slug}?limit=0` };
-    },
-    async search(q, _ctx) {
-      enter("search", q);
-      const needle = q.toLowerCase();
-      const hits = FULL.filter((p) => p.title.toLowerCase().includes(needle) || p.description.toLowerCase().includes(needle));
-      return { products: list(hits), endpoint: `/products/search?q=${encodeURIComponent(q)}&limit=0` };
+      return { products: list(FULL.filter((p) => p.category === slug)) };
     },
     async all(_ctx) {
       enter("all", null);
-      return { products: list(FULL), endpoint: "/products?limit=0" };
+      return { products: list(FULL) };
     },
     async product(id, _ctx) {
       enter("product", id);
