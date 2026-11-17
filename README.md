@@ -110,4 +110,4 @@ I used Claude Code as a pair programmer: I made the design calls and checked the
 - Conversations can't be deleted or renamed.
 - It's built for one local server process (the in-process lock and rate limit assume it).
 
-**With another week:** run the evals on every prompt change and grow them from real conversations; give the models a running summary of the whole conversation; put a real search engine in front of the filters for a bigger catalog; delete and rename conversations; a cart; more languages; and visual polish (original prices on discounted cards, a busy marker in the sidebar).
+**With another week:** run the evals on every prompt change and grow them from real conversations; give the models a running summary of the whole conversation; put a real search engine in front of the filters for a bigger catalog; delete and rename conversations; a cart; more languages; a catalog carousel; and visual polish (original prices on discounted cards, a busy marker in the sidebar).
