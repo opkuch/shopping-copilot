@@ -1,4 +1,4 @@
-# Bazak shopping copilot
+# Shopping copilot
 
 A local chat for finding products in the DummyJSON catalog. You say what you want; the copilot works out what you mean, searches the catalog, and answers with a short sentence and product cards right in the chat. Conversations are saved on the server, so they survive a refresh and can be listed and continued.
 
